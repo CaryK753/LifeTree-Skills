@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="#-inhaltsverzeichnis"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python" alt="Python 3.10+" /></a>
+  <a href="#-anthropic-skill-standard-konformität"><img src="https://img.shields.io/badge/Anthropic--Skill-Standard--Compliant-brightgreen.svg?style=for-the-badge&logo=anthropic" alt="Anthropic Skill Standard" /></a>
   <a href="#-architektur--technologie-stack"><img src="https://img.shields.io/badge/Database-SQLite%20FTS5-green.svg?style=for-the-badge&logo=sqlite" alt="SQLite FTS5" /></a>
   <a href="#-hauptinnovationen"><img src="https://img.shields.io/badge/GraphRAG-Temporal%20Ontology-purple.svg?style=for-the-badge" alt="Temporal GraphRAG" /></a>
   <a href="#-lizenz"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License MIT" /></a>
@@ -26,11 +26,13 @@
 ## 📖 Inhaltsverzeichnis
 
 - [🤖 Leitfaden für KI-Agenten zur Nutzung dieses Skills](#-leitfaden-für-ki-agenten-zur-nutzung-dieses-skills)
+- [📦 Anthropic Skill Standard Konformität](#-anthropic-skill-standard-konformität)
 - [🌟 Systemphilosophie & Metapher](#-systemphilosophie--metapher)
 - [🏗️ Architektur & Technologie-Stack](#️-architektur--technologie-stack)
 - [🚀 Hauptinnovationen](#-hauptinnovationen)
 - [📁 Repository- & Skill-Struktur](#-repository--und-skill-struktur)
 - [💻 Schnellstart & Ausführung](#-schnellstart--ausführung)
+- [📈 Star History](#-star-history)
 - [📄 Lizenz](#-lizenz)
 
 ---
@@ -63,6 +65,7 @@ python3 scripts/data_connectors/jit_connector_synthesizer.py
 python3 scripts/graph_engines/temporal_graph_engine.py
 python3 scripts/simulation_engines/monte_carlo_decision_engine.py
 python3 scripts/decision_analysis/graph_sensitivity_engine.py
+python3 scripts/decision_analysis/tornado_diagram_engine.py
 python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
 ```
 
@@ -75,42 +78,9 @@ python3 scripts/ui_translators/action_checklist_generator.py
 
 ---
 
-## 🌟 Systemphilosophie & Metapher
+## 📈 Star History
 
-LifeTree (人生树) ist ein **Persönliches Entscheidungs-Intelligenz-Betriebssystem (Life OS)**. Es verbindet öffentliche Regelwerke, Wirtschaftstrends und persönliche Entscheidungen in einer dynamischen Baumarchitektur.
-
-- **Der Boden / Das Netz (网/土壤)**: Gesetze, Steuergesetze und Marktbedingungen als Wissensnetz.
-- **Der Baum / Das Schicksal (树/命运)**: Das persönliche Profil und Entscheidungen, die wie ein Baum im Boden wachsen.
-
----
-
-## 🏗️ Architektur & Technologie-Stack
-
-```mermaid
-flowchart TD
-    subgraph DataIngestion["1. Agentische Datenerfassung"]
-        A[Tavily / Bocha API] --> B[JIT-Graph-Synthesizer]
-        C[Lokales Benutzerprofil] --> B
-    end
-
-    subgraph KnowledgeSoil["2. Objektzentrierter Wissensboden (SQLite FTS5)"]
-        B --> D[(SQLite FTS5 Datenbank)]
-        D --> E[Boden-Gesundheits-Auditor]
-    end
-
-    subgraph CalculationEngines["3. Code-getriebene mathematische Engines"]
-        D --> F[Temporale Dijkstra-Pfade]
-        D --> G[10.000-Simulationen Monte-Carlo]
-        D --> H[Sensitivitäts-ROI-Rechner]
-        D --> I[Spieltheoretischer Konfliktlöser]
-    end
-
-    subgraph UserInterface["4. UI & Übersetzer"]
-        F & G & H & I --> J[Sprachübersetzer]
-        J --> K[Wöchentliche Checkliste]
-        J --> L[Berater-Briefing / Forschungsbericht]
-    end
-```
+[![Star History Chart](https://api.star-history.com/svg?repos=CaryK753/LifeTree-Skills&type=Date)](https://star-history.com/#CaryK753/LifeTree-Skills&Date)
 
 ---
 

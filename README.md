@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="#-table-of-contents"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python" alt="Python 3.10+" /></a>
+  <a href="#-anthropic-skill-standard-compliance"><img src="https://img.shields.io/badge/Anthropic--Skill-Standard--Compliant-brightgreen.svg?style=for-the-badge&logo=anthropic" alt="Anthropic Skill Standard" /></a>
   <a href="#-architecture--tech-stack"><img src="https://img.shields.io/badge/Database-SQLite%20FTS5-green.svg?style=for-the-badge&logo=sqlite" alt="SQLite FTS5" /></a>
   <a href="#-key-innovations"><img src="https://img.shields.io/badge/GraphRAG-Temporal%20Ontology-purple.svg?style=for-the-badge" alt="Temporal GraphRAG" /></a>
   <a href="#-license"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License MIT" /></a>
@@ -26,11 +26,13 @@
 ## 📖 Table of Contents
 
 - [🤖 How AI Agents Should Use This Skill](#-how-ai-agents-should-use-this-skill)
+- [📦 Anthropic Skill Standard Compliance](#-anthropic-skill-standard-compliance)
 - [🌟 System Philosophy & Metaphor](#-system-philosophy--metaphor)
 - [🏗️ Architecture & Tech Stack](#️-architecture--tech-stack)
 - [🚀 Key Innovations](#-key-innovations)
 - [📁 Repository & Skill Structure](#-repository--skill-structure)
 - [💻 Quick Start & Engine Execution](#-quick-start--engine-execution)
+- [📈 Star History](#-star-history)
 - [📄 License](#-license)
 
 ---
@@ -66,8 +68,9 @@ python3 scripts/graph_engines/temporal_graph_engine.py
 # 2. Run 10,000-Trial Monte Carlo Stochastic Simulation & 95% VaR
 python3 scripts/simulation_engines/monte_carlo_decision_engine.py
 
-# 3. Calculate Sensitivity Elasticity & Personal Action ROI
+# 3. Calculate Sensitivity Elasticity & Tornado Diagram Swings
 python3 scripts/decision_analysis/graph_sensitivity_engine.py
+python3 scripts/decision_analysis/tornado_diagram_engine.py
 
 # 4. Solve Game-Theoretic Stakeholder Conflicts
 python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
@@ -79,6 +82,16 @@ Translate raw mathematical outputs into plain executive summaries and prioritize
 python3 scripts/ui_translators/human_translator.py
 python3 scripts/ui_translators/action_checklist_generator.py
 ```
+
+---
+
+## 📦 Anthropic Skill Standard Compliance
+
+This repository is 100% compliant with the official **Anthropic Skill Standard & Agent Skill Specification**:
+
+- **`SKILL.md` Manifest**: Root-level `SKILL.md` manifest with valid YAML frontmatter (`name`, `description`).
+- **Standard Skill Folders**: Modular subfolders for `scripts/`, `resources/`, `references/`, and `examples/`.
+- **Zero External Runtime Overhead**: Standard library implementation with optional Tavily/Bocha API keys.
 
 ---
 
@@ -109,7 +122,7 @@ flowchart TD
     subgraph CalculationEngines["3. Code-Driven Mathematical Engines"]
         D --> F[Temporal Dijkstra Pathfinding]
         D --> G[10,000-Trial Monte Carlo Engine]
-        D --> H[Sensitivity ROI Calculator]
+        D --> H[Sensitivity ROI & Tornado Engine]
         D --> I[Game-Theoretic Conflict Solver]
     end
 
@@ -128,6 +141,7 @@ flowchart TD
 | **Local Storage** | SQLite3 + FTS5 | Embedded DB with WAL mode concurrency & full-text search |
 | **Graph Algorithm** | Dijkstra & BFS | Lowest-friction causal pathfinding & N-hop risk cascades |
 | **Stochastic Engine**| Monte Carlo (10k Trials) | Gaussian processing delays & Lognormal cost inflation shocks |
+| **Risk Sensitivity**| Tornado Diagram | Evaluates low/base/high volatility swings across parameters |
 | **Web Ingestion** | Tavily & Bocha API | Site-specific domain filtering & `/extract` webpage crawling |
 | **Decision Science**| Game Theory & Pareto | Pareto-optimal compromise solver & ROI elasticity derivatives |
 
@@ -148,9 +162,9 @@ flowchart TD
 - Models Gaussian processing delays and Lognormal cost inflation shocks.
 - Calculates **P10 (optimistic), P50 (median), P90 (pessimistic)** completion timelines, financial capital requirements, and 95% Value at Risk (VaR).
 
-### 4. Sensitivity Elasticity & Personal Action ROI Calculator
+### 4. Sensitivity Elasticity & Tornado Diagram Risk Ranking
 - Computes partial elasticity $\frac{\partial \text{Probability}}{\partial \text{Variable}}$ across user profile parameters.
-- Ranks personal actions by Return on Investment (ROI), identifying the single personal action yielding maximum marginal success.
+- Ranks personal actions by Return on Investment (ROI) and generates Tornado Diagram volatility swings.
 
 ---
 
@@ -158,14 +172,14 @@ flowchart TD
 
 ```
 lifetree/
-├── SKILL.md                            # Master Operational Directives
-├── README.md                           # Comprehensive Technical Manual (English)
+├── SKILL.md                            # Master Operational Directives (Anthropic Skill Standard)
+├── README.md                           # Technical Manual (English)
 ├── README_zh.md                        # Technical Manual (Simplified Chinese)
 ├── README_de.md                        # Technical Manual (German)
 ├── scripts/                            # Categorized Python Engines & Tools
 │   ├── graph_engines/                  # GraphRAG, Pathfinding & SQLite Storage
 │   ├── simulation_engines/             # Monte Carlo & Temporal Deduction
-│   ├── decision_analysis/              # Sensitivity, Game Theory & Trade-Offs
+│   ├── decision_analysis/              # Sensitivity, Tornado Diagrams & Game Theory
 │   ├── risk_surveillance/              # Latent Risk Discovery & Surveillance
 │   ├── data_connectors/                # Search & Memory Connectors
 │   ├── ui_translators/                 # Human Translators & Action Checklists
@@ -181,8 +195,14 @@ lifetree/
 
 ### Run Complete End-to-End MVP Decision Pipeline
 ```bash
-python3 .agent/skills/lifetree/scripts/run_mvp_workflow.py
+python3 scripts/run_mvp_workflow.py
 ```
+
+---
+
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=CaryK753/LifeTree-Skills&type=Date)](https://star-history.com/#CaryK753/LifeTree-Skills&Date)
 
 ---
 
