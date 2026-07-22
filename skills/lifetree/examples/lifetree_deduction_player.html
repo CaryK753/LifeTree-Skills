@@ -104,8 +104,8 @@
     </main>
 
     <script>
-        const trajA = [{"year": 1, "success_probability": 0.85, "capital_balance_usd": 26000.0, "events": ["Year 1 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}, {"year": 2, "success_probability": 0.78, "capital_balance_usd": 44000.0, "events": ["Year 2 Standard Progression", "SHOCK: Sperrkonto Increase (+€800) (NEGATIVE)"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}, {"year": 3, "success_probability": 0.98, "capital_balance_usd": 74000.0, "events": ["Year 3 Standard Progression", "Statutory Settlement PR (§ 18g) Unlocked!"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}, {"year": 4, "success_probability": 0.98, "capital_balance_usd": 74000.0, "events": ["Year 4 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}, {"year": 5, "success_probability": 0.98, "capital_balance_usd": 74000.0, "events": ["Year 5 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}];
-        const trajB = [{"year": 1, "success_probability": 0.7, "capital_balance_usd": 35000.0, "events": ["Year 1 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 2, "success_probability": 0.5, "capital_balance_usd": 56000.0, "events": ["Year 2 Direct Employment Progression", "SHOCK: Sperrkonto Increase (+€800) (NEGATIVE)"], "plan_b_active": true, "badge": "PLAN_B_ACTIVATED"}, {"year": 3, "success_probability": 0.6, "capital_balance_usd": 91000.0, "events": ["Year 3 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 4, "success_probability": 0.6, "capital_balance_usd": 91000.0, "events": ["Year 4 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 5, "success_probability": 0.6, "capital_balance_usd": 91000.0, "events": ["Year 5 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}];
+        const trajA = [{"year": 1, "success_probability": 0.85, "capital_balance_usd": 26000.0, "events": ["Year 1 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}, {"year": 2, "success_probability": 0.9, "capital_balance_usd": 46000.0, "events": ["Year 2 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}, {"year": 3, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 3 Standard Progression", "Statutory Settlement PR (§ 18g) Unlocked!"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}, {"year": 4, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 4 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}, {"year": 5, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 5 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}];
+        const trajB = [{"year": 1, "success_probability": 0.7, "capital_balance_usd": 35000.0, "events": ["Year 1 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 2, "success_probability": 0.7, "capital_balance_usd": 60000.0, "events": ["Year 2 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 3, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 3 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 4, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 4 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}, {"year": 5, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 5 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}];
         let currentYear = 1;
 
         const probCtx = document.getElementById('probChart').getContext('2d');
@@ -114,8 +114,8 @@
             data: {
                 labels: ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"],
                 datasets: [
-                    { label: 'Pathway A (Chancenkarte -> Blue Card)', data: [85.0, 78.0, 98.0, 98.0, 98.0], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3 },
-                    { label: 'Pathway B (Direct Employer)', data: [70.0, 50.0, 60.0, 60.0, 60.0], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.3 }
+                    { label: 'Pathway A (Chancenkarte -> Blue Card)', data: [85.0, 90.0, 98.0, 98.0, 98.0], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3 },
+                    { label: 'Pathway B (Direct Employer)', data: [70.0, 70.0, 80.0, 80.0, 80.0], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.3 }
                 ]
             },
             options: {
@@ -134,8 +134,8 @@
             data: {
                 labels: ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"],
                 datasets: [
-                    { label: 'Pathway A Capital ($)', data: [26000.0, 44000.0, 74000.0, 74000.0, 74000.0], borderColor: '#3b82f6', tension: 0.3 },
-                    { label: 'Pathway B Capital ($)', data: [35000.0, 56000.0, 91000.0, 91000.0, 91000.0], borderColor: '#ec4899', tension: 0.3 }
+                    { label: 'Pathway A Capital ($)', data: [26000.0, 46000.0, 76000.0, 76000.0, 76000.0], borderColor: '#3b82f6', tension: 0.3 },
+                    { label: 'Pathway B Capital ($)', data: [35000.0, 60000.0, 95000.0, 95000.0, 95000.0], borderColor: '#ec4899', tension: 0.3 }
                 ]
             },
             options: {
