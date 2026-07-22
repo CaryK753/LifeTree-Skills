@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LifeTree End-to-End MVP Workflow Execution Test Runner
+LifeTree End-to-End MVP Workflow Execution Test Runner (Decision Science Integrated)
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
 Generates interactive HTML Decision Dashboards, Vis.js Graph Viewers, HTML Deduction Scenario Players,
-and Animated Growing Decision Trees.
-All calculations are strictly code-driven via Python.
+and Animated Growing Decision Trees with full Decision Science integration.
 """
 
 import os
@@ -40,6 +39,11 @@ import graph_visualizer_html
 import html_report_generator
 import deduction_player_html
 import growing_tree_html
+import utility_theory_engine
+import influence_diagram_engine
+import tail_risk_cvar_engine
+import bayesian_belief_engine
+import optimal_stopping_engine
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -87,8 +91,8 @@ def run_full_mvp_pipeline():
     registry = risk_surveillance_tracker.update_risk_surveillance({}, latent_risks['discovered_risk_domains'])
     print(f"  ✓ Registered {registry['registry_summary']['total_tracked_risk_domains']} Risk Domains into Continuous Surveillance Pipeline.")
 
-    # Phase 4: Object-Centric Graph Pathfinding
-    print("\n[Phase 4] Object-Centric Dynamic Ontology GraphRAG: Dijkstra Pathfinding & Cascade")
+    # Phase 4: Object-Centric Graph Pathfinding & Influence Diagram Evaluation
+    print("\n[Phase 4] Object-Centric GraphRAG: Dijkstra Pathfinding & Influence Diagram")
     sample_ontology = {
         "nodes": [
             {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON", "confidence": 1.0},
@@ -105,10 +109,11 @@ def run_full_mvp_pipeline():
         ]
     }
     path_res = temporal_graph_engine.find_optimal_causal_path(sample_ontology, "usr_person", "route_bluecard")
-    print(f"  ✓ Dijkstra Optimal Causal Path Found! Friction Cost: {path_res['pathfinding_summary']['total_path_friction_cost']}, Hops: {path_res['pathfinding_summary']['hops_count']}")
+    id_res = influence_diagram_engine.evaluate_influence_diagram({})
+    print(f"  ✓ Dijkstra Optimal Path Friction: {path_res['pathfinding_summary']['total_path_friction_cost']} | Optimal Policy: {id_res['influence_diagram_summary']['optimal_decision_policy']}")
 
-    # Phase 5: Monte Carlo Simulation
-    print("\n[Phase 5] Code-Driven 10,000-Trial Monte Carlo Simulation & Value at Risk (VaR)")
+    # Phase 5: Code-Driven Monte Carlo & Tail Risk CVaR Copula Simulation
+    print("\n[Phase 5] Code-Driven 10,000-Trial Monte Carlo & Copula CVaR Tail Risk")
     mc_res = monte_carlo_decision_engine.run_monte_carlo_simulation({
         "name": "Chancenkarte -> EU Blue Card Route",
         "base_time_months": 24,
@@ -116,33 +121,47 @@ def run_full_mvp_pipeline():
         "baseline_success_prob": 0.88,
         "volatility_factor": 0.25,
         "random_seed": 42
-    }, num_trials=5000)
+    }, num_trials=10000)
     mc_results = mc_res['monte_carlo_results']
-    print(f"  ✓ Monte Carlo Trial Complete! Success Rate: {mc_results['overall_success_rate_pct']}%")
 
-    # Phase 6: Sensitivity Elasticity & Human Language Summary Translation
-    print("\n[Phase 6] Sensitivity Elasticity & Human Language Summary Translation")
+    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000)
+    print(f"  ✓ Monte Carlo Trials: {mc_results['total_trials_simulated']} | 95% VaR: ${mc_results['financial_capital_usd']['VaR_95_max_cost']:,.2f} | CVaR Expected Shortfall: ${cvar_res['copula_simulation']['cvar_expected_shortfall_usd']:,.2f}")
+
+    # Phase 6: Behavioral Prospect Theory & MAUT Utility Elicitation
+    print("\n[Phase 6] Behavioral Prospect Theory & MAUT Multi-Attribute Utility")
+    cpt_res = utility_theory_engine.calculate_prospect_utility([
+        {"payoff_usd": 45000.0, "probability": 0.85},
+        {"payoff_usd": -18000.0, "probability": 0.15}
+    ])
+    maut_res = utility_theory_engine.calculate_maut_utility({
+        "income": 75.0, "health": 85.0, "time_freedom": 70.0, "family_security": 90.0, "stress_inverted": 65.0
+    })
     sens_res = graph_sensitivity_engine.calculate_parameter_sensitivity(mem["global_profile"], {})
     top_action = sens_res['sensitivity_summary']['top_recommended_action']
     human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res})
+    print(f"  ✓ CPT Utility: {cpt_res['cpt_utility_score']} | MAUT Score: {maut_res['maut_total_utility_score']} / 100")
 
-    # Phase 7: Game Theory Stakeholder Conflict
-    print("\n[Phase 7] Game-Theoretic Stakeholder Conflict & Pareto Compromise Solver")
+    # Phase 7: Bayesian Belief Updating & Game Theory
+    print("\n[Phase 7] Bayesian Belief Updating & Game-Theoretic Pareto Solver")
+    bayes_res = bayesian_belief_engine.update_bayesian_belief(0.85, 0.92, 0.15)
     gt_res = game_theory_stakeholder_solver.solve_stakeholder_conflicts([
         {"stakeholder": "Host Immigration Board", "category": "IMMIGRATION_PHYSICAL_PRESENCE"},
         {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY"}
     ])
+    print(f"  ✓ Bayesian Posterior Belief P(H|E): {bayes_res['posterior_probability_P_H_given_E']*100:.2f}% | Compromise Pathways: {gt_res['stakeholder_audit_summary']['pareto_compromises_found']}")
 
-    # Phase 8: Multi-Step Temporal Deduction (Deduction Mode)
-    print("\n[Phase 8] Multi-Step Temporal Deduction Engine (5-Year Horizon)")
+    # Phase 8: Multi-Step Temporal Deduction (Deduction Mode) & Optimal Stopping
+    print("\n[Phase 8] Multi-Step Temporal Deduction & Optimal Stopping Rule")
     ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5)
+    stopping_res = optimal_stopping_engine.calculate_optimal_stopping_threshold(10)
+    print(f"  ✓ 5-Year Deduction Complete! | 37% Stopping Cutoff: Observe first {stopping_res['optimal_stopping_rule']['observation_cutoff_sample_k']} opportunities")
 
-    # Phase 9: Immediate Weekly Action Checklist
+    # Phase 9: Actionable Weekly To-Do Checklist Generator
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
     checklist_res = action_checklist_generator.generate_action_checklist(sample_ontology["nodes"], top_action)
 
-    # Phase 10: Interactive HTML Dashboards, Growing Tree & Graph Viewer Generation
-    print("\n[Phase 10] Generating Interactive HTML Dashboard, Growing Decision Tree & Vis.js Graph Viewer")
+    # Phase 10: Interactive HTML Dashboards, Deduction Player & Graph Viewers
+    print("\n[Phase 10] Generating Interactive HTML Dashboard, Deduction Player & Graph Viewer Output")
     html_report_path = os.path.join(SKILL_ROOT, "examples", "lifetree_decision_report.html")
     graph_viewer_path = os.path.join(SKILL_ROOT, "examples", "lifetree_graph_viewer.html")
     deduction_player_path = os.path.join(SKILL_ROOT, "examples", "lifetree_deduction_player.html")
@@ -152,7 +171,14 @@ def run_full_mvp_pipeline():
         "monte_carlo_results": mc_results,
         "human_readable_summary": human_summary,
         "weekly_action_checklist": checklist_res["weekly_action_checklist"],
-        "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}}
+        "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}},
+        "decision_science": {
+            "prospect_theory": cpt_res,
+            "maut_utility": maut_res,
+            "cvar_tail_risk": cvar_res,
+            "bayesian_belief": bayes_res,
+            "optimal_stopping": stopping_res
+        }
     }, html_report_path)
 
     graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path)
