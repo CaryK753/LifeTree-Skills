@@ -26,6 +26,7 @@
 ## 📖 目录
 
 - [🤖 AI Agent 使用此 Skill 指导说明](#-ai-agent-使用此-skill-指导说明)
+- [🎨 交互式 HTML 决策仪表盘与动态图谱查看器](#-交互式-html-决策仪表盘与动态图谱查看器)
 - [📦 Anthropic Skill 标准兼容](#-anthropic-skill-标准兼容)
 - [🌟 系统哲学与隐喻](#-系统哲学与隐喻)
 - [🏗️ 架构与技术栈](#️-架构与技术栈)
@@ -62,50 +63,46 @@ python3 scripts/data_connectors/jit_connector_synthesizer.py
 > **严禁大模型通过文本生成盲估数学指标**：
 > 必须显式运行 `scripts/` 中的 Python 脚本来计算最短路径、蒙特卡洛模拟、龙卷风敏感度图与 VaR 资金限额：
 ```bash
-# 1. 计算 Dijkstra 最优路径与风险级联传导
 python3 scripts/graph_engines/temporal_graph_engine.py
-
-# 2. 运行 10,000 次蒙特卡洛随机模拟与 95% 在险价值 (VaR)
 python3 scripts/simulation_engines/monte_carlo_decision_engine.py
-
-# 3. 计算偏导敏感度弹性与龙卷风波动图 (Tornado Diagram)
 python3 scripts/decision_analysis/graph_sensitivity_engine.py
 python3 scripts/decision_analysis/tornado_diagram_engine.py
-
-# 4. 求解博弈论多利益相关者冲突死锁
 python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
 ```
 
-### 第 5 步：翻译为人类直观摘要与周度行动清单
-将复杂的运筹学指标自动翻译为直观的执行摘要，并生成带截止日期的周度 To-Do 清单：
+### 第 5 步：生成交互式 HTML 决策仪表盘与动态图谱查看器
+自动生成单文件自包含的高保真 HTML 可视化决策产物：
 ```bash
-python3 scripts/ui_translators/human_translator.py
-python3 scripts/ui_translators/action_checklist_generator.py
+# 1. 生成交互式 HTML 决策仪表盘
+python3 scripts/ui_translators/html_report_generator.py
+
+# 2. 生成动态 Vis.js 知识图谱查看器
+python3 scripts/graph_engines/graph_visualizer_html.py
 ```
 
 ---
 
-## 📦 Anthropic Skill 标准兼容
+## 🎨 交互式 HTML 决策仪表盘与动态图谱查看器
 
-本仓库 100% 符合 Anthropic 官方 **Agent Skill 规范与 Anthropic Skill 标准**：
+LifeTree 自动导出单文件自包含的可视化 HTML 产物：
 
-- **`SKILL.md` 清单文件**：根目录与 Skill 子目录均包含带有规范 YAML Frontmatter (`name`, `description`) 的主指令文件。
-- **标准模块化目录结构**：分门别类地组织 `scripts/`、`resources/`、`references/` 与 `examples/`。
-- **零额外运行开销**：基于 Python 标准库实现，支持无缝导入。
-
----
-
-## 🌟 系统哲学与隐喻
-
-LifeTree (人生树) 是新一代 **个人决策智能 (PDI) 操作系统 (Life OS)**。它将公共政策网络、宏观经济趋势、法定法规与个人人生选择融入动态树状决策架构中，具备实时风险对冲、代码驱动随机预测与博弈论冲突求解能力。
+1. **交互式 HTML 决策仪表盘 (`lifetree_decision_report.html`)**：
+   - 核心决策指标卡片（P50 目标时缓、95% VaR 资金限额、后悔最小化得分）。
+   - 带 Checkbox 复选框的周度待办 Task 清单。
+   - Chart.js 动态蒙特卡洛置信度分布图表。
+2. **动态 Vis.js 知识图谱查看器 (`lifetree_graph_viewer.html`)**：
+   - 力导向物理拓扑网络，支持节点拖拽、平移与缩放。
+   - 区分实体颜色的 Badge（`PERSON`、`REGULATION_LAW`、`PATHWAY_ROUTE`、`CAPITAL_ASSET` 等）。
+   - 侧滑式 **节点 Inspector 检查器**，点击任意节点展示详细属性、置信度与数据源 provenance。
+   - 支持实时模糊搜索与按实体类型筛选。
 
 ---
 
 ## 💻 快速开始与引擎运行
 
-### 运行端到端 MVP 决策流程闭环
+### 运行端到端 MVP 决策流程闭环（自动生成 HTML 产物）
 ```bash
-python3 scripts/run_mvp_workflow.py
+python3 .agent/skills/lifetree/scripts/run_mvp_workflow.py
 ```
 
 ---

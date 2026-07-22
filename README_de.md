@@ -26,6 +26,7 @@
 ## 📖 Inhaltsverzeichnis
 
 - [🤖 Leitfaden für KI-Agenten zur Nutzung dieses Skills](#-leitfaden-für-ki-agenten-zur-nutzung-dieses-skills)
+- [🎨 Interaktive HTML-Dashboards & Graph-Viewer](#-interaktive-html-dashboards--graph-viewer)
 - [📦 Anthropic Skill Standard Konformität](#-anthropic-skill-standard-konformität)
 - [🌟 Systemphilosophie & Metapher](#-systemphilosophie--metapher)
 - [🏗️ Architektur & Technologie-Stack](#️-architektur--technologie-stack)
@@ -69,12 +70,27 @@ python3 scripts/decision_analysis/tornado_diagram_engine.py
 python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
 ```
 
-### Schritt 5: In verständliche Sprache & wöchentliche Checkliste übersetzen
-Übersetzen Sie mathematische Werte in verständliche Übersichten und erstellen Sie wöchentliche Aufgaben:
+### Schritt 5: Interaktive HTML-Dashboards & Vis.js-Viewer generieren
+Generieren Sie interaktive HTML-Berichte und Vis.js-Wissensgraph-Viewer:
 ```bash
-python3 scripts/ui_translators/human_translator.py
-python3 scripts/ui_translators/action_checklist_generator.py
+python3 scripts/ui_translators/html_report_generator.py
+python3 scripts/graph_engines/graph_visualizer_html.py
 ```
+
+---
+
+## 🎨 Interaktive HTML-Dashboards & Graph-Viewer
+
+LifeTree exportiert automatisch eigenständige HTML-Dateien:
+
+1. **Interaktives HTML-Entscheidungs-Dashboard (`lifetree_decision_report.html`)**:
+   - Executive Metric Cards (P50 Timeline, 95% VaR Budget, Regret Score).
+   - Wöchentliche Aufgabenliste mit interaktiven Checkboxen.
+   - Dynamic Chart.js Gauges.
+2. **Vis.js Wissensgraph-Viewer (`lifetree_graph_viewer.html`)**:
+   - Interaktiver Graph mit Drachen, Zoomen und Dragging.
+   - Farbcodierte Entitäts-Typen (`PERSON`, `REGULATION_LAW`, `PATHWAY_ROUTE`, `CAPITAL_ASSET`).
+   - Side-over **Knoten-Inspektor-Panel** beim Klicken auf einen Knoten.
 
 ---
 

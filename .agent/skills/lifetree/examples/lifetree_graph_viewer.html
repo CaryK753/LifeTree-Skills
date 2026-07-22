@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeTree — Interactive Knowledge Graph Viewer</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; overflow: hidden; }
+        #network-container { width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%); }
+        .glass-panel { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body>
+    <!-- Top Control Bar -->
+    <div class="absolute top-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl glass-panel shadow-2xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                <span class="text-xl">🌳</span>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white tracking-wide">LifeTree GraphRAG Knowledge Soil Viewer</h1>
+                <p class="text-xs text-slate-400">Object-Centric Dynamic Ontology & Kinetic Links</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <input type="text" id="search-input" placeholder="🔍 Search nodes by keyword..." 
+                   class="px-4 py-2 text-sm bg-slate-900/80 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-64"
+                   onkeyup="filterNodes()" />
+            <select id="entity-filter" onchange="filterNodes()" class="px-3 py-2 text-sm bg-slate-900/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
+                <option value="ALL">All Entity Types</option>
+                <option value="PERSON">PERSON</option>
+                <option value="REGULATION_LAW">REGULATION_LAW</option>
+                <option value="PATHWAY_ROUTE">PATHWAY_ROUTE</option>
+                <option value="CAPITAL_ASSET">CAPITAL_ASSET</option>
+                <option value="INSTITUTION_AGENCY">INSTITUTION_AGENCY</option>
+                <option value="MACRO_EVENT">MACRO_EVENT</option>
+            </select>
+            <button onclick="resetView()" class="px-4 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all shadow-lg shadow-emerald-900/30">
+                Reset Fit
+            </button>
+        </div>
+    </div>
+
+    <!-- Network Graph Canvas -->
+    <div id="network-container"></div>
+
+    <!-- Node Inspector Sidebar -->
+    <div id="inspector-panel" class="absolute top-24 right-4 bottom-4 w-96 z-10 glass-panel rounded-xl p-6 shadow-2xl overflow-y-auto hidden">
+        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🔍 Node Inspector</span>
+            </h2>
+            <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+        </div>
+        <div id="inspector-content"></div>
+    </div>
+
+    <script>
+        const rawNodes = [{"id": "usr_person", "label": "Person (Applicant)", "group": "PERSON", "color": {"background": "#06b6d4", "border": "#ffffff", "highlight": {"background": "#ffffff", "border": "#06b6d4"}}, "shape": "dot", "size": 25, "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"}, "raw_data": {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON", "confidence": 1.0}}, {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "group": "CAPITAL_ASSET", "color": {"background": "#f59e0b", "border": "#ffffff", "highlight": {"background": "#ffffff", "border": "#f59e0b"}}, "shape": "dot", "size": 18, "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"}, "raw_data": {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}}}, {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "group": "REGULATION_LAW", "color": {"background": "#a855f7", "border": "#ffffff", "highlight": {"background": "#ffffff", "border": "#a855f7"}}, "shape": "dot", "size": 18, "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"}, "raw_data": {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9}}, {"id": "inst_embassy", "label": "German Embassy", "group": "INSTITUTION_AGENCY", "color": {"background": "#3b82f6", "border": "#ffffff", "highlight": {"background": "#ffffff", "border": "#3b82f6"}}, "shape": "dot", "size": 18, "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"}, "raw_data": {"id": "inst_embassy", "label": "German Embassy", "entity_type": "INSTITUTION_AGENCY", "confidence": 0.95}}, {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "group": "PATHWAY_ROUTE", "color": {"background": "#10b981", "border": "#ffffff", "highlight": {"background": "#ffffff", "border": "#10b981"}}, "shape": "dot", "size": 25, "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"}, "raw_data": {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}}];
+        const rawEdges = [{"from": "usr_person", "to": "asset_sperrkonto", "label": "REQUIRES_CAPITAL", "arrows": "to", "dashes": false, "color": {"color": "rgba(156, 163, 175, 0.6)", "highlight": "#10b981"}, "font": {"color": "#9ca3af", "size": 11, "align": "middle"}, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "asset_sperrkonto", "to": "reg_chancenkarte", "label": "GOVERNS", "arrows": "to", "dashes": false, "color": {"color": "rgba(156, 163, 175, 0.6)", "highlight": "#10b981"}, "font": {"color": "#9ca3af", "size": 11, "align": "middle"}, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "reg_chancenkarte", "to": "inst_embassy", "label": "DEPENDS_ON", "arrows": "to", "dashes": false, "color": {"color": "rgba(156, 163, 175, 0.6)", "highlight": "#10b981"}, "font": {"color": "#9ca3af", "size": 11, "align": "middle"}, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "inst_embassy", "to": "route_bluecard", "label": "CONVERTS_TO", "arrows": "to", "dashes": false, "color": {"color": "rgba(156, 163, 175, 0.6)", "highlight": "#10b981"}, "font": {"color": "#9ca3af", "size": 11, "align": "middle"}, "smooth": {"type": "curvedCW", "roundness": 0.2}}];
+
+        const container = document.getElementById('network-container');
+        const nodesDataSet = new vis.DataSet(rawNodes);
+        const edgesDataSet = new vis.DataSet(rawEdges);
+
+        const data = { nodes: nodesDataSet, edges: edgesDataSet };
+        const options = {
+            nodes: {
+                font: { color: '#ffffff', strokeWidth: 2, strokeColor: '#0f172a' }
+            },
+            edges: {
+                font: { color: '#9ca3af', strokeWidth: 0 },
+                smooth: { type: 'continuous' }
+            },
+            physics: {
+                solver: 'forceAtlas2Based',
+                forceAtlas2Based: {
+                    gravitationalConstant: -50,
+                    centralGravity: 0.01,
+                    springLength: 120,
+                    springConstant: 0.08
+                },
+                stabilization: { iterations: 150 }
+            },
+            interaction: { hover: true, tooltipDelay: 200 }
+        };
+
+        const network = new vis.Network(container, data, options);
+
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const nodeItem = rawNodes.find(n => n.id === nodeId);
+                if (nodeItem) {
+                    openInspector(nodeItem.raw_data);
+                }
+            } else {
+                closeInspector();
+            }
+        });
+
+        function openInspector(nodeData) {
+            const panel = document.getElementById('inspector-panel');
+            const content = document.getElementById('inspector-content');
+            
+            let propsHtml = '';
+            if (nodeData.properties) {
+                propsHtml = Object.entries(nodeData.properties)
+                    .map(([k, v]) => `<div class="flex justify-between py-1 border-b border-slate-800 text-xs"><span class="text-slate-400">${k}</span><span class="text-slate-200 font-mono">${v}</span></div>`)
+                    .join('');
+            }
+
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            ${nodeData.entity_type || 'ENTITY'}
+                        </span>
+                        <h3 class="text-lg font-bold text-white mt-2">${nodeData.label || nodeData.id}</h3>
+                        <p class="text-xs text-slate-400 font-mono mt-1">ID: ${nodeData.id}</p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
+                        <div class="flex justify-between"><span class="text-slate-400">Confidence Score:</span><span class="text-emerald-400 font-bold">${(nodeData.confidence || 1.0) * 100}%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Source Tag:</span><span class="text-slate-300 font-mono">${nodeData.source_id || 'SRC_LOCAL'}</span></div>
+                    </div>
+
+                    ${propsHtml ? `<div><h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Properties</h4><div class="bg-slate-900/40 p-2 rounded-lg border border-slate-800/80">${propsHtml}</div></div>` : ''}
+                </div>
+            `;
+            panel.classList.remove('hidden');
+        }
+
+        function closeInspector() {
+            document.getElementById('inspector-panel').classList.add('hidden');
+        }
+
+        function resetView() {
+            network.fit({ animation: { duration: 800, easingFunction: 'easeInOutQuad' } });
+        }
+
+        function filterNodes() {
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const filterType = document.getElementById('entity-filter').value;
+
+            const filteredNodes = rawNodes.filter(n => {
+                const matchesSearch = (n.label || '').toLowerCase().includes(searchVal) || (n.id || '').toLowerCase().includes(searchVal);
+                const matchesType = filterType === 'ALL' || n.group === filterType;
+                return matchesSearch && matchesType;
+            });
+
+            nodesDataSet.clear();
+            nodesDataSet.add(filteredNodes);
+        }
+    </script>
+</body>
+</html>

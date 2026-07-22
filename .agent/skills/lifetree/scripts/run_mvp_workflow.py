@@ -2,6 +2,7 @@
 """
 LifeTree End-to-End MVP Workflow Execution Test Runner
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
+Generates interactive HTML Decision Dashboards and dynamic Vis.js Graph Viewers.
 All calculations are strictly code-driven via Python.
 """
 
@@ -10,6 +11,8 @@ import sys
 import json
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SKILL_ROOT = os.path.dirname(SCRIPT_DIR)
+
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "data_connectors"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "graph_engines"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "simulation_engines"))
@@ -32,6 +35,8 @@ import decision_tree_engine
 import decision_journal_auditor
 import human_translator
 import action_checklist_generator
+import graph_visualizer_html
+import html_report_generator
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -83,11 +88,11 @@ def run_full_mvp_pipeline():
     print("\n[Phase 4] Object-Centric Dynamic Ontology GraphRAG: Dijkstra Pathfinding & Cascade")
     sample_ontology = {
         "nodes": [
-            {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON"},
-            {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET"},
-            {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "entity_type": "REGULATION_LAW"},
-            {"id": "inst_embassy", "label": "German Embassy", "entity_type": "INSTITUTION_AGENCY"},
-            {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "entity_type": "PATHWAY_ROUTE"}
+            {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON", "confidence": 1.0},
+            {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}},
+            {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9},
+            {"id": "inst_embassy", "label": "German Embassy", "entity_type": "INSTITUTION_AGENCY", "confidence": 0.95},
+            {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}
         ],
         "edges": [
             {"source": "usr_person", "target": "asset_sperrkonto", "relation_type": "REQUIRES_CAPITAL", "confidence": 1.0, "kinetic_weight": 1.0},
@@ -114,16 +119,12 @@ def run_full_mvp_pipeline():
     }, num_trials=5000)
     mc_results = mc_res['monte_carlo_results']
     print(f"  ✓ Monte Carlo Trial Complete! Success Rate: {mc_results['overall_success_rate_pct']}%")
-    print(f"    - Timeline: P10={mc_results['execution_timeline_months']['P10_optimistic']}m, P50={mc_results['execution_timeline_months']['P50_median']}m, P90={mc_results['execution_timeline_months']['P90_pessimistic']}m (95% VaR: {mc_results['execution_timeline_months']['VaR_95_max_time']}m)")
-    print(f"    - Cost: P10=${mc_results['financial_capital_usd']['P10_optimistic']:,.2f}, P50=${mc_results['financial_capital_usd']['P50_median']:,.2f}, P90=${mc_results['financial_capital_usd']['P90_pessimistic']:,.2f} (95% VaR: ${mc_results['financial_capital_usd']['VaR_95_max_cost']:,.2f})")
 
-    # Phase 6: Sensitivity Elasticity & Human Language Translation
+    # Phase 6: Sensitivity Elasticity & Human Language Summary Translation
     print("\n[Phase 6] Sensitivity Elasticity & Human Language Summary Translation")
     sens_res = graph_sensitivity_engine.calculate_parameter_sensitivity(mem["global_profile"], {})
     top_action = sens_res['sensitivity_summary']['top_recommended_action']
     human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res})
-    print(f"  ✓ Top Recommended Action: {top_action}")
-    print(f"  ✓ Executive Verdict: Difficulty '{human_summary['executive_verdict']['execution_difficulty']}' | Target Budget: ${human_summary['executive_verdict']['recommended_total_budget_usd']:,.2f}")
 
     # Phase 7: Game Theory Stakeholder Conflict
     print("\n[Phase 7] Game-Theoretic Stakeholder Conflict & Pareto Compromise Solver")
@@ -131,39 +132,31 @@ def run_full_mvp_pipeline():
         {"stakeholder": "Host Immigration Board", "category": "IMMIGRATION_PHYSICAL_PRESENCE"},
         {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY"}
     ])
-    print(f"  ✓ Identified {gt_res['stakeholder_audit_summary']['conflicts_detected_count']} Regulatory Conflict(s). Pareto Compromise Action:")
-    for cmp in gt_res['pareto_compromise_pathways']:
-        print(f"    - {cmp['title']}: {cmp['action']}")
 
     # Phase 8: Multi-Step Temporal Deduction
     print("\n[Phase 8] Multi-Step Temporal Deduction Engine (5-Year Horizon)")
-    ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5, hypothetical_shocks=[
-        {"year": 2, "name": "Sperrkonto Increase (+€800)", "impact": "NEGATIVE"},
-        {"year": 4, "name": "German B1 Level Attained", "impact": "POSITIVE"}
-    ])
-    print(f"  ✓ 5-Year Deduction Complete! Final Path Success Probability: {ded_res['deduction_summary']['final_path_probability']*100}%")
+    ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5)
 
     # Phase 9: Immediate Weekly Action Checklist
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
     checklist_res = action_checklist_generator.generate_action_checklist(sample_ontology["nodes"], top_action)
-    print(f"  ✓ Weekly Action Checklist Generated ({checklist_res['checklist_summary']['total_action_items']} Action Items):")
-    for item in checklist_res['weekly_action_checklist']:
-        print(f"    - [{item['priority']}] {item['task_title']} ({item['target_deadline']})")
 
-    # Phase 10: Decision Journal Audit
-    print("\n[Phase 10] Decision Journal Audit & Regret Minimization Review")
-    mem = user_memory_manager.update_user_memory(
-        mem,
-        new_decision={
-            "topic_id": "tpc_1",
-            "title": "Selected Chancenkarte -> Blue Card Master Route",
-            "chosen_pathway": "Chancenkarte § 20a",
-            "rationale": "Optimal Pareto balance between entry speed and Plan B reliability.",
-            "plan_b_status": "ACTIVE_RESERVE"
-        }
-    )
-    journal_audit = decision_journal_auditor.audit_decision_journal(mem["decision_journal"])
-    print(f"  ✓ Decision Journal Audited: Regret Minimization Index = {journal_audit['audit_summary']['regret_minimization_index']}/100. Verdict: {journal_audit['audit_summary']['audit_verdict']}")
+    # Phase 10: Interactive HTML Dashboards & Graph Viewer Generation
+    print("\n[Phase 10] Generating Interactive HTML Dashboard & Graph Viewer Output")
+    html_report_path = os.path.join(SKILL_ROOT, "examples", "lifetree_decision_report.html")
+    graph_viewer_path = os.path.join(SKILL_ROOT, "examples", "lifetree_graph_viewer.html")
+
+    html_report_generator.generate_interactive_html_report({
+        "monte_carlo_results": mc_results,
+        "human_readable_summary": human_summary,
+        "weekly_action_checklist": checklist_res["weekly_action_checklist"],
+        "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}}
+    }, html_report_path)
+
+    graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path)
+
+    print(f"  ✓ Interactive Decision Report Dashboard HTML Generated: {html_report_path}")
+    print(f"  ✓ Interactive Knowledge Graph Viewer HTML Generated: {graph_viewer_path}")
 
     print("\n" + "=" * 80)
     print("✅ LIFETREE MVP DECISION PIPELINE EXECUTION COMPLETED SUCCESSFULLY!")

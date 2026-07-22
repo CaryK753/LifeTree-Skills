@@ -26,6 +26,7 @@
 ## 📖 Table of Contents
 
 - [🤖 How AI Agents Should Use This Skill](#-how-ai-agents-should-use-this-skill)
+- [🎨 Interactive HTML Reports & Graph Viewer](#-interactive-html-reports--graph-viewer)
 - [📦 Anthropic Skill Standard Compliance](#-anthropic-skill-standard-compliance)
 - [🌟 System Philosophy & Metaphor](#-system-philosophy--metaphor)
 - [🏗️ Architecture & Tech Stack](#️-architecture--tech-stack)
@@ -76,32 +77,37 @@ python3 scripts/decision_analysis/tornado_diagram_engine.py
 python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
 ```
 
-### Step 5: Translate to Human Summaries & Weekly Action Checklist
-Translate raw mathematical outputs into plain executive summaries and prioritize immediate weekly action items:
+### Step 5: Generate Interactive HTML Dashboard & Dynamic Graph Viewer
+Generate self-contained, responsive HTML Decision Dashboards and dynamic Vis.js Knowledge Graph Viewers:
 ```bash
-python3 scripts/ui_translators/human_translator.py
-python3 scripts/ui_translators/action_checklist_generator.py
+# 1. Generate Interactive HTML Decision Dashboard
+python3 scripts/ui_translators/html_report_generator.py
+
+# 2. Generate Interactive Vis.js Knowledge Graph Viewer
+python3 scripts/graph_engines/graph_visualizer_html.py
 ```
 
 ---
 
-## 📦 Anthropic Skill Standard Compliance
+## 🎨 Interactive HTML Reports & Graph Viewer
 
-This repository is 100% compliant with the official **Anthropic Skill Standard & Agent Skill Specification**:
+LifeTree automatically exports single-file, self-contained HTML visual artifacts:
 
-- **`SKILL.md` Manifest**: Root-level `SKILL.md` manifest with valid YAML frontmatter (`name`, `description`).
-- **Standard Skill Folders**: Modular subfolders for `scripts/`, `resources/`, `references/`, and `examples/`.
-- **Zero External Runtime Overhead**: Standard library implementation with optional Tavily/Bocha API keys.
+1. **Interactive HTML Decision Dashboard (`lifetree_decision_report.html`)**:
+   - Executive Metric Cards (P50 Timeline, 95% VaR Budget, Regret Score).
+   - Interactive Weekly Action Checklist with To-Do Checkboxes.
+   - Interactive Chart.js Monte Carlo Confidence Distribution Gauges.
+2. **Dynamic Vis.js Knowledge Graph Viewer (`lifetree_graph_viewer.html`)**:
+   - Force-directed physics network with node dragging, zoom, and pan.
+   - Color-coded Entity Badges (`PERSON`, `REGULATION_LAW`, `PATHWAY_ROUTE`, `CAPITAL_ASSET`, `INSTITUTION_AGENCY`, `MACRO_EVENT`).
+   - Slide-over **Node Inspector Panel** showing properties, confidence, and source provenance upon clicking any node.
+   - Live Fuzzy Search Bar & Entity Type Filters.
 
 ---
 
 ## 🌟 System Philosophy & Metaphor
 
 LifeTree (人生树) is a next-generation **Personal Decision Intelligence (PDI) Operating System (Life OS)**. It bridges public policy networks, macroeconomic trends, regulatory laws, and personal life choices into an interactive, dynamic decision-tree architecture with real-time risk hedging, code-driven stochastic forecasting, and game-theoretic conflict resolution.
-
-- **The Soil / Network (网/土壤)**: Public policies, statutes, geopolitical shifts, tax treaties, and market constraints forming a dynamic reality knowledge graph.
-- **The Tree / Fate (树/命运)**: The user's personal profile, goals, and decision choices growing like a tree out of the knowledge soil.
-- **Core Claim**: *The Soil provides objective facts and resistance; the Tree presents personal choices and possibilities, ensuring every major decision maintains controllable "Plan B side buds".*
 
 ---
 
@@ -126,45 +132,12 @@ flowchart TD
         D --> I[Game-Theoretic Conflict Solver]
     end
 
-    subgraph UserInterface["4. Decision UI & Human Translator"]
-        F & G & H & I --> J[Human Language Translator]
-        J --> K[Weekly Action Checklist]
-        J --> L[Advisor Brief / Deep Research Report]
+    subgraph UserInterface["4. Decision UI & Vis.js Graph Viewer"]
+        F & G & H & I --> J[Interactive HTML Dashboard]
+        F & G & H & I --> K[Vis.js Knowledge Graph Viewer]
+        J & K --> L[Weekly Action Checklist & Advisor Brief]
     end
 ```
-
-### 🛠️ Tech Stack Specification
-
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Core Logic** | Python 3.10+ | Zero-dependency, modular calculation & inference engine |
-| **Local Storage** | SQLite3 + FTS5 | Embedded DB with WAL mode concurrency & full-text search |
-| **Graph Algorithm** | Dijkstra & BFS | Lowest-friction causal pathfinding & N-hop risk cascades |
-| **Stochastic Engine**| Monte Carlo (10k Trials) | Gaussian processing delays & Lognormal cost inflation shocks |
-| **Risk Sensitivity**| Tornado Diagram | Evaluates low/base/high volatility swings across parameters |
-| **Web Ingestion** | Tavily & Bocha API | Site-specific domain filtering & `/extract` webpage crawling |
-| **Decision Science**| Game Theory & Pareto | Pareto-optimal compromise solver & ROI elasticity derivatives |
-
----
-
-## 🚀 Key Innovations
-
-### 1. Embedded Zero-Dependency Local SQLite Database (`sqlite3`)
-- Uses Python's built-in `sqlite3` library (zero pip/server installation).
-- Stores Object Nodes, Kinetic Links, Global User Memory, Decision Journals, and Risk Surveillance Registries in local file `lifetree_local_db.sqlite`.
-
-### 2. Object-Centric Dynamic Ontology & GraphRAG
-- **Dynamic Ontology Objects**: `PERSON`, `REGULATION_LAW`, `PATHWAY_ROUTE`, `CAPITAL_ASSET`, `INSTITUTION_AGENCY`, `MACRO_EVENT`, `ACTION`.
-- **Kinetic Links**: Directional, weighted, temporal relations (`DEPENDS_ON`, `GOVERNS`, `REQUIRES_CAPITAL`, `TRIGGERS_EVENT`, `MUTATES_STATE`, `CONFLICTS_WITH`).
-
-### 3. 10,000-Trial Monte Carlo Stochastic Simulation & Value at Risk (VaR)
-- Runs 10,000 stochastic simulation trials over decision pathways.
-- Models Gaussian processing delays and Lognormal cost inflation shocks.
-- Calculates **P10 (optimistic), P50 (median), P90 (pessimistic)** completion timelines, financial capital requirements, and 95% Value at Risk (VaR).
-
-### 4. Sensitivity Elasticity & Tornado Diagram Risk Ranking
-- Computes partial elasticity $\frac{\partial \text{Probability}}{\partial \text{Variable}}$ across user profile parameters.
-- Ranks personal actions by Return on Investment (ROI) and generates Tornado Diagram volatility swings.
 
 ---
 
@@ -177,25 +150,33 @@ lifetree/
 ├── README_zh.md                        # Technical Manual (Simplified Chinese)
 ├── README_de.md                        # Technical Manual (German)
 ├── scripts/                            # Categorized Python Engines & Tools
-│   ├── graph_engines/                  # GraphRAG, Pathfinding & SQLite Storage
+│   ├── graph_engines/                  # GraphRAG, Pathfinding, SQLite & HTML Graph Visualizer
+│   │   ├── temporal_graph_engine.py
+│   │   ├── sqlite_graph_store.py
+│   │   └── graph_visualizer_html.py     # Vis.js Knowledge Graph Viewer Generator
 │   ├── simulation_engines/             # Monte Carlo & Temporal Deduction
 │   ├── decision_analysis/              # Sensitivity, Tornado Diagrams & Game Theory
 │   ├── risk_surveillance/              # Latent Risk Discovery & Surveillance
 │   ├── data_connectors/                # Search & Memory Connectors
-│   ├── ui_translators/                 # Human Translators & Action Checklists
+│   ├── ui_translators/                 # Human Translators, Action Checklists & HTML Dashboard
+│   │   ├── human_translator.py
+│   │   ├── action_checklist_generator.py
+│   │   └── html_report_generator.py     # Interactive HTML Decision Dashboard Generator
 │   └── run_mvp_workflow.py             # End-to-End Workflow Execution Test Runner
 ├── resources/                          # Schemas, Databases & Templates
-├── references/                         # 21 Reference Architecture Subdocs
-└── examples/                          # Example Profile & Graph Inputs
+├── references/                         # 22 Reference Architecture Subdocs
+└── examples/                          # Example Profile, Graph Inputs & Output HTMLs
+    ├── lifetree_decision_report.html   # Sample Interactive Decision Dashboard HTML
+    └── lifetree_graph_viewer.html      # Sample Interactive Graph Viewer HTML
 ```
 
 ---
 
 ## 💻 Quick Start & Engine Execution
 
-### Run Complete End-to-End MVP Decision Pipeline
+### Run Complete End-to-End MVP Decision Pipeline (Generates HTML Dashboards)
 ```bash
-python3 scripts/run_mvp_workflow.py
+python3 .agent/skills/lifetree/scripts/run_mvp_workflow.py
 ```
 
 ---
