@@ -1,27 +1,34 @@
-# Advanced Mathematical Algorithms: Monte Carlo, Sensitivity ROI & Game Theory
+# 18. Advanced Code-Driven Algorithms Specification
 
-> [!IMPORTANT]
-> **STRICT CODE-DRIVEN MATHEMATICAL ENGINE POLICY**:
-> All probabilistic simulations, Value at Risk (VaR) distributions, sensitivity elasticities, and game-theoretic compromises MUST be computed exclusively via Python script execution (`scripts/`). The AI Agent MUST NEVER guess or manually calculate numbers via LLM text generation!
+## 1. Monte Carlo Stochastic Simulation (10,000 Trials)
+Monte Carlo simulation models stochastic uncertainty across execution timeline $T$ and financial cost $K$:
 
----
+$$T_i = \max(1, \mu_T + \mathcal{N}(0, \sigma_T^2))$$
+$$K_i = K_0 \times \exp(\mathcal{N}(0, \sigma_K^2))$$
 
-## 1. Monte Carlo Stochastic Simulation & Tail Risk Engine (`scripts/monte_carlo_decision_engine.py`)
-Rather than relying on static point estimates, LifeTree runs 10,000 stochastic simulation trials over decision pathways:
-- **Stochastic Time Delays**: Truncated Gaussian noise model simulating processing backlogs and embassy delays.
-- **Stochastic Cost Inflation**: Lognormal distribution model simulating currency fluctuations and statutory deposit hikes.
-- **Outcome Metrics**: Computes P10 (optimistic), P50 (median), P90 (pessimistic) confidence intervals, 95% Value at Risk (VaR), and tail risk warnings.
+### Value at Risk (VaR 95%) Calculation
+The 95% Value at Risk specifies the maximum expected cost at the 95th percentile index after sorting $10,000$ trial outputs:
 
----
+$$\text{VaR}_{0.95}(K) = K_{(0.95 \times N)}$$
 
-## 2. Parameter Sensitivity & Personal ROI Elasticity (`scripts/graph_sensitivity_engine.py`)
-Calculates the partial derivative elasticity $\frac{\partial \text{Probability}}{\partial \text{Variable}}$ across user profile parameters:
-- Ranks personal actions by Return on Investment (ROI).
-- Identifies the single personal parameter change (e.g. language level vs capital deposit) that produces the maximum marginal gain in pathway success.
+Executed via [monte_carlo_decision_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/simulation_engines/monte_carlo_decision_engine.py).
 
 ---
 
-## 3. Game-Theoretic Stakeholder Conflict Solver (`scripts/game_theory_stakeholder_solver.py`)
-Analyzes competing regulatory requirements between multi-stakeholder entities (Host Immigration Board vs Origin Tax Board vs Employer):
-- Detects physical presence vs worldwide tax residency traps.
-- Calculates Pareto-optimal compromise pathways (e.g. DTA Article 4 tie-breaker rules) to achieve non-conflicting compliance.
+## 2. Sensitivity Elasticity & Tornado Diagram Derivatives
+Computes partial derivative elasticity $\frac{\partial P}{\partial x_i}$ across user parameters:
+
+$$S_i = \left| P(x_i + \Delta x_i) - P(x_i - \Delta x_i) \right|$$
+
+$$\text{ROI}_i = \frac{S_i}{\text{Effort\_Cost}(x_i)}$$
+
+Executed via [graph_sensitivity_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_analysis/graph_sensitivity_engine.py) and [tornado_diagram_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_analysis/tornado_diagram_engine.py).
+
+---
+
+## 3. Game-Theoretic Multi-Stakeholder Pareto Solver
+Evaluates competing constraint sets $\{C_1, C_2, \dots, C_M\}$ across multiple stakeholders (e.g. Host Immigration Board vs Origin Tax Authority). Solves for Pareto-optimal non-conflicting rule combinations:
+
+$$\max_{A} \quad U_1(A) + U_2(A) \quad \text{subject to} \quad \text{ConflictPenalty}(A) = 0$$
+
+Executed via [game_theory_stakeholder_solver.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_analysis/game_theory_stakeholder_solver.py).

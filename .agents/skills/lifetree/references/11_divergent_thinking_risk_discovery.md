@@ -1,23 +1,40 @@
-# Divergent Thinking Mode & Latent Risk Domain Discovery (思维发散模式)
+# 11. Divergent Thinking Mode & Latent Risk Discovery Architecture
 
-## 1. Concept: Brainstorming Hidden Soil Risks
-Users often focus narrowly on explicit decision goals (e.g. "Get German Blue Card" or "Buy US Real Estate"). However, major real-world failures stem from **latent, non-obvious risk domains** (Tax residency traps, foreign exchange controls, healthcare coverage gaps, forced heirship estate laws).
+## 1. Executive Summary
+Divergent Thinking Mode forces out-of-the-box latent risk discovery by evaluating active user decision topics against a multi-domain risk knowledge matrix across 5 distinct risk verticals:
+1. **Tax Jurisdiction Exposure**: Exit tax liabilities, dual residence, worldwide income claims.
+2. **Capital Control & Foreign Exchange Constraints**: Annual transfer limits, FX conversion bottlenecks.
+3. **Statutory Healthcare Coverage Gaps**: Age cut-offs for public healthcare admission (>30 or >55 yo).
+4. **Forced Heirship & Cross-Border Estate Probate Traps**: Statutory succession overrides under local civil codes.
+5. **Dependent Age-Out Hazards**: Children approaching 18 or 21 during long-term PR processing.
 
-**Divergent Thinking Mode** (`scripts/divergent_risk_discovery.py`) acts as an exploratory mind-spreading engine that scans explicit user topics, brainstorms latent risk categories, and proactively expands the knowledge soil.
+---
 
-## 2. Latent Risk Domain Categories
-1. **TAX_RESIDENCY_TRAP**: Dual tax residency, worldwide taxation, exit tax exposure.
-2. **FOREIGN_EXCHANGE_RESTRICTION**: Capital outflow quotas, FX conversion bottlenecks.
-3. **HEALTHCARE_INSURANCE_GAP**: Waiting periods (Wartezeit), pre-existing condition exclusions.
-4. **FAMILY_ESTATE_SUCCESSION**: Cross-border forced heirship vs probate conflict.
-5. **EDUCATION_QUOTA_SHIFT**: Municipal school registration cut-off dates.
+## 2. Dynamic Risk Discovery Algorithm
 
+$$\text{RiskScore}(R_k) = \text{SeverityWeight}(R_k) \times \sum_{c \in \text{Categories}} \mathbb{I}(c \in \text{UserProfile}) \times C(R_k)$$
+
+Where:
+- $\mathbb{I}(\cdot)$: Indicator function returning 1 if category match occurs.
+- $C(R_k)$: Confidence score of the underlying risk knowledge node.
+
+---
+
+## 3. Surveillance Registry Schema
+
+```sql
+CREATE TABLE IF NOT EXISTS risk_surveillance_registry (
+    domain_id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    severity_level TEXT CHECK(severity_level IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),
+    trigger_condition TEXT,
+    tracking_metric TEXT,
+    last_audited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
-[Explicit User Topics] (Immigration / Asset Allocation)
-          │
-          ▼
-[Divergent Thinking Engine] ──(Mind-Spreading Risk Discovery)──> [Latent Risk Map]
-                                                                        │
-                                                                        ▼
-                                                   [Registered for Continuous Surveillance]
-```
+
+---
+
+## 4. Execution Pipeline Integration
+Executes via [divergent_risk_discovery.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/risk_surveillance/divergent_risk_discovery.py) and updates [risk_surveillance_tracker.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/risk_surveillance/risk_surveillance_tracker.py).
