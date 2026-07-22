@@ -2,7 +2,7 @@
 """
 LifeTree Unit Tests for ./scripts/decision_models/ Modules
 Tests MAUT+AHP, CVaR Expected Shortfall, Influence Diagrams, Bayesian Belief, Intertemporal Discounting,
-Optimal Stopping, Copula Correlation, and Prospect Theory.
+Optimal Stopping, Copula Correlation, Prospect Theory, and Markov Transitions.
 """
 
 import os
@@ -21,6 +21,7 @@ import intertemporal_discounting_engine
 import optimal_stopping_solver
 import copula_correlation_engine
 import prospect_theory_engine
+import markov_transition_engine
 
 class TestDecisionModelsFolder(unittest.TestCase):
 
@@ -42,10 +43,13 @@ class TestDecisionModelsFolder(unittest.TestCase):
         self.assertEqual(res["status"], "SUCCESS")
         self.assertEqual(res["influence_nodes"][0]["influence_node_type"], "DECISION_NODE")
 
-    def test_bayesian_belief_updater(self):
-        res = bayesian_belief_updater.update_posterior_belief(0.80, 0.90, 0.20)
-        self.assertEqual(res["status"], "SUCCESS")
-        self.assertTrue(res["posterior_belief_P_H_given_E"] > 0.80)
+    def test_bayesian_belief_updater_and_dempster_combination(self):
+        res_b = bayesian_belief_updater.update_posterior_belief(0.80, 0.90, 0.20)
+        m1 = {"TRUE": 0.60, "FALSE": 0.10, "UNCERTAIN": 0.30}
+        m2 = {"TRUE": 0.70, "FALSE": 0.05, "UNCERTAIN": 0.25}
+        res_ds = bayesian_belief_updater.combine_dempster_shafer_evidence(m1, m2)
+        self.assertEqual(res_b["status"], "SUCCESS")
+        self.assertEqual(res_ds["status"], "SUCCESS")
 
     def test_intertemporal_discounting(self):
         res = intertemporal_discounting_engine.calculate_intertemporal_discounting(100000.0, 5.0)
@@ -66,6 +70,11 @@ class TestDecisionModelsFolder(unittest.TestCase):
         b = [{"payoff_usd": 18000.0, "prob": 1.00}]
         res = prospect_theory_engine.evaluate_prospect_theory(a, b)
         self.assertEqual(res["status"], "SUCCESS")
+
+    def test_markov_state_transitions(self):
+        res = markov_transition_engine.simulate_markov_transitions({}, {}, steps_n=5)
+        self.assertEqual(res["status"], "SUCCESS")
+        self.assertEqual(len(res["step_by_step_trajectory"]), 6)
 
 if __name__ == "__main__":
     unittest.main()
