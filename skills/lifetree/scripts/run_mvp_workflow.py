@@ -3,7 +3,7 @@
 LifeTree End-to-End MVP Workflow Execution Test Runner
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
 Generates interactive HTML Decision Dashboards, Vis.js Graph Viewers, HTML Deduction Scenario Players,
-and Animated Growing Decision Trees with full i18n native language support.
+Animated Growing Decision Trees, and the Master Aggregator Homepage Portal with full i18n support.
 """
 
 import os
@@ -40,6 +40,7 @@ import graph_visualizer_html
 import html_report_generator
 import deduction_player_html
 import growing_tree_html
+import homepage_generator
 import utility_theory_engine
 import influence_diagram_engine
 import tail_risk_cvar_engine
@@ -157,14 +158,15 @@ def run_full_mvp_pipeline():
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
     checklist_res = action_checklist_generator.generate_action_checklist(sample_ontology["nodes"], top_action)
 
-    # Phase 10: Interactive HTML Dashboards, Deduction Player & Graph Viewers
-    print("\n[Phase 10] Generating Interactive HTML Dashboard, Deduction Player & Graph Viewer Output")
+    # Phase 10: Generating Interactive HTML Dashboards, Deduction Player & Master Aggregator Homepage
+    print("\n[Phase 10] Generating Master Aggregator Homepage Portal & HTML Viewers")
+    homepage_path = os.path.join(SKILL_ROOT, "examples", "lifetree_homepage.html")
     html_report_path = os.path.join(SKILL_ROOT, "examples", "lifetree_decision_report.html")
     graph_viewer_path = os.path.join(SKILL_ROOT, "examples", "lifetree_graph_viewer.html")
     deduction_player_path = os.path.join(SKILL_ROOT, "examples", "lifetree_deduction_player.html")
     growing_tree_path = os.path.join(SKILL_ROOT, "examples", "lifetree_growing_tree.html")
 
-    html_report_generator.generate_interactive_html_report({
+    pipeline_payload = {
         "monte_carlo_results": mc_results,
         "human_readable_summary": human_summary,
         "weekly_action_checklist": [
@@ -193,12 +195,18 @@ def run_full_mvp_pipeline():
             "causal_intervention_edges_count": 3,
             "optimal_decision_policy": "CHANCENKARTE_ROUTE"
         }
-    }, html_report_path)
+    }
 
+    # Generate Individual 4 HTML Views
+    html_report_generator.generate_interactive_html_report(pipeline_payload, html_report_path, lang="zh")
     graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path, lang="zh")
     deduction_player_html.generate_deduction_player_html(ded_res, deduction_player_path, lang="zh")
     growing_tree_html.generate_growing_tree_html(ded_res, growing_tree_path, lang="zh")
 
+    # Generate Master Homepage Portal
+    homepage_generator.generate_homepage_html(pipeline_payload, homepage_path, lang="zh")
+
+    print(f"  🌟 ALL-IN-ONE MASTER PORTAL HOMEPAGE GENERATED: {homepage_path}")
     print(f"  ✓ Interactive Decision Report Dashboard HTML Generated: {html_report_path}")
     print(f"  ✓ Interactive Knowledge Graph Viewer HTML Generated: {graph_viewer_path}")
     print(f"  ✓ Interactive Deduction Scenario Player HTML Generated: {deduction_player_path}")
