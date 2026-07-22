@@ -13,13 +13,12 @@ import os
 import sys
 import json
 
+# Task 5: centralized sys.path setup via the scripts package.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_ROOT = os.path.dirname(SCRIPT_DIR)
-
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_analysis"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_models"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "graph_engines"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "simulation_engines"))
+if SKILL_ROOT not in sys.path:
+    sys.path.insert(0, SKILL_ROOT)
+import scripts  # noqa: F401 — runs __init__.py which sets up sys.path
 
 # Bug 3: use canonical decision_models/ engines
 import prospect_theory_engine       # CPT + probability weighting (was utility_theory_engine)

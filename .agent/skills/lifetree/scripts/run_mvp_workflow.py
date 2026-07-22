@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 LifeTree End-to-End MVP Workflow Execution Test Runner
-Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
+Executes the complete LifeTree decision intelligence pipeline using the modular Skill engines.
 Generates interactive HTML Decision Dashboards, Vis.js Graph Viewers, HTML Deduction Scenario Players,
 Animated Growing Decision Trees, and the Master Aggregator Homepage Portal with full i18n support.
 """
@@ -10,16 +10,13 @@ import os
 import sys
 import json
 
+# Task 5: centralized sys.path setup via the scripts package.
+# scripts/__init__.py adds all subdirectories to sys.path so flat imports work.
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_ROOT = os.path.dirname(SCRIPT_DIR)
-
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "data_connectors"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "graph_engines"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "simulation_engines"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_analysis"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "risk_surveillance"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_models"))
-sys.path.insert(0, os.path.join(SCRIPT_DIR, "ui_translators"))
+if SKILL_ROOT not in sys.path:
+    sys.path.insert(0, SKILL_ROOT)
+import scripts  # noqa: F401 — runs __init__.py which sets up sys.path
 
 import user_memory_manager
 import search_connector_tavily
@@ -52,6 +49,12 @@ import influence_diagram_engine
 import influence_diagram_layer      # Bug 4: tag graph nodes before ID evaluation
 import tail_risk_cvar_engine        # Copula simulation (CVaR delegated to cvar_risk_engine)
 import optimal_stopping_engine
+# Task 1-4: previously-dead modules now integrated into the pipeline
+import risk_reward_frontier         # Task 1: Pareto frontier
+import tornado_diagram_engine       # Task 2: Tornado sensitivity diagram
+import markov_transition_engine     # Task 3: Markov long-term state evolution
+import graph_confidence_filter      # Task 4: Poison graph pruning
+import graph_rehabilitation_engine  # Task 4: Broken path rehabilitation
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -105,7 +108,7 @@ def run_full_mvp_pipeline():
         "nodes": [
             {"id": "usr_person", "label": "申请人 (Person)", "entity_type": "PERSON", "confidence": 1.0},
             {"id": "asset_sperrkonto", "label": "€12,000 保证金账户", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}},
-            {"id": "reg_chancenkarte", "label": "德国机会卡法规 § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9},
+            {"id": "reg_chancenkarte", "label": "德国机会卡法规 § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9, "source_id": "SRC_COMMUNITY_UNRELIABLE"},
             {"id": "inst_embassy", "label": "德国大使馆签证处", "entity_type": "INSTITUTION_AGENCY", "confidence": 0.95},
             {"id": "route_bluecard", "label": "欧盟蓝卡工作签证 § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}
         ],
@@ -144,6 +147,26 @@ def run_full_mvp_pipeline():
         ]
     })
     print(f"  ✓ Dijkstra Optimal Path Friction: {path_res['pathfinding_summary']['total_path_friction_cost']} | Optimal Policy: {id_res['influence_diagram_summary']['optimal_decision_policy']}")
+
+    # Task 4: Phase 4c — Poison Graph Pruning & Rehabilitation
+    # Simulate revoking a community-sourced regulation and verify the graph
+    # survives via the rehabilitation engine's alternative-bridge search.
+    print("\n[Phase 4c] Graph Poison Pruning & Rehabilitation")
+    revoked_sources = ["SRC_COMMUNITY_UNRELIABLE"]
+    pruned = graph_confidence_filter.process_knowledge_graph(
+        sample_ontology,
+        revoked_source_ids=revoked_sources,
+        min_confidence=0.0  # don't filter by confidence, only by source_id
+    )
+    print(f"  ✓ Removed {pruned['summary']['poisoned_nodes_removed']} poisoned nodes (revoked: {revoked_sources})")
+    # Rehabilitate broken paths using a candidate pool of alternative sources
+    candidate_pool = [
+        {"id": "alt_official_source", "label": "Official Alternative Source",
+         "entity_type": "REGULATION_LAW", "confidence": 1.0}
+    ]
+    rehab_res = graph_rehabilitation_engine.rehabilitate_damaged_graph(pruned, candidate_pool)
+    print(f"  ✓ Graph Rehabilitation: {rehab_res['rehabilitation_summary']['repair_bridges_applied']} bridges applied")
+    print(f"  ✓ Graph health: {rehab_res['rehabilitation_summary']['graph_health']}")
 
     # Phase 5: Code-Driven Monte Carlo & Tail Risk CVaR Copula Simulation
     print("\n[Phase 5] Code-Driven 10,000-Trial Monte Carlo & Copula CVaR Tail Risk")
@@ -184,6 +207,22 @@ def run_full_mvp_pipeline():
     top_action = sens_res['sensitivity_summary']['top_recommended_action']
     human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res}, lang="zh")
 
+    # Task 2: Phase 6b — Tornado Sensitivity Diagram
+    # Ranks decision parameters by their volatility swing on success probability.
+    print("\n[Phase 6b] Tornado Sensitivity Diagram")
+    tornado_params = {
+        "base_success_prob": mc_results.get("overall_success_rate_pct", 82.0) / 100.0,
+        "parameters": [
+            {"parameter_name": "German Language Level", "base_value": 2.0, "delta_low": 0.0, "delta_high": 4.0, "unit": "CEFR", "sensitivity_factor": 0.06},
+            {"parameter_name": "Liquid Capital Reserves", "base_value": 15000.0, "delta_low": 5000.0, "delta_high": 25000.0, "unit": "USD", "sensitivity_factor": 0.000008},
+            {"parameter_name": "Statutory Processing Time", "base_value": 6.0, "delta_low": 3.0, "delta_high": 12.0, "unit": "Months", "sensitivity_factor": 0.03},
+        ]
+    }
+    tornado_res = tornado_diagram_engine.calculate_tornado_sensitivity_swings(tornado_params)
+    print(f"  ✓ Top risk driver: {tornado_res['tornado_analysis_summary']['top_risk_driver']} (swing: {tornado_res['tornado_analysis_summary']['max_volatility_swing']})")
+    for s in tornado_res.get("tornado_diagram_swings", []):
+        print(f"     #{s['impact_rank']} {s['parameter_name']}: swing={s['volatility_swing']}")
+
     # Phase 7: Bayesian Belief Updating & Game-Theoretic Pareto Solver
     print("\n[Phase 7] Bayesian Belief Updating & Game-Theoretic Pareto Solver")
     bayes_res = bayesian_belief_updater.update_bayesian_belief(0.85, 0.92, 0.15)
@@ -195,6 +234,66 @@ def run_full_mvp_pipeline():
     print("\n[Phase 8] Multi-Step Temporal Deduction & Optimal Stopping Rule")
     ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5)
     stopping_res = optimal_stopping_engine.calculate_optimal_stopping_threshold(10)
+
+    # Task 1: Phase 8b — Pareto Efficiency Frontier
+    # Compare candidate pathways on (success_prob, cost, time) and identify
+    # non-dominated options. First generate a scenario comparison matrix, then
+    # convert its rows into Pareto candidates.
+    print("\n[Phase 8b] Pareto Efficiency Frontier")
+    pathway_options = [
+        {"name": "Chancenkarte -> EU Blue Card", "financial_cost_usd": 15000.0,
+         "horizon_months": 24, "risk_level": "LOW", "prereq_friction_level": "MEDIUM",
+         "plan_b_reliability_score": 85.0},
+        {"name": "Direct Employer Sponsorship", "financial_cost_usd": 8000.0,
+         "horizon_months": 12, "risk_level": "MEDIUM", "prereq_friction_level": "HIGH",
+         "plan_b_reliability_score": 70.0},
+        {"name": "Job Seeker Visa -> Employment", "financial_cost_usd": 20000.0,
+         "horizon_months": 36, "risk_level": "HIGH", "prereq_friction_level": "MEDIUM",
+         "plan_b_reliability_score": 60.0},
+    ]
+    cmp_res = scenario_comparison_matrix.generate_comparison_matrix(pathway_options)
+    pareto_candidates = []
+    for row in cmp_res.get("comparison_matrix", []):
+        risk = row.get("risk_level", "MEDIUM")
+        success_prob = 1.0 - (0.3 if risk == "HIGH" else (0.15 if risk == "MEDIUM" else 0.0))
+        pareto_candidates.append({
+            "name": row["pathway_name"],
+            "success_prob": success_prob,
+            "cost_usd": row.get("financial_cost_usd", 50000),
+            "time_months": row.get("horizon_months", 60),
+        })
+    pareto_res = risk_reward_frontier.calculate_pareto_frontier(pareto_candidates)
+    print(f"  ✓ {pareto_res['frontier_summary']['pareto_efficient_count']} Pareto-efficient pathways out of {pareto_res['frontier_summary']['total_pathways_analyzed']}")
+    for p in pareto_res.get("pareto_frontier_pathways", []):
+        print(f"     ✅ {p['name']}")
+    for p in pareto_res.get("dominated_pathways", []):
+        print(f"     ❌ {p} (dominated)")
+
+    # Task 3: Phase 8c — Markov Long-Term State Evolution
+    # After the decision pathway completes, what state distribution is most
+    # likely after 10 years? MC tells you "success rate"; Markov tells you
+    # "where you end up."
+    print("\n[Phase 8c] Markov Long-Term State Evolution (10-year)")
+    markov_profile = {
+        "EMPLOYED_DE": 0.0,
+        "EMPLOYED_CN": 0.0,
+        "PR_HOLDER": 1.0,  # Start: just got PR
+        "ENTREPRENEUR": 0.0,
+        "UNEMPLOYED": 0.0,
+    }
+    markov_matrix = {
+        "EMPLOYED_DE": {"EMPLOYED_DE": 0.70, "EMPLOYED_CN": 0.05, "PR_HOLDER": 0.20, "ENTREPRENEUR": 0.03, "UNEMPLOYED": 0.02},
+        "EMPLOYED_CN": {"EMPLOYED_DE": 0.05, "EMPLOYED_CN": 0.80, "PR_HOLDER": 0.05, "ENTREPRENEUR": 0.05, "UNEMPLOYED": 0.05},
+        "PR_HOLDER":   {"EMPLOYED_DE": 0.60, "EMPLOYED_CN": 0.05, "PR_HOLDER": 0.30, "ENTREPRENEUR": 0.03, "UNEMPLOYED": 0.02},
+        "ENTREPRENEUR":{"EMPLOYED_DE": 0.10, "EMPLOYED_CN": 0.05, "PR_HOLDER": 0.05, "ENTREPRENEUR": 0.75, "UNEMPLOYED": 0.05},
+        "UNEMPLOYED":  {"EMPLOYED_DE": 0.30, "EMPLOYED_CN": 0.15, "PR_HOLDER": 0.05, "ENTREPRENEUR": 0.05, "UNEMPLOYED": 0.45},
+    }
+    markov_res = markov_transition_engine.simulate_markov_transitions(markov_profile, markov_matrix, steps_n=10)
+    final_dist = markov_res.get("markov_summary", {}).get("final_state_distribution", {})
+    most_likely = markov_res.get("markov_summary", {}).get("most_likely_final_state", "N/A")
+    for state, prob in sorted(final_dist.items(), key=lambda x: -x[1]):
+        print(f"     {state}: {prob*100:.1f}%")
+    print(f"  ✓ Most likely state after 10 years: {most_likely}")
 
     # Phase 9: Actionable Weekly To-Do Checklist Generator
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
