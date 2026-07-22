@@ -9,10 +9,18 @@ import sys
 import json
 from typing import Dict, Any, List
 
-def update_bayesian_belief(prior_prob: float, likelihood_given_true: float, likelihood_given_false: float) -> Dict[str, Any]:
+def update_bayesian_belief(prior_prob: float, likelihood_given_true: float, likelihood_given_false: float,
+                           evidence_basis: Dict[str, Any] = None) -> Dict[str, Any]:
     """
     Calculates posterior probability P(H|E) using Bayes' Theorem:
     P(H|E) = (P(E|H) * P(H)) / (P(E|H) * P(H) + P(E|~H) * (1 - P(H)))
+
+    M3 fix: the caller can now supply an `evidence_basis` dict documenting where each
+    likelihood number comes from. Without this, the engine silently accepted arbitrary
+    numbers like P(B1|success)=0.95 / P(B1|failure)=0.15 with no provenance — making
+    the posterior look authoritative when the inputs were speculative. The response now
+    echoes the basis back and flags speculative likelihoods so downstream UIs can warn
+    the user.
     """
     try:
         p_h = max(0.001, min(0.999, float(prior_prob)))
@@ -22,12 +30,35 @@ def update_bayesian_belief(prior_prob: float, likelihood_given_true: float, like
         p_e = (p_e_given_h * p_h) + (p_e_given_not_h * (1.0 - p_h))
         posterior_prob = (p_e_given_h * p_h) / p_e
 
+        # M3: validate / document the likelihood provenance
+        basis = evidence_basis or {}
+        is_speculative = False
+        warnings = []
+        if not basis:
+            is_speculative = True
+            warnings.append(
+                "No evidence_basis supplied. Likelihood values are unverified — "
+                "posterior should be treated as illustrative, not authoritative."
+            )
+        else:
+            src = str(basis.get("source", "")).strip()
+            if not src:
+                is_speculative = True
+                warnings.append("evidence_basis.source is empty — likelihood provenance unclear.")
+            if basis.get("is_speculative", False):
+                is_speculative = True
+                warnings.append("evidence_basis.is_speculative=true — likelihoods are estimates, not measured data.")
+
         return {
             "status": "SUCCESS",
             "prior_probability_P_H": round(p_h, 4),
             "evidence_likelihood_P_E_given_H": round(p_e_given_h, 4),
+            "evidence_likelihood_P_E_given_not_H": round(p_e_given_not_h, 4),
             "posterior_probability_P_H_given_E": round(posterior_prob, 4),
-            "belief_delta": round(posterior_prob - p_h, 4)
+            "belief_delta": round(posterior_prob - p_h, 4),
+            "evidence_basis": basis,
+            "is_speculative": is_speculative,
+            "warnings": warnings
         }
     except Exception as e:
         return {"status": "ERROR", "error_code": "BAYESIAN_UPDATE_EXCEPTION", "message": str(e)}

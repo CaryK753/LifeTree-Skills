@@ -1,334 +1,187 @@
 #!/usr/bin/env python3
 """
-LifeTree Growing Decision Tree HTML Viewer Generator (i18n & Human-Centric UI Enhanced)
-Generates an interactive "Growing Decision Tree" visualization.
-Branches represent future choice trajectories, fruits represent PR/Citizenship goals,
-side buds represent Plan B hedges, and withered branches represent pruned high-risk paths.
+LifeTree Growing Decision Tree HTML Viewer Generator
+Generates an interactive Vis.js decision tree visualization with clean SaaS-style design.
 """
 
 import os
 import sys
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any
+
 
 def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str, lang: str = "zh") -> str:
-    """
-    Generates a single self-contained HTML file displaying an interactive growing decision tree with i18n support.
-    """
-    summary = deduction_data.get("deduction_summary", {})
-    traj_a = deduction_data.get("pathway_a_trajectory", [])
-    traj_b = deduction_data.get("pathway_b_trajectory", [])
+    """Generates a Vis.js interactive decision tree HTML page."""
+    path_a = deduction_data.get("pathway_a_trajectory", [])
+    path_b = deduction_data.get("pathway_b_trajectory", [])
 
-    is_zh = (lang == "zh")
+    nodes = [{"id": "root", "label": "当前状态\\n决策起点", "level": 0,
+              "color": {"background": "#1e1e2a", "border": "#2a2a3a"},
+              "font": {"color": "#e8e8ee"}, "shape": "box",
+              "data": {"year": 0, "desc": "决策起点"}}]
+    edges = []
 
-    # Titles & Labels
-    title_text = "LifeTree 决策树生长全景推演" if is_zh else "LifeTree Growing Decision Tree"
-    subtitle_text = "未来选择分支推演 · 果实目标与退路侧芽视角" if is_zh else "Future Choice Branching & Temporal Trajectory Visualizer"
-    play_btn_text = "▶ 播放决策树生长动画" if is_zh else "▶ Play Tree Growth"
-    fit_btn_text = "复位全景视角" if is_zh else "Fit Layout"
-    inspector_title = "🍃 分支节点详情拆解" if is_zh else "🍃 Branch Inspector"
-
-    # Construct Tree Node Hierarchy
-    nodes = [
-        {
-            "id": "root_soil",
-            "label": "🌱 知识土壤 (底层政策与客观法规)" if is_zh else "🌱 Knowledge Soil\n(Statutory Laws & Constraints)",
-            "group": "SOIL",
-            "level": 0,
-            "color": "#78350f"
-        },
-        {
-            "id": "trunk_user",
-            "label": "🪵 当前个人状态 (第 0 年)\n(31岁, 硕士学历, 4万美金, A2德语)" if is_zh else "🪵 Current State (Year 0)\n(31 Yo, MS CS, $40k, A2 German)",
-            "group": "TRUNK",
-            "level": 1,
-            "color": "#059669"
-        }
-    ]
-    edges = [
-        {"from": "root_soil", "to": "trunk_user", "label": "滋养" if is_zh else "Nourishes"}
-    ]
-
-    # Branch A Nodes (Chancenkarte -> Blue Card)
-    prev_id = "trunk_user"
-    for step in traj_a:
-        yr = step["year"]
-        nid = f"branch_a_y{yr}"
-        prob_pct = int(step["success_probability"] * 100)
-
-        is_fruit = prob_pct >= 95
-        is_plan_b = step.get("plan_b_active", False)
-
-        shape_type = "star" if is_fruit else ("diamond" if is_plan_b else "dot")
-        node_color = "#34d399" if is_fruit else ("#fbbf24" if is_plan_b else "#10b981")
-
-        if is_zh:
-            node_label = f"🌿 第{yr}年: 方案A (胜算{prob_pct}%)\n资金: ${step['capital_balance_usd']:,.0f}"
-            if is_fruit:
-                node_label = f"🏆 第{yr}年: 永居/目标果实成熟!\n(成功率 {prob_pct}%)"
-        else:
-            node_label = f"🌿 Y{yr}: Pathway A ({prob_pct}%)\nCapital: ${step['capital_balance_usd']:,.0f}"
-            if is_fruit:
-                node_label = f"🏆 Y{yr}: PR Unlocked!\n({prob_pct}% Success)"
-
-        nodes.append({
-            "id": nid,
-            "label": node_label,
-            "group": "BRANCH_A",
-            "level": yr + 1,
-            "color": node_color,
-            "shape": shape_type,
-            "raw_data": step
-        })
-        edges.append({"from": prev_id, "to": nid, "label": f"第{yr}年" if is_zh else f"Year {yr}"})
+    prev_id = "root"
+    for step in path_a:
+        yr = step.get("year", 1)
+        prob = step.get("success_probability", 0)
+        cap = step.get("capital_balance_usd", 0)
+        badge = step.get("badge", "")
+        plan_b = step.get("plan_b_active", False)
+        nid = f"a_{yr}"
+        bg = "#f59e0b" if plan_b else "#22c55e"
+        nodes.append({"id": nid, "label": f"第{yr}年 方案A\\n{prob}%", "level": yr,
+                       "color": {"background": bg, "border": bg},
+                       "font": {"color": "#0c0c14"}, "shape": "box",
+                       "data": {"year": yr, "prob": prob, "capital": cap, "badge": badge, "plan_b": plan_b, "path": "A"}})
+        edges.append({"from": prev_id, "to": nid, "color": {"color": "#2a2a3a"}})
         prev_id = nid
 
-        # Add Side Bud (Plan B) if active
-        if is_plan_b:
-            bud_id = f"side_bud_y{yr}"
-            nodes.append({
-                "id": bud_id,
-                "label": f"🛡️ Plan B 侧芽 (第{yr}年)\n(远程自由职业对冲备用)" if is_zh else f"🛡️ Plan B Side Bud (Y{yr})\n(Remote Freelance Hedge)",
-                "group": "SIDE_BUD",
-                "level": yr + 1,
-                "color": "#f59e0b",
-                "shape": "triangle"
-            })
-            edges.append({"from": nid, "to": bud_id, "label": "萌发退路侧芽" if is_zh else "Sprouts Plan B", "dashes": True})
-
-    # Branch B Nodes (Direct Employer)
-    prev_id = "trunk_user"
-    for step in traj_b:
-        yr = step["year"]
-        nid = f"branch_b_y{yr}"
-        prob_pct = int(step["success_probability"] * 100)
-
-        is_fruit = prob_pct >= 95
-        node_color = "#60a5fa" if not is_fruit else "#6366f1"
-
-        if is_zh:
-            node_label = f"🌿 第{yr}年: 方案B (胜算{prob_pct}%)\n资金: ${step['capital_balance_usd']:,.0f}"
-            if is_fruit:
-                node_label = f"🏆 第{yr}年: 方案B 果实成熟!\n(成功率 {prob_pct}%)"
-        else:
-            node_label = f"🌿 Y{yr}: Pathway B ({prob_pct}%)\nCapital: ${step['capital_balance_usd']:,.0f}"
-            if is_fruit:
-                node_label = f"🏆 Y{yr}: Pathway B PR!\n({prob_pct}% Success)"
-
-        nodes.append({
-            "id": nid,
-            "label": node_label,
-            "group": "BRANCH_B",
-            "level": yr + 1,
-            "color": node_color,
-            "shape": "star" if is_fruit else "dot",
-            "raw_data": step
-        })
-        edges.append({"from": prev_id, "to": nid, "label": f"第{yr}年" if is_zh else f"Year {yr}"})
+    prev_id = "root"
+    for step in path_b:
+        yr = step.get("year", 1)
+        prob = step.get("success_probability", 0)
+        cap = step.get("capital_balance_usd", 0)
+        badge = step.get("badge", "")
+        nid = f"b_{yr}"
+        nodes.append({"id": nid, "label": f"第{yr}年 方案B\\n{prob}%", "level": yr,
+                       "color": {"background": "#6366f1", "border": "#6366f1"},
+                       "font": {"color": "#ffffff"}, "shape": "box",
+                       "data": {"year": yr, "prob": prob, "capital": cap, "badge": badge, "plan_b": False, "path": "B"}})
+        edges.append({"from": prev_id, "to": nid, "color": {"color": "#2a2a3a"}})
         prev_id = nid
 
-    # Add Dead Branch (Withered High Risk Path)
-    nodes.append({
-        "id": "dead_branch_01",
-        "label": "🥀 已剪枝的高风险枯枝\n(高摩擦留学语言班路径)" if is_zh else "🥀 Pruned High-Friction Path\n(Blocked Student Visa)",
-        "group": "DEAD_BRANCH",
-        "level": 2,
-        "color": "#ef4444",
-        "shape": "cross"
-    })
-    edges.append({"from": "trunk_user", "to": "dead_branch_01", "label": "剪枝规避" if is_zh else "Pruned", "dashes": True, "color": "#ef4444"})
+    nodes_json = json.dumps(nodes, ensure_ascii=False)
+    edges_json = json.dumps(edges, ensure_ascii=False)
 
-    html_content = f"""<!DOCTYPE html>
-<html lang="{ 'zh-CN' if is_zh else 'en' }" class="dark">
+    html_template = """<!DOCTYPE html>
+<html lang="__LANG__">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeTree — {title_text}</title>
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <title>LifeTree · 决策树推演</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
-        body {{ font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; margin: 0; overflow: hidden; }}
-        #tree-container {{ width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 90%, #1e293b 0%, #0b0f19 100%); }}
-        .glass-panel {{ background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }}
-        .gradient-text {{ background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
+        body { font-family: 'Inter', sans-serif; background: #0c0c14; color: #e8e8ee; margin: 0; overflow: hidden; }
+        #network { width: 100vw; height: calc(100vh - 56px); }
+        #inspector { transition: transform 0.25s ease; transform: translateX(100%); }
+        #inspector.open { transform: translateX(0); }
     </style>
 </head>
-<body>
-    <!-- Top Control Bar -->
-    <div class="absolute top-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel shadow-2xl">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl">
-                🌳
+<body class="flex flex-col h-screen">
+    <header class="h-14 bg-[#16161f] border-b border-[#2a2a3a] flex items-center justify-between px-6 shrink-0 z-10">
+        <div class="flex items-center gap-4">
+            <a href="lifetree_homepage.html" class="text-[#8888a0] hover:text-white text-sm">← 返回首页</a>
+            <div class="h-4 w-px bg-[#2a2a3a]"></div>
+            <h1 class="text-sm font-semibold">🌳 决策树推演</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-reset" class="px-3 py-1.5 text-xs font-medium border border-[#2a2a3a] rounded-lg hover:bg-[#1e1e2a]">重置视图</button>
+            <button id="btn-play" class="px-3 py-1.5 text-xs font-medium bg-[#6366f1] text-white rounded-lg hover:bg-[#4f46e5]">▶ 播放动画</button>
+        </div>
+    </header>
+    <main class="flex-1 relative">
+        <div id="network"></div>
+        <aside id="inspector" class="absolute top-0 right-0 h-full w-80 bg-[#16161f] border-l border-[#2a2a3a] z-20 flex flex-col">
+            <div class="p-4 border-b border-[#2a2a3a] flex items-center justify-between">
+                <h2 class="font-semibold text-sm">节点详情</h2>
+                <button id="btn-close" class="text-[#8888a0] hover:text-white text-lg">&times;</button>
             </div>
-            <div>
-                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">{ '决策树生长全景推演' if is_zh else 'Growing Decision Tree' }</span></h1>
-                <p class="text-xs text-slate-400">{subtitle_text}</p>
+            <div class="p-4 overflow-y-auto flex-1" id="inspector-content">
+                <div class="text-[#8888a0] text-sm text-center mt-10">点击节点查看详情</div>
             </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="flex items-center gap-3">
-            <button onclick="playGrowthAnimation()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2">
-                <span>{play_btn_text}</span>
-            </button>
-            <button onclick="resetTreeLayout()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700">
-                {fit_btn_text}
-            </button>
-        </div>
-    </div>
-
-    <!-- Tree Canvas -->
-    <div id="tree-container"></div>
-
-    <!-- Inspector Drawer -->
-    <div id="node-inspector" class="absolute top-24 right-4 bottom-4 w-96 z-10 glass-panel rounded-2xl p-6 shadow-2xl overflow-y-auto hidden border border-slate-700/60">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>{inspector_title}</span>
-            </h2>
-            <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-lg">&times;</button>
-        </div>
-        <div id="inspector-content"></div>
-    </div>
-
+        </aside>
+    </main>
     <script>
-        const rawNodes = {json.dumps(nodes, ensure_ascii=False)};
-        const rawEdges = {json.dumps(edges, ensure_ascii=False)};
-
-        const visNodes = new vis.DataSet();
-        const visEdges = new vis.DataSet();
-
-        const container = document.getElementById('tree-container');
-        const data = {{ nodes: visNodes, edges: visEdges }};
-
-        const options = {{
-            layout: {{
-                hierarchical: {{
-                    direction: 'BU',
-                    sortMethod: 'directed',
-                    nodeSpacing: 180,
-                    levelSeparation: 130
-                }}
-            }},
-            nodes: {{
-                font: {{ color: '#f8fafc', size: 13, face: 'Inter, system-ui, sans-serif' }},
-                borderWidth: 2,
-                shadow: true
-            }},
-            edges: {{
-                color: {{ color: 'rgba(16, 185, 129, 0.5)', highlight: '#34d399' }},
-                arrows: {{ to: {{ enabled: true, scaleFactor: 0.8 }} }},
-                smooth: {{ type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 }}
-            }},
-            physics: {{ hierarchicalRepulsion: {{ nodeDistance: 160 }} }}
-        }};
-
-        const network = new vis.Network(container, data, options);
-
-        network.on("click", function(params) {{
-            if (params.nodes.length > 0) {{
-                const nid = params.nodes[0];
-                const nodeItem = rawNodes.find(n => n.id === nid);
-                if (nodeItem) openInspector(nodeItem);
-            }} else {{
-                closeInspector();
-            }}
-        }});
-
-        function playGrowthAnimation() {{
-            visNodes.clear();
-            visEdges.clear();
-
-            const levels = [0, 1, 2, 3, 4, 5, 6];
-            let delay = 0;
-
-            levels.forEach(lvl => {{
-                setTimeout(() => {{
-                    const lvlNodes = rawNodes.filter(n => n.level === lvl);
-                    lvlNodes.forEach(n => visNodes.add(n));
-
-                    const lvlNodeIds = new Set(lvlNodes.map(n => n.id));
-                    const lvlEdges = rawEdges.filter(e => lvlNodeIds.has(e.to));
-                    lvlEdges.forEach(e => visEdges.add(e));
-                }}, delay);
-                delay += 700;
-            }});
-        }}
-
-        function openInspector(nodeData) {{
-            const panel = document.getElementById('node-inspector');
-            const content = document.getElementById('inspector-content');
-
-            let detailsHtml = '';
-            if (nodeData.raw_data) {{
-                const d = nodeData.raw_data;
-                const isZh = { 'true' if is_zh else 'false' };
-                detailsHtml = `
-                    <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-xs">
-                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '胜算成功率' : 'Success Probability'}}:</span><span class="text-emerald-400 font-bold font-mono">${{(d.success_probability * 100).toFixed(0)}}%</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '资金储备余额' : 'Capital Balance'}}:</span><span class="text-white font-mono">$${{d.capital_balance_usd.toLocaleString()}}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '轨迹状态标记' : 'Trajectory Badge'}}:</span><span class="text-amber-300 font-semibold">${{d.badge || 'NORMAL'}}</span></div>
-                    </div>
-                `;
-            }}
-
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            ${{nodeData.group}}
-                        </span>
-                        <h3 class="text-base font-bold text-white mt-2">${{nodeData.label.replace('\\n', ' — ')}}</h3>
-                    </div>
-                    ${{detailsHtml}}
-                </div>
-            `;
-            panel.classList.remove('hidden');
-        }}
-
-        function closeInspector() {{
-            document.getElementById('node-inspector').classList.add('hidden');
-        }}
-
-        function resetTreeLayout() {{
-            network.fit({{ animation: {{ duration: 800, easingFunction: 'easeInOutQuad' }} }});
-        }}
-
-        playGrowthAnimation();
+        const nodesData = __NODES_JSON__;
+        const edgesData = __EDGES_JSON__;
+        const container = document.getElementById('network');
+        let network = null;
+        const inspector = document.getElementById('inspector');
+        const inspContent = document.getElementById('inspector-content');
+        const opts = {
+            layout: { hierarchical: { direction: 'DU', sortMethod: 'directed', levelSeparation: 120, nodeSpacing: 200 } },
+            nodes: { shape: 'box', margin: 10, borderWidth: 1, shadow: { enabled: true, color: 'rgba(0,0,0,0.3)', size: 8 }, font: { face: 'Inter', size: 13, multi: true } },
+            edges: { width: 2, smooth: { type: 'cubicBezier', forceDirection: 'vertical', roundness: 0.4 }, arrows: { to: { enabled: true, scaleFactor: 0.5 } } },
+            interaction: { hover: true, zoomView: true, dragView: true },
+            physics: false
+        };
+        function init(animate) {
+            const data = { nodes: new vis.DataSet(nodesData), edges: new vis.DataSet(edgesData) };
+            network = new vis.Network(container, data, opts);
+            network.on("click", function(p) { if (p.nodes.length > 0) showInsp(data.nodes.get(p.nodes[0])); else closeInsp(); });
+            if (animate) network.fit({ animation: { duration: 800, easingFunction: 'easeInOutQuad' } });
+            else network.fit();
+        }
+        function fmtMoney(v) { return '$' + v.toLocaleString(); }
+        function showInsp(node) {
+            inspector.classList.add('open');
+            if (!node.data) { inspContent.innerHTML = '<div class="text-[#8888a0] text-sm">无数据</div>'; return; }
+            const d = node.data;
+            let h = '<div class="text-xs text-[#8888a0] mb-1">节点</div><div class="text-sm font-semibold mb-4">' + node.label.replace('\\n',' ') + '</div>';
+            if (d.path) {
+                h += '<div class="space-y-0">';
+                h += '<div class="flex justify-between text-sm py-2.5 border-t border-[#2a2a3a]"><span class="text-[#8888a0]">路径</span><span class="font-medium">' + (d.path==='A'?'方案 A':'方案 B') + '</span></div>';
+                h += '<div class="flex justify-between text-sm py-2.5 border-t border-[#2a2a3a]"><span class="text-[#8888a0]">时间</span><span class="font-medium">第 ' + d.year + ' 年</span></div>';
+                h += '<div class="flex justify-between text-sm py-2.5 border-t border-[#2a2a3a]"><span class="text-[#8888a0]">成功率</span><span class="font-medium text-[#22c55e]">' + d.prob + '%</span></div>';
+                h += '<div class="flex justify-between text-sm py-2.5 border-t border-[#2a2a3a]"><span class="text-[#8888a0]">资金</span><span class="font-medium">' + fmtMoney(d.capital) + '</span></div>';
+                if (d.badge) h += '<div class="flex justify-between text-sm py-2.5 border-t border-[#2a2a3a]"><span class="text-[#8888a0]">标记</span><span class="font-medium">' + d.badge + '</span></div>';
+                if (d.plan_b) h += '<div class="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-[#f59e0b]">⚠ Plan B 已激活</div>';
+                h += '</div>';
+            }
+            inspContent.innerHTML = h;
+        }
+        function closeInsp() { inspector.classList.remove('open'); if (network) network.unselectAll(); }
+        init(true);
+        document.getElementById('btn-reset').addEventListener('click', () => { network.fit({ animation: { duration: 600 } }); closeInsp(); });
+        document.getElementById('btn-play').addEventListener('click', () => {
+            closeInsp();
+            const d = { nodes: new vis.DataSet([nodesData[0]]), edges: new vis.DataSet([]) };
+            network = new vis.Network(container, d, opts);
+            network.on("click", function(p) { if (p.nodes.length > 0) showInsp(d.nodes.get(p.nodes[0])); else closeInsp(); });
+            let i = 1;
+            const iv = setInterval(() => {
+                if (i < nodesData.length) {
+                    d.nodes.add(nodesData[i]);
+                    const e = edgesData.find(e => e.to === nodesData[i].id);
+                    if (e) d.edges.add(e);
+                    network.fit({ animation: { duration: 400 } });
+                    i++;
+                } else clearInterval(iv);
+            }, 500);
+        });
+        document.getElementById('btn-close').addEventListener('click', closeInsp);
     </script>
 </body>
-</html>
-"""
+</html>"""
+
+    html_content = html_template.replace("__LANG__", lang).replace("__NODES_JSON__", nodes_json).replace("__EDGES_JSON__", edges_json)
 
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_content)
-
     return output_path
 
-def main():
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    else:
-        data = {
-            "deduction_summary": {"timeline_horizon_years": 5},
-            "pathway_a_trajectory": [
-                {"year": 1, "success_probability": 0.85, "capital_balance_usd": 26000.0, "badge": "OPTIMAL_PROGRESSION"},
-                {"year": 2, "success_probability": 0.90, "capital_balance_usd": 46000.0, "badge": "OPTIMAL_PROGRESSION", "plan_b_active": True},
-                {"year": 3, "success_probability": 0.98, "capital_balance_usd": 76000.0, "badge": "PR_ELIGIBLE"}
-            ],
-            "pathway_b_trajectory": [
-                {"year": 1, "success_probability": 0.70, "capital_balance_usd": 35000.0, "badge": "HIGH_FRICTION_PROGRESSION"},
-                {"year": 2, "success_probability": 0.65, "capital_balance_usd": 60000.0, "badge": "HIGH_FRICTION_PROGRESSION"},
-                {"year": 3, "success_probability": 0.75, "capital_balance_usd": 95000.0, "badge": "OPTIMAL_PROGRESSION"}
-            ]
-        }
 
-    out_file = sys.argv[2] if len(sys.argv) > 2 else "lifetree_growing_tree.html"
+def main():
+    data = {
+        "pathway_a_trajectory": [
+            {"year": 1, "success_probability": 85, "capital_balance_usd": 26000, "badge": "OPTIMAL"},
+            {"year": 2, "success_probability": 90, "capital_balance_usd": 46000, "badge": "OPTIMAL", "plan_b_active": True},
+            {"year": 3, "success_probability": 98, "capital_balance_usd": 76000, "badge": "PR_ELIGIBLE"}
+        ],
+        "pathway_b_trajectory": [
+            {"year": 1, "success_probability": 70, "capital_balance_usd": 35000, "badge": "HIGH_FRICTION"},
+            {"year": 2, "success_probability": 65, "capital_balance_usd": 60000, "badge": "HIGH_FRICTION"},
+            {"year": 3, "success_probability": 75, "capital_balance_usd": 95000, "badge": "OPTIMAL"}
+        ]
+    }
+    out_file = sys.argv[1] if len(sys.argv) > 1 else "lifetree_growing_tree.html"
     res_path = generate_growing_tree_html(data, out_file, lang="zh")
-    print(json.dumps({"status": "SUCCESS", "growing_tree_html_path": os.path.abspath(res_path)}, indent=2, ensure_ascii=False))
+    print(json.dumps({"status": "SUCCESS", "path": os.path.abspath(res_path)}, indent=2, ensure_ascii=False))
+
 
 if __name__ == "__main__":
     main()

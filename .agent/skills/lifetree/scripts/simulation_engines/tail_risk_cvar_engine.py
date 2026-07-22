@@ -39,15 +39,37 @@ def calculate_cvar_expected_shortfall(simulated_losses: List[float], alpha: floa
     except Exception as e:
         return {"status": "ERROR", "error_code": "CVAR_CALCULATION_EXCEPTION", "message": str(e)}
 
-def simulate_copula_systemic_risks(base_cost: float = 15000.0, correlation_rho: float = 0.65, num_trials: int = 5000) -> Dict[str, Any]:
+def simulate_copula_systemic_risks(base_cost: float = 15000.0, correlation_rho: float = 0.65,
+                                   num_trials: int = 5000, volatility: float = 0.25,
+                                   shock_magnitude_macro: float = None,
+                                   shock_magnitude_income: float = None) -> Dict[str, Any]:
     """
     Simulates correlated systemic risks using Gaussian Copula transformation.
     Correlates Macro Economy Shock, Income Loss, and FX Asset Depreciation.
+
+    C2 fix: Shock magnitudes are now mean-preserving (mu = -b^2/2 so E[shock]=1.0)
+    and parameterized by `volatility` (default 0.25, matching Monte Carlo). With the
+    default volatility=0.25 and correlation_rho=0.65, the Copula VaR95 lands within
+    ~5-15% of the Monte Carlo VaR95 for the same base_cost — previously the Copula
+    used exp(0.25*z1)*exp(0.35*z2) which inflated VaR95 by ~2x vs Monte Carlo.
+
+    The shock betas default to volatility * 0.6 (≈0.15 for vol=0.25). At rho=0.65
+    this gives combined log-shock 95th percentile ≈ 1.645 * sqrt(2*b² + 2*rho*b²) - b²
+    = 0.425, so VaR95 ≈ exp(0.425) * base_cost ≈ 1.53 * base_cost, vs Monte Carlo's
+    1.46 * base_cost — within 5%.
     """
     try:
         trials = max(100, int(num_trials))
+        # C2: scale shock betas from volatility (same parameter Monte Carlo uses)
+        b_macro = float(shock_magnitude_macro) if shock_magnitude_macro is not None else float(volatility) * 0.6
+        b_income = float(shock_magnitude_income) if shock_magnitude_income is not None else float(volatility) * 0.6
+
         joint_disaster_count = 0
         losses = []
+
+        # Pre-compute mean-preserving offsets so E[macro_shock] = E[income_shock] = 1
+        macro_mu = -0.5 * b_macro * b_macro
+        income_mu = -0.5 * b_income * b_income
 
         for _ in range(trials):
             # Generate correlated normal variables via Cholesky decomposition
@@ -55,9 +77,11 @@ def simulate_copula_systemic_risks(base_cost: float = 15000.0, correlation_rho: 
             z2_independent = random.gauss(0, 1)
             z2 = correlation_rho * z1 + math.sqrt(max(0.0, 1.0 - correlation_rho**2)) * z2_independent
 
-            # Transform to cost shocks
-            macro_shock = math.exp(0.25 * z1)
-            income_drop_shock = math.exp(0.35 * z2)
+            # C2 fix: mean-preserving lognormal shocks (E[shock] = 1, same as Monte Carlo).
+            # Old formula exp(0.25*z1)*exp(0.35*z2) had E[shock] > 1 and 95th percentile
+            # of base_cost * 2.67 — wildly out of line with Monte Carlo.
+            macro_shock = math.exp(macro_mu + b_macro * z1)
+            income_drop_shock = math.exp(income_mu + b_income * z2)
             total_loss = base_cost * macro_shock * income_drop_shock
 
             losses.append(total_loss)
@@ -73,6 +97,10 @@ def simulate_copula_systemic_risks(base_cost: float = 15000.0, correlation_rho: 
             "copula_simulation": {
                 "num_trials": trials,
                 "correlation_rho": correlation_rho,
+                "volatility": float(volatility),
+                "shock_magnitude_macro": b_macro,
+                "shock_magnitude_income": b_income,
+                "shock_parameterization": "MEAN_PRESERVING_LOGNORMAL (mu = -b²/2)",
                 "joint_tail_disaster_trials": joint_disaster_count,
                 "joint_disaster_prob_pct": round((joint_disaster_count / trials) * 100.0, 2),
                 "var_95_max_cost_usd": cvar_res["var_value_at_risk"],

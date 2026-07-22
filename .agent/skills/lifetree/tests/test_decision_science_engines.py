@@ -35,8 +35,37 @@ class TestDecisionScienceEngines(unittest.TestCase):
         self.assertTrue(res["maut_total_utility_score"] > 0)
 
     def test_influence_diagram_backward_induction(self):
-        res = influence_diagram_engine.evaluate_influence_diagram({})
+        # C5 fix: empty payload must NOT silently substitute hardcoded defaults.
+        # It should return an explicit NO_DECISION_NODES error so callers know no
+        # real decision modeling happened.
+        empty_res = influence_diagram_engine.evaluate_influence_diagram({})
+        self.assertEqual(empty_res["status"], "ERROR")
+        self.assertEqual(empty_res["error_code"], "NO_DECISION_NODES")
+
+        # Opt-in defaults carry used_default_payload=true so downstream UIs can warn.
+        opt_in_res = influence_diagram_engine.evaluate_influence_diagram({"use_defaults_if_empty": True})
+        self.assertEqual(opt_in_res["status"], "SUCCESS")
+        self.assertTrue(opt_in_res["used_default_payload"])
+
+        # Real payload performs actual backward induction.
+        res = influence_diagram_engine.evaluate_influence_diagram({
+            "decision_nodes": [{"id": "d_visa_route", "label": "Visa Path Choice",
+                                "options": ["CHANCENKARTE_ROUTE", "DIRECT_EMPLOYER_ROUTE"]}],
+            "chance_nodes": [
+                {"id": "c_chancen", "parent_option": "CHANCENKARTE_ROUTE",
+                 "outcomes": [{"state": "SUCCESS", "prob": 0.88}, {"state": "DELAY", "prob": 0.12}]},
+                {"id": "c_direct", "parent_option": "DIRECT_EMPLOYER_ROUTE",
+                 "outcomes": [{"state": "SUCCESS", "prob": 0.70}, {"state": "REJECT", "prob": 0.30}]}
+            ],
+            "value_nodes": [
+                {"parent_option": "CHANCENKARTE_ROUTE", "state": "SUCCESS", "utility_value": 90.0},
+                {"parent_option": "CHANCENKARTE_ROUTE", "state": "DELAY", "utility_value": 30.0},
+                {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "SUCCESS", "utility_value": 95.0},
+                {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "REJECT", "utility_value": -50.0}
+            ]
+        })
         self.assertEqual(res["status"], "SUCCESS")
+        self.assertFalse(res["used_default_payload"])
         summary = res["influence_diagram_summary"]
         self.assertIn("optimal_decision_policy", summary)
 

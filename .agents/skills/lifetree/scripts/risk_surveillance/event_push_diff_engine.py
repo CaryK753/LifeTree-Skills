@@ -14,7 +14,27 @@ def process_event_diff(previous_state: Dict[str, Any], current_state: Dict[str, 
     - If NO diff: returns silent (0 notification resource consumed).
     - If LOW/MEDIUM risk diff: queues for Daily/Weekly Brief.
     - If HIGH/CRITICAL risk diff: triggers Urgent Circuit Breaker Alert (SMS / Direct Push).
+
+    m1 fix: comparison now ignores metadata fields (last_checked_at, updated_at,
+    cached_hash, surveillance_run_id, ...) that change on every routine polling
+    cycle. Previously `prev_node != node` flagged any metadata refresh as a
+    "CRITICAL" modification, triggering false-positive circuit-breaker alerts.
+    Only logical fields (label, entity_type, confidence, risk_level, valid_time,
+    properties) are compared.
     """
+    # m1: metadata fields excluded from diff comparison — they change on every
+    # routine surveillance refresh and would otherwise generate false positives.
+    METADATA_FIELDS = {"last_checked_at", "updated_at", "cached_at", "cached_hash",
+                       "surveillance_run_id", "polled_at", "fetched_at", "ingested_at",
+                       "ttl_expires_at", "_rev", "_etag"}
+
+    def _logical_view(node: Dict[str, Any]) -> Dict[str, Any]:
+        """Return a copy of node with only logical (non-metadata) fields."""
+        return {k: v for k, v in node.items() if k not in METADATA_FIELDS}
+
+    def _logical_equal(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
+        return _logical_view(a) == _logical_view(b)
+
     prev_nodes = {n["id"]: n for n in previous_state.get("nodes", [])}
     curr_nodes = {n["id"]: n for n in current_state.get("nodes", [])}
 
@@ -27,9 +47,12 @@ def process_event_diff(previous_state: Dict[str, Any], current_state: Dict[str, 
             added_nodes.append(node)
         else:
             prev_node = prev_nodes[nid]
-            if prev_node != node:
+            # m1: compare only logical fields, not metadata
+            if not _logical_equal(prev_node, node):
                 modified_nodes.append({
                     "id": nid,
+                    "previous_logical_view": _logical_view(prev_node),
+                    "current_logical_view": _logical_view(node),
                     "previous": prev_node,
                     "current": node
                 })

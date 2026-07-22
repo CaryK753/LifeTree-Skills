@@ -46,13 +46,30 @@ def run_decision_science_suite(input_payload: dict = None) -> dict:
     print(f"  ✓ MAUT Multi-Attribute Utility Score: {maut_res['maut_total_utility_score']} / 100.0")
 
     # 2. Influence Diagram Backward Induction
-    id_res = influence_diagram_engine.evaluate_influence_diagram({})
+    # C5 fix: pass a real decision diagram instead of {} so the engine does actual
+    # backward-induction instead of silently returning hardcoded "CHANCENKARTE_ROUTE".
+    id_res = influence_diagram_engine.evaluate_influence_diagram({
+        "decision_nodes": [{"id": "d_visa_route", "label": "Visa Path Choice",
+                            "options": ["CHANCENKARTE_ROUTE", "DIRECT_EMPLOYER_ROUTE"]}],
+        "chance_nodes": [
+            {"id": "c_chancen", "parent_option": "CHANCENKARTE_ROUTE",
+             "outcomes": [{"state": "SUCCESS", "prob": 0.88}, {"state": "DELAY", "prob": 0.12}]},
+            {"id": "c_direct", "parent_option": "DIRECT_EMPLOYER_ROUTE",
+             "outcomes": [{"state": "SUCCESS", "prob": 0.70}, {"state": "REJECT", "prob": 0.30}]}
+        ],
+        "value_nodes": [
+            {"parent_option": "CHANCENKARTE_ROUTE", "state": "SUCCESS", "utility_value": 90.0},
+            {"parent_option": "CHANCENKARTE_ROUTE", "state": "DELAY", "utility_value": 30.0},
+            {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "SUCCESS", "utility_value": 95.0},
+            {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "REJECT", "utility_value": -50.0}
+        ]
+    })
     print(f"\n[2] Influence Diagram Backward Induction")
     print(f"  ✓ Optimal Decision Policy: {id_res['influence_diagram_summary']['optimal_decision_policy']}")
     print(f"  ✓ Max Expected Utility (EU): {id_res['influence_diagram_summary']['max_expected_utility_EU']}")
 
     # 3. Tail Risk CVaR & Copula Systemic Correlation
-    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000)
+    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000, volatility=0.25)
     cop = cvar_res["copula_simulation"]
     print(f"\n[3] Tail Risk CVaR & Copula Correlation")
     print(f"  ✓ 95% Value at Risk (VaR): ${cop['var_95_max_cost_usd']:,.2f}")

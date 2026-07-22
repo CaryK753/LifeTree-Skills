@@ -22,10 +22,41 @@ try:
 except ImportError:
     influence_diagram_layer = None
 
+# C3 fix: Modifier edges augment an adjacent primary relationship (e.g. "B1 EXPEDITES
+# PR" means "B1 shortens the PR wait once Blue Card is held" — it is NOT a standalone
+# reachable path from B1 to PR). Dijkstra must skip modifier edges when building the
+# primary causal path; otherwise it produces nonsensical shortcuts like
+#   usr_cary → lang_a1 → lang_a2 → lang_b1 → route_pr
+# that bypass the entire education + visa + employment chain.
+MODIFIER_RELATION_TYPES = {
+    "EXPEDITES", "IMPROVES_CHANCE", "SUBSTANTIALLY_HELPS", "IMPEDES",
+    "THREATENS", "ASSOCIATED_WITH", "ALSO_QUALIFIES", "PARALLEL_ACTIVITY",
+}
+
+
+def _is_modifier_edge(edge: Dict[str, Any]) -> bool:
+    """C3: an edge is a modifier if it has `is_modifier: true` OR its relation_type
+    matches a known augmenting relation. Explicit `is_modifier: false` overrides the
+    heuristic, so callers can force a relation type into the primary path if needed."""
+    if "is_modifier" in edge:
+        return bool(edge.get("is_modifier"))
+    rel = str(edge.get("relation_type", "")).upper()
+    return rel in MODIFIER_RELATION_TYPES
+
+
 def find_optimal_causal_path(graph: Dict[str, Any], start_node_id: str, target_node_id: str) -> Dict[str, Any]:
     """
     Finds lowest-friction causal path using Dijkstra algorithm over temporal graph.
     Superimposes Influence Diagram semantics (Decision, Chance, Value) over path nodes.
+
+    C3 fix: modifier edges (EXPEDITES, IMPROVES_CHANCE, IMPEDES, THREATENS, ...) are
+             excluded from primary Dijkstra traversal. They are collected separately
+             as `modifier_edges_along_path` so their cost/friction effects on adjacent
+             nodes remain visible to downstream tools.
+    C4 fix: confidence < 0.60 no longer drops an edge. Lower confidence now applies a
+             continuous cost penalty (1/conf - 1), so a 0.59-confidence edge is
+             expensive but still traversable. Only conf < 0.01 (effectively disabled)
+             is skipped entirely.
     """
     try:
         nodes_dict = {n["id"]: n for n in graph.get("nodes", [])}
@@ -42,7 +73,11 @@ def find_optimal_causal_path(graph: Dict[str, Any], start_node_id: str, target_n
             }
 
         # Build adjacency list: node_id -> list of (target_id, friction_cost, edge_obj)
+        # C3: skip modifier edges for primary pathfinding; collect them separately.
+        # C4: skip only near-zero confidence; apply continuous penalty otherwise.
         adj = {}
+        modifier_edges_by_source = {}
+        skipped_modifier_count = 0
         for edge in edges:
             src = edge["source"]
             tgt = edge["target"]
@@ -50,10 +85,20 @@ def find_optimal_causal_path(graph: Dict[str, Any], start_node_id: str, target_n
             friction = float(edge.get("friction_penalty", 0.0))
             conf = float(edge.get("confidence", 1.0))
 
-            if conf < 0.60:
+            if _is_modifier_edge(edge):
+                modifier_edges_by_source.setdefault(src, []).append(edge)
+                skipped_modifier_count += 1
                 continue
 
-            cost = max(0.1, (1.0 / weight) + friction + (1.0 - conf))
+            if conf < 0.01:
+                # C4: only skip effectively-disabled edges (conf ~ 0)
+                continue
+
+            # C4: continuous confidence penalty — lower conf makes edge more expensive
+            # but does NOT remove it. At conf=1.0 penalty=0; at conf=0.6 penalty≈0.67;
+            # at conf=0.1 penalty=9.0.
+            confidence_cost = (1.0 / max(0.01, conf)) - 1.0
+            cost = max(0.1, (1.0 / max(0.01, weight)) + friction + confidence_cost)
             adj.setdefault(src, []).append((tgt, cost, edge))
 
         # Dijkstra algorithm
@@ -125,16 +170,40 @@ def find_optimal_causal_path(graph: Dict[str, Any], start_node_id: str, target_n
         path_nodes.reverse()
         path_edges.reverse()
 
+        # C3: collect modifier edges whose source sits on the reconstructed primary
+        # path. These augment (don't enable) the path — e.g. "lang_b1 EXPEDITES route_pr"
+        # means B1 shortens the PR wait once Blue Card is held. Reporting them
+        # separately preserves their informational value without letting them create
+        # bogus shortcuts through Dijkstra.
+        path_node_ids = {n["id"] for n in path_nodes}
+        modifier_edges_along_path = []
+        for src, mod_edges in modifier_edges_by_source.items():
+            if src in path_node_ids:
+                for me in mod_edges:
+                    modifier_edges_along_path.append({
+                        "source": me.get("source"),
+                        "target": me.get("target"),
+                        "relation_type": me.get("relation_type", "MODIFIES"),
+                        "confidence": me.get("confidence", 1.0),
+                        "description": me.get("description", ""),
+                        "modifier_effect": "AUGMENTS_ADJACENT_PATH_COST_OR_TIMELINE"
+                    })
+
         return {
             "found": True,
             "pathfinding_summary": {
                 "start_node": start_node_id,
                 "target_node": target_node_id,
                 "total_path_friction_cost": round(distances[target_node_id], 2),
-                "hops_count": len(path_edges)
+                "hops_count": len(path_edges),
+                "nodes_count": len(path_nodes),
+                "modifier_edges_excluded_from_primary_path": skipped_modifier_count,
+                "modifier_edges_along_path_count": len(modifier_edges_along_path),
+                "confidence_threshold_applied": "CONTINUOUS_PENALTY (conf < 0.01 skipped; 0.01 ≤ conf < 1.0 penalized via 1/conf − 1)"
             },
             "path_nodes": path_nodes,
-            "path_edges": path_edges
+            "path_edges": path_edges,
+            "modifier_edges_along_path": modifier_edges_along_path
         }
 
     except Exception as e:

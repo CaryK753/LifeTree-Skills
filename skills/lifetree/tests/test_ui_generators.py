@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
-LifeTree Unit Tests for UI Translators & Master Homepage Generator
-Tests Master Homepage Aggregator Portal, HTML Dashboard Generator (including Decision Science Cards & Graceful Degradation),
-Graph Visualizer HTML, Deduction Player HTML, and Growing Tree HTML.
+LifeTree Unit Tests for UI Translators & HTML Generators
 """
 
 import os
@@ -21,6 +19,7 @@ import graph_visualizer_html
 import deduction_player_html
 import growing_tree_html
 
+
 class TestUIGenerators(unittest.TestCase):
 
     def test_homepage_generator(self):
@@ -38,8 +37,8 @@ class TestUIGenerators(unittest.TestCase):
             with open(res_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 self.assertIn("LifeTree", content)
-                self.assertIn("决策推演仪表盘", content)
-                self.assertIn("生长决策树全景", content)
+                self.assertIn("核心指标", content)
+                self.assertIn("深入探索", content)
 
     def test_interactive_html_report_generator_full_and_graceful(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -59,10 +58,10 @@ class TestUIGenerators(unittest.TestCase):
             self.assertTrue(os.path.exists(res_path))
             with open(res_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-                self.assertIn("最坏情况资金保障线", content)
-                self.assertIn("心理真实满意度", content)
-                self.assertIn("最新证据胜算信心", content)
-                self.assertIn("决策全景要素拆解", content)
+                self.assertIn("最坏情况保障", content)
+                self.assertIn("心理满意度", content)
+                self.assertIn("证据更新", content)
+                self.assertIn("决策要素拆解", content)
 
             # Test Graceful Degradation (Missing Decision Science fields)
             minimal_out = os.path.join(tmp_dir, "report_minimal.html")
@@ -95,6 +94,7 @@ class TestUIGenerators(unittest.TestCase):
             ded = {"timeline_projection": [{"year": 2026, "net_worth_usd": 40000}]}
             path = growing_tree_html.generate_growing_tree_html(ded, out, lang="zh")
             self.assertTrue(os.path.exists(path))
+
 
 if __name__ == "__main__":
     unittest.main()

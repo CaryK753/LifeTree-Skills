@@ -114,7 +114,24 @@ def run_full_mvp_pipeline():
         ]
     }
     path_res = temporal_graph_engine.find_optimal_causal_path(sample_ontology, "usr_person", "route_bluecard")
-    id_res = influence_diagram_engine.evaluate_influence_diagram({})
+    # C5 fix: pass a real decision diagram instead of {} so the engine does actual
+    # backward-induction instead of silently returning hardcoded "CHANCENKARTE_ROUTE".
+    id_res = influence_diagram_engine.evaluate_influence_diagram({
+        "decision_nodes": [{"id": "d_visa_route", "label": "Visa Path Choice",
+                            "options": ["CHANCENKARTE_ROUTE", "DIRECT_EMPLOYER_ROUTE"]}],
+        "chance_nodes": [
+            {"id": "c_chancen", "parent_option": "CHANCENKARTE_ROUTE",
+             "outcomes": [{"state": "SUCCESS", "prob": 0.88}, {"state": "DELAY", "prob": 0.12}]},
+            {"id": "c_direct", "parent_option": "DIRECT_EMPLOYER_ROUTE",
+             "outcomes": [{"state": "SUCCESS", "prob": 0.70}, {"state": "REJECT", "prob": 0.30}]}
+        ],
+        "value_nodes": [
+            {"parent_option": "CHANCENKARTE_ROUTE", "state": "SUCCESS", "utility_value": 90.0},
+            {"parent_option": "CHANCENKARTE_ROUTE", "state": "DELAY", "utility_value": 30.0},
+            {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "SUCCESS", "utility_value": 95.0},
+            {"parent_option": "DIRECT_EMPLOYER_ROUTE", "state": "REJECT", "utility_value": -50.0}
+        ]
+    })
     print(f"  ✓ Dijkstra Optimal Path Friction: {path_res['pathfinding_summary']['total_path_friction_cost']} | Optimal Policy: {id_res['influence_diagram_summary']['optimal_decision_policy']}")
 
     # Phase 5: Code-Driven Monte Carlo & Tail Risk CVaR Copula Simulation
@@ -129,7 +146,7 @@ def run_full_mvp_pipeline():
     }, num_trials=10000)
     mc_results = mc_res['monte_carlo_results']
 
-    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000)
+    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000, volatility=0.25)
     print(f"  ✓ Monte Carlo Trials: {mc_results['total_trials_simulated']} | 95% VaR: ${mc_results['financial_capital_usd']['VaR_95_max_cost']:,.2f} | CVaR Expected Shortfall: ${cvar_res['copula_simulation']['cvar_expected_shortfall_usd']:,.2f}")
 
     # Phase 6: Behavioral Prospect Theory & MAUT Utility Elicitation

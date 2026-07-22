@@ -32,8 +32,19 @@ def calculate_ahp_weights(pairwise_matrix: List[List[float]]) -> Tuple[List[floa
         row_avg = sum(pairwise_matrix[row][col] / col_sums[col] for col in range(n)) / n
         weights.append(row_avg)
 
-    # Calculate max eigenvalue (lambda_max)
-    lambda_max = sum(col_sums[col] * weights[col] for col in range(n))
+    # M1 fix: lambda_max is the principal eigenvalue Aw = lambda_max * w. The correct
+    # approximation from the normalized column-average method is the Rayleigh quotient
+    #   lambda_max = (1/n) * sum_i [ (sum_j a_ij * w_j) / w_i ]
+    # The previous formula `sum(col_sums[col] * weights[col])` returned a value close
+    # to 1 (because col_sums[col] * weights[col] ≈ 1 for each col after normalization),
+    # producing meaningless CR values close to (1 - n) / ((n-1) * RI) which are always
+    # negative and thus always "consistent" — masking arbitrary weight matrices.
+    lambda_max = 0.0
+    for i in range(n):
+        aw_i = sum(pairwise_matrix[i][j] * weights[j] for j in range(n))
+        if weights[i] > 1e-12:
+            lambda_max += aw_i / weights[i]
+    lambda_max = lambda_max / n if n > 0 else 0.0
 
     # Consistency Index (CI) and Consistency Ratio (CR)
     ci = (lambda_max - n) / (n - 1) if n > 1 else 0.0

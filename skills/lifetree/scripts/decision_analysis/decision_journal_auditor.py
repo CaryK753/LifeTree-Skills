@@ -44,10 +44,64 @@ def audit_decision_journal(journal_entries: List[Dict[str, Any]]) -> Dict[str, A
         if plan_b_status in ["READY", "ACTIVE_RESERVE"]:
             plan_b_active_count += 1
 
-        # Regret Minimization Evaluation
-        # High rationale clarity + active Plan B -> High Regret Minimization Score
-        rationale_length = len(entry.get("user_rationale", ""))
-        regret_score = min(100.0, 50.0 + (rationale_length * 0.2) + (30.0 if plan_b_status != "INACTIVE" else 0.0))
+        # m2 fix: Regret Minimization score now uses real decision-quality criteria
+        # instead of `50 + rationale_length * 0.2`. The old formula gave a 250-char
+        # rationale a score of 100 regardless of content, and a 10-char rationale a
+        # score of 52 — completely uncorrelated with decision quality.
+        #
+        # New criteria (each 0..25, summed to 0..100):
+        #   1. Rationale quality    — score 0..25 based on documented research depth
+        #                             (presence of alternatives_considered, evidence_links,
+        #                             quant_analysis fields), NOT on string length.
+        #   2. Goal alignment       — score 0..25 based on entry's alignment_with_stated_goal
+        #                             field, or 12.5 (neutral) if not recorded.
+        #   3. Plan B readiness     — score 0..25 based on plan_b_status:
+        #                             READY/ACTIVE_RESERVE=25, DRAFT=15, INACTIVE=0.
+        #   4. Reversibility guard  — score 0..25: if entry marked is_reversible=true → 25,
+        #                             is_reversible=false → 5 (irreversible = higher regret
+        #                             risk), unknown → 12.5.
+        rationale_text = str(entry.get("user_rationale", ""))
+
+        # (1) Rationale quality: look for structured research markers, not length.
+        research_markers = 0
+        for marker_field in ["alternatives_considered", "evidence_links", "quant_analysis",
+                             "data_sources", "consulted_advisors"]:
+            if entry.get(marker_field):
+                research_markers += 1
+        # Bonus for rationales that mention concrete numbers/percentages (≥3 digits)
+        import re as _re
+        if _re.search(r"\d{3,}", rationale_text):
+            research_markers += 1
+        rationale_quality = min(25.0, research_markers * 5.0)
+
+        # (2) Goal alignment
+        goal_align_raw = entry.get("alignment_with_stated_goal")
+        if goal_align_raw is None:
+            goal_alignment = 12.5  # neutral when not recorded
+        else:
+            try:
+                goal_alignment = max(0.0, min(25.0, float(goal_align_raw) * 25.0))
+            except (TypeError, ValueError):
+                goal_alignment = 12.5
+
+        # (3) Plan B readiness
+        plan_b_readiness = {"READY": 25.0, "ACTIVE_RESERVE": 25.0, "DRAFT": 15.0,
+                             "INACTIVE": 0.0}.get(plan_b_status, 0.0)
+
+        # (4) Reversibility guard
+        is_reversible = entry.get("is_reversible", None)
+        if is_reversible is True:
+            reversibility = 25.0
+        elif is_reversible is False:
+            reversibility = 5.0
+        else:
+            reversibility = 12.5
+
+        regret_score = rationale_quality + goal_alignment + plan_b_readiness + reversibility
+        # Penalyze undocumented strategic pivots — switching paths without research
+        # is the canonical high-regret move.
+        if is_pivot and research_markers == 0:
+            regret_score = max(0.0, regret_score - 15.0)
 
         audited_entries.append({
             "entry_id": entry.get("entry_id"),
@@ -55,7 +109,14 @@ def audit_decision_journal(journal_entries: List[Dict[str, Any]]) -> Dict[str, A
             "topic_id": entry.get("topic_id"),
             "chosen_pathway": curr_path,
             "is_strategic_pivot": is_pivot,
-            "regret_minimization_score": round(regret_score, 1)
+            "regret_minimization_score": round(regret_score, 1),
+            "regret_score_breakdown": {
+                "rationale_quality": round(rationale_quality, 1),
+                "goal_alignment": round(goal_alignment, 1),
+                "plan_b_readiness": round(plan_b_readiness, 1),
+                "reversibility_guard": round(reversibility, 1),
+                "undocumented_pivot_penalty": -15.0 if (is_pivot and research_markers == 0) else 0.0
+            }
         })
 
     avg_regret_score = round(sum(e["regret_minimization_score"] for e in audited_entries) / total_decisions, 1)
