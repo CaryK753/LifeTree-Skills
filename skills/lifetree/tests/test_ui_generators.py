@@ -13,6 +13,7 @@ import tempfile
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, os.path.join(SKILL_ROOT, "scripts", "ui_translators"))
+sys.path.insert(0, os.path.join(SKILL_ROOT, "scripts", "graph_engines"))
 
 import html_report_generator
 import graph_visualizer_html
@@ -39,10 +40,10 @@ class TestUIGenerators(unittest.TestCase):
             self.assertTrue(os.path.exists(res_path))
             with open(res_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-                self.assertIn("CVaR Tail Risk", content)
-                self.assertIn("Prospect Theory", content)
-                self.assertIn("Bayesian Belief", content)
-                self.assertIn("Influence Diagram Topology Summary", content)
+                self.assertIn("最坏情况资金保障线", content)
+                self.assertIn("心理真实满意度", content)
+                self.assertIn("最新证据胜算信心", content)
+                self.assertIn("决策全景要素拆解", content)
 
             # Test Graceful Degradation (Missing Decision Science fields)
             minimal_out = os.path.join(tmp_dir, "report_minimal.html")
