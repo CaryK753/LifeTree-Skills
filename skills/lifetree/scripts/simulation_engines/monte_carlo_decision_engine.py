@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-LifeTree Monte Carlo Stochastic Decision Simulation & Tail Risk Engine
+LifeTree Monte Carlo Stochastic Decision Simulation Engine (CVaR Expected Shortfall Integrated)
 Runs 10,000 stochastic simulation trials over decision pathways to calculate P10/P50/P90 confidence intervals,
-Value at Risk (VaR), and tail risk probabilities with robust error handling.
+VaR_0.95, and CVaR_0.95 Expected Shortfall tail risk metrics.
 """
 
 import sys
@@ -25,7 +25,7 @@ except ImportError:
 
 def run_monte_carlo_simulation(pathway_config: Dict[str, Any], num_trials: int = None) -> Dict[str, Any]:
     """
-    Runs stochastic Monte Carlo trials over a pathway.
+    Runs stochastic Monte Carlo trials over a pathway and computes VaR_0.95 and CVaR_0.95 Expected Shortfall.
     """
     try:
         if not isinstance(pathway_config, dict):
@@ -74,8 +74,14 @@ def run_monte_carlo_simulation(pathway_config: Dict[str, Any], num_trials: int =
         p50_cost = round(simulated_costs[int(trials * 0.50)], 2)
         p90_cost = round(simulated_costs[int(trials * 0.90)], 2)
 
+        # 1. VaR 95%
         var_95_cost = round(simulated_costs[int(trials * 0.95)], 2)
         var_95_time = round(simulated_times[int(trials * 0.95)], 1)
+
+        # 2. CVaR 95% Expected Shortfall (Average loss in upper 5% tail)
+        tail_costs = simulated_costs[int(trials * 0.95):]
+        cvar_95_cost = round(sum(tail_costs) / len(tail_costs), 2) if tail_costs else var_95_cost
+        tail_severity_ratio = round(cvar_95_cost / var_95_cost, 3) if var_95_cost > 0 else 1.0
 
         return {
             "status": "SUCCESS",
@@ -99,10 +105,12 @@ def run_monte_carlo_simulation(pathway_config: Dict[str, Any], num_trials: int =
                     "P10_optimistic": p10_cost,
                     "P50_median": p50_cost,
                     "P90_pessimistic": p90_cost,
-                    "VaR_95_max_cost": var_95_cost
+                    "VaR_95_max_cost": var_95_cost,
+                    "CVaR_95_expected_shortfall_cost": cvar_95_cost,
+                    "tail_severity_ratio": tail_severity_ratio
                 }
             },
-            "tail_risk_verdict": "LOW_VOLATILITY" if volatility < 0.2 else ("MODERATE_VOLATILITY" if volatility < 0.35 else "HIGH_TAIL_RISK_WARNING")
+            "tail_risk_verdict": "CRITICAL_TAIL_SHORTFALL_WARNING" if tail_severity_ratio > 1.25 else "NORMAL_VOLATILITY"
         }
 
     except Exception as e:
