@@ -1,0 +1,27 @@
+name: LifeTree Skill CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Run Master Unit Test Suite
+      run: |
+        python3 .agent/skills/lifetree/tests/run_all_tests.py
+
+    - name: Run MVP Workflow End-to-End Pipeline
+      run: |
+        python3 .agent/skills/lifetree/scripts/run_mvp_workflow.py
