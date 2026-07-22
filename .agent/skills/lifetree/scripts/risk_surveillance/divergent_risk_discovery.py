@@ -1,113 +1,119 @@
 #!/usr/bin/env python3
 """
-LifeTree Dynamic Divergent Thinking Risk Discovery Engine
-Dynamically analyzes active user decision topics and profile parameters against multi-domain risk matrices,
-discovering latent risk domains with dynamic severity scoring and robust error handling.
+LifeTree Combinatorial Divergent Risk Discovery Engine
+Generates dynamic latent risk hypotheses across Risk Categories, Impact Subjects, and Causal Mechanisms,
+replacing static knowledge bases with true combinatorial risk discovery.
 """
 
 import sys
 import json
 from typing import Dict, Any, List
 
-# Core Rule KB Matrix
-RISK_MATRIX_KB = [
-    {
-        "category_match": ["IMMIGRATION", "GLOBAL_MOBILITY", "TAX"],
-        "title": "Dual Tax Residency & Exit Tax Exposure",
-        "severity": "HIGH",
-        "trigger_condition": "Cross-border relocation without tax de-registration",
-        "description": "Physical presence (>183 days) in host country triggers local tax residency while origin country retains worldwide tax claim.",
-        "suggested_tracking_metric": "Days spent in jurisdiction & Tax Treaty Clause"
-    },
-    {
-        "category_match": ["IMMIGRATION", "ASSET_ALLOCATION", "FINANCIAL"],
-        "title": "Capital Outflow Controls & FX Conversion Bottlenecks",
-        "severity": "CRITICAL",
-        "trigger_condition": "Large liquid capital transfer requirements across currency borders",
-        "description": "Statutory annual capital transfer limits or foreign exchange controls can delay statutory deposit fulfillment.",
-        "suggested_tracking_metric": "Statutory Annual Capital Transfer Limit"
-    },
-    {
-        "category_match": ["IMMIGRATION", "HEALTHCARE", "CAREER"],
-        "title": "Private vs Public Statutory Healthcare Coverage Gap",
-        "severity": "MEDIUM",
-        "trigger_condition": "Age > 30 transitioning to non-salaried or freelance visa status",
-        "description": "Exceeding statutory age limits blocks entry into public health insurance schemes, forcing expensive private health policies.",
-        "suggested_tracking_metric": "Health Insurance Entry Statutory Age Limit"
-    },
-    {
-        "category_match": ["ASSET_ALLOCATION", "ESTATE_SUCCESSION"],
-        "title": "Forced Heirship & Cross-Border Estate Probate Traps",
-        "severity": "HIGH",
-        "trigger_condition": "Holding real estate or liquid assets in multiple legal jurisdictions",
-        "description": "Host jurisdiction succession statutes may override origin country wills, forcing statutory heirship allocations.",
-        "suggested_tracking_metric": "EU Succession Regulation No 650/2012 Choice of Law"
-    },
-    {
-        "category_match": ["IMMIGRATION", "FAMILY_EDUCATION"],
-        "title": "School Registration Cut-Offs & Dependent Visa Age Out",
-        "severity": "HIGH",
-        "trigger_condition": "Dependents approaching age 18 during long-term PR processing",
-        "description": "Child dependents aging out (exceeding age 18 or 21) lose eligibility for family reunification visas.",
-        "suggested_tracking_metric": "Dependent Child Age at PR Application Date"
-    }
-]
+# Risk Categories
+RISK_CATEGORIES = ["TAX", "LEGAL", "HEALTH", "EDUCATION", "FAMILY", "ASSET", "CAREER", "IMMIGRATION"]
+
+# Impact Subjects
+IMPACT_SUBJECTS = ["PERSON", "REGULATION_LAW", "CAPITAL_ASSET", "PATHWAY_ROUTE"]
+
+# Causal Mechanisms & Base Severity Weights
+CAUSAL_MECHANISMS = {
+    "TRIGGER": {"weight": 0.8, "desc": "Triggers unforeseen statutory or financial liabilities"},
+    "BLOCK": {"weight": 1.0, "desc": "Completely blocks target pathway progression"},
+    "DELAY": {"weight": 0.6, "desc": "Imposes significant statutory processing delays"},
+    "COST_INCREASE": {"weight": 0.7, "desc": "Causes unanticipated statutory capital expenditure"},
+    "CONFLICT": {"weight": 0.9, "desc": "Creates irreconcilable multi-jurisdictional legal conflicts"}
+}
+
+def calculate_dynamic_severity(impact_subject: str, causal_mechanism: str) -> str:
+    """
+    Dynamically computes severity based on subject and mechanism.
+    BLOCK + PATHWAY_ROUTE -> CRITICAL
+    CONFLICT + REGULATION_LAW -> HIGH
+    """
+    if causal_mechanism == "BLOCK" and impact_subject == "PATHWAY_ROUTE":
+        return "CRITICAL"
+    elif causal_mechanism in ["BLOCK", "CONFLICT"]:
+        return "HIGH"
+    elif causal_mechanism in ["TRIGGER", "COST_INCREASE"]:
+        return "MEDIUM"
+    else:
+        return "LOW"
 
 def discover_latent_risks(active_user_topics: List[Dict[str, Any]], user_profile: Dict[str, Any] = None) -> Dict[str, Any]:
     """
-    Dynamically analyzes active user topics and profile parameters to discover non-obvious latent risk domains.
+    Generates combinatorial latent risk hypotheses based on input active topics.
     """
     try:
         if not isinstance(active_user_topics, list):
-            return {"status": "ERROR", "error_code": "INVALID_TOPICS_INPUT", "message": "Expected list of active_user_topics"}
+            return {"status": "ERROR", "error_code": "INVALID_TOPICS", "message": "Expected list for active_user_topics"}
 
-        user_categories = set()
+        # Extract target categories from active user topics
+        target_categories = set()
         for t in active_user_topics:
             if isinstance(t, dict):
                 cat = t.get("category", "").upper()
                 if cat:
-                    user_categories.add(cat)
+                    target_categories.add(cat)
 
-        discovered = []
-        for kb_item in RISK_MATRIX_KB:
-            matches = [c for c in kb_item["category_match"] if c in user_categories]
-            if matches:
-                item_copy = dict(kb_item)
-                item_copy["matched_category"] = matches[0]
-                discovered.append(item_copy)
+        if not target_categories:
+            target_categories = {"IMMIGRATION", "ASSET", "CAREER"}
 
-        # Fallback if specific topics are not in KB: return full broad surveillance set
-        if not discovered:
-            discovered = [dict(kb) for kb in RISK_MATRIX_KB[:3]]
+        generated_risks = []
+        risk_counter = 1
+
+        # Combinatorial Risk Generation over target categories
+        for cat in sorted(list(target_categories)):
+            for subject in IMPACT_SUBJECTS:
+                for mech_key, mech_val in CAUSAL_MECHANISMS.items():
+                    # Filter relevant combinations
+                    if (cat == "TAX" and subject in ["PERSON", "REGULATION_LAW"] and mech_key in ["TRIGGER", "CONFLICT", "COST_INCREASE"]) or \
+                       (cat in ["IMMIGRATION", "CAREER"] and subject == "PATHWAY_ROUTE" and mech_key in ["BLOCK", "DELAY"]) or \
+                       (cat == "ASSET" and subject == "CAPITAL_ASSET" and mech_key in ["COST_INCREASE", "BLOCK"]) or \
+                       (cat in ["HEALTH", "EDUCATION", "FAMILY"] and subject == "PERSON" and mech_key in ["TRIGGER", "DELAY"]):
+
+                        severity = calculate_dynamic_severity(subject, mech_key)
+                        risk_id = f"rsk_gen_{risk_counter:03d}"
+                        title = f"Latent {cat} {mech_key} Risk on {subject}"
+                        description = f"Combinatorial Hypothesis: {cat} constraints may {mech_val['desc']} impacting {subject}."
+                        tracking_metric = f"Statutory {cat} {mech_key} Threshold"
+
+                        generated_risks.append({
+                            "risk_id": risk_id,
+                            "title": title,
+                            "category": cat,
+                            "impact_subject": subject,
+                            "causal_mechanism": mech_key,
+                            "severity": severity,
+                            "description": description,
+                            "suggested_tracking_metric": tracking_metric
+                        })
+                        risk_counter += 1
 
         return {
             "status": "SUCCESS",
             "divergent_discovery_summary": {
                 "topics_analyzed_count": len(active_user_topics),
-                "latent_risks_discovered_count": len(discovered)
+                "latent_risks_discovered_count": len(generated_risks),
+                "generation_mode": "COMBINATORIAL_RISK_GENERATOR"
             },
-            "discovered_risk_domains": discovered
+            "discovered_risk_domains": generated_risks
         }
 
     except Exception as e:
-        return {
-            "status": "ERROR",
-            "error_code": "DIVERGENT_RISK_DISCOVERY_EXCEPTION",
-            "message": str(e)
-        }
+        return {"status": "ERROR", "error_code": "DIVERGENT_RISK_GENERATOR_EXCEPTION", "message": str(e)}
 
 def main():
     try:
         if len(sys.argv) > 1:
             with open(sys.argv[1], 'r', encoding='utf-8') as f:
-                top_data = json.load(f)
+                topics = json.load(f)
         else:
-            top_data = [
-                {"topic_id": "tpc_1", "title": "German Skilled Migration", "category": "IMMIGRATION"},
-                {"topic_id": "tpc_2", "title": "Global Tech Portfolio", "category": "ASSET_ALLOCATION"}
+            topics = [
+                {"topic_id": "t1", "category": "IMMIGRATION"},
+                {"topic_id": "t2", "category": "ASSET"}
             ]
 
-        res = discover_latent_risks(top_data)
+        res = discover_latent_risks(topics)
         print(json.dumps(res, indent=2, ensure_ascii=False))
     except Exception as e:
         print(json.dumps({"status": "ERROR", "message": str(e)}))
