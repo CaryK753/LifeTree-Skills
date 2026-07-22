@@ -2,7 +2,7 @@
 """
 LifeTree End-to-End MVP Workflow Execution Test Runner
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
-Generates interactive HTML Decision Dashboards and dynamic Vis.js Graph Viewers.
+Generates interactive HTML Decision Dashboards, dynamic Vis.js Graph Viewers, and HTML Deduction Scenario Players.
 All calculations are strictly code-driven via Python.
 """
 
@@ -37,6 +37,7 @@ import human_translator
 import action_checklist_generator
 import graph_visualizer_html
 import html_report_generator
+import deduction_player_html
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -133,18 +134,22 @@ def run_full_mvp_pipeline():
         {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY"}
     ])
 
-    # Phase 8: Multi-Step Temporal Deduction
+    # Phase 8: Multi-Step Temporal Deduction (Deduction Mode)
     print("\n[Phase 8] Multi-Step Temporal Deduction Engine (5-Year Horizon)")
-    ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5)
+    ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5, hypothetical_shocks=[
+        {"year": 2, "name": "Sperrkonto Increase (+€800)", "impact": "NEGATIVE"}
+    ])
+    print(f"  ✓ 5-Year Deduction Complete! Final Path Success Probability: {ded_res['deduction_summary']['final_year_prob_pathway_a']*100}%")
 
     # Phase 9: Immediate Weekly Action Checklist
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
     checklist_res = action_checklist_generator.generate_action_checklist(sample_ontology["nodes"], top_action)
 
-    # Phase 10: Interactive HTML Dashboards & Graph Viewer Generation
-    print("\n[Phase 10] Generating Interactive HTML Dashboard & Graph Viewer Output")
+    # Phase 10: Interactive HTML Dashboards, Deduction Player & Graph Viewer Generation
+    print("\n[Phase 10] Generating Interactive HTML Dashboard, Deduction Player & Graph Viewer Output")
     html_report_path = os.path.join(SKILL_ROOT, "examples", "lifetree_decision_report.html")
     graph_viewer_path = os.path.join(SKILL_ROOT, "examples", "lifetree_graph_viewer.html")
+    deduction_player_path = os.path.join(SKILL_ROOT, "examples", "lifetree_deduction_player.html")
 
     html_report_generator.generate_interactive_html_report({
         "monte_carlo_results": mc_results,
@@ -154,9 +159,11 @@ def run_full_mvp_pipeline():
     }, html_report_path)
 
     graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path)
+    deduction_player_html.generate_deduction_player_html(ded_res, deduction_player_path)
 
     print(f"  ✓ Interactive Decision Report Dashboard HTML Generated: {html_report_path}")
     print(f"  ✓ Interactive Knowledge Graph Viewer HTML Generated: {graph_viewer_path}")
+    print(f"  ✓ Interactive Deduction Scenario Player HTML Generated: {deduction_player_path}")
 
     print("\n" + "=" * 80)
     print("✅ LIFETREE MVP DECISION PIPELINE EXECUTION COMPLETED SUCCESSFULLY!")
