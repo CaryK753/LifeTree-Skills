@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>基于以对象为中心的时序 GraphRAG 与代码驱动蒙特卡洛模拟的个人决策操作系统</strong>
+  <strong>基于以对象为中心的时序 GraphRAG 与现代决策科学数学模型的个人决策操作系统</strong>
 </p>
 
 <p align="center">
@@ -23,14 +23,19 @@
 
 ---
 
+> [!CAUTION]
+> **重要风险提示与免责声明**：
+> 所有仿真结论、事件概率、VaR/CVaR 风险指标与效用得分高度依赖于人为输入的权重、主观效用参数与法定/市场历史概率；模型仅作为**定量决策辅助与情景推演工具**，**不构成任何金融、法律、税务、医疗或移民正式建议，亦无法替代最终的人为判断**。
+
+---
+
 ## 📖 目录
 
 - [🤖 AI Agent 使用此 Skill 指导说明](#-ai-agent-使用此-skill-指导说明)
+- [🧠 决策科学模型与数学矩阵](#-决策科学模型与数学矩阵)
 - [🎨 交互式 HTML 决策仪表盘与动态图谱查看器](#-交互式-html-决策仪表盘与动态图谱查看器)
 - [📦 Anthropic Skill 标准兼容](#-anthropic-skill-标准兼容)
-- [🌟 系统哲学与隐喻](#-系统哲学与隐喻)
 - [🏗️ 架构与技术栈](#️-架构与技术栈)
-- [🚀 核心创新点](#-核心创新点)
 - [📁 项目与 Skill 目录结构](#-项目与-skill-目录结构)
 - [💻 快速开始与引擎运行](#-快速开始与引擎运行)
 - [📈 Star History 趋势图](#-star-history-趋势图)
@@ -38,78 +43,39 @@
 
 ---
 
-## 🤖 AI Agent 使用此 Skill 指导说明
+## 🧠 决策科学模型与数学矩阵 (`./scripts/decision_models/`)
 
-当 AI Agent 被分配用于解决复杂的个人高风险决策（如全球身份规划、资产配置、职业转型、跨国避税）时，**必须严格遵循以下 5 步操作规程**：
+LifeTree 为高风险个人决策场景（职业转型、资产配置、身份规划、跨国避税）集成了专门解耦的决策科学模型库：
 
-### 第 1 步：读取 Skill 指令
-首先阅读 `SKILL.md`，理解领域规则、本地 SQLite 数据库 Schema 以及 Python 计算引擎位置。
-
-### 第 2 步：检索嵌入式本地 SQLite 数据库
-在向用户重复询问之前，先通过 FTS5 全文检索本地已有的知识图谱节点：
-```bash
-python3 scripts/graph_engines/sqlite_graph_store.py "blocked account"
-```
-
-### 第 3 步：运行 Agent 联网检索与即时 GraphRAG 合成
-使用 Tavily / 博查 搜索工具获取最新的法定政策法规，并将事实合成入本体图谱：
-```bash
-python3 scripts/data_connectors/search_connector_tavily.py "Germany chanceskarte statutory deposit 2026"
-python3 scripts/data_connectors/jit_connector_synthesizer.py
-```
-
-### 第 4 步：执行代码驱动数学计算引擎（强制规程）
-> [!IMPORTANT]
-> **严禁大模型通过文本生成盲估数学指标**：
-> 必须显式运行 `scripts/` 中的 Python 脚本来计算最短路径、蒙特卡洛模拟、龙卷风敏感度图与 VaR 资金限额：
-```bash
-python3 scripts/graph_engines/temporal_graph_engine.py
-python3 scripts/simulation_engines/monte_carlo_decision_engine.py
-python3 scripts/decision_analysis/graph_sensitivity_engine.py
-python3 scripts/decision_analysis/tornado_diagram_engine.py
-python3 scripts/decision_analysis/game_theory_stakeholder_solver.py
-```
-
-### 第 5 步：生成交互式 HTML 决策仪表盘与动态图谱查看器
-自动生成单文件自包含的高保真 HTML 可视化决策产物：
-```bash
-# 1. 生成交互式 HTML 决策仪表盘
-python3 scripts/ui_translators/html_report_generator.py
-
-# 2. 生成动态 Vis.js 知识图谱查看器
-python3 scripts/graph_engines/graph_visualizer_html.py
-```
-
----
-
-## 🎨 交互式 HTML 决策仪表盘与动态图谱查看器
-
-LifeTree 自动导出单文件自包含的可视化 HTML 产物：
-
-1. **交互式 HTML 决策仪表盘 (`lifetree_decision_report.html`)**：
-   - 核心决策指标卡片（P50 目标时缓、95% VaR 资金限额、后悔最小化得分）。
-   - 带 Checkbox 复选框的周度待办 Task 清单。
-   - Chart.js 动态蒙特卡洛置信度分布图表。
-2. **动态 Vis.js 知识图谱查看器 (`lifetree_graph_viewer.html`)**：
-   - 力导向物理拓扑网络，支持节点拖拽、平移与缩放。
-   - 区分实体颜色的 Badge（`PERSON`、`REGULATION_LAW`、`PATHWAY_ROUTE`、`CAPITAL_ASSET` 等）。
-   - 侧滑式 **节点 Inspector 检查器**，点击任意节点展示详细属性、置信度与数据源 provenance。
-   - 支持实时模糊搜索与按实体类型筛选。
+| 模块 | 脚本路径 | 核心算法与数学原理 |
+| :--- | :--- | :--- |
+| **MAUT 多属性效用** | `maut_utility_engine.py` | 6 维标准化效用标定与 AHP 层次分析法特征向量权重抽取 ($\mathbf{A}w = \lambda_{\max} w$) |
+| **CVaR 尾部风险** | `cvar_risk_engine.py` | 95% 在险价值 (VaR) 与 95% 条件风险价值 ($\text{CVaR}_{0.95}$ / 期望短缺 $ES_{0.95}$) 极端破产警示 |
+| **影响图 Semantic 建模** | `influence_diagram_layer.py` | 决策节点 ($\square$)、机会节点 ($\bigcirc$)、价值节点 ($\diamondsuit$) 拓扑标注与因果干预链路区分 |
+| **贝叶斯信念更新** | `bayesian_belief_updater.py` | 动态后验概率更新 $P(H \mid E) = \frac{P(E \mid H)P(H)}{P(E)}$ 与 Dempster-Shafer 区间概率 bounds |
+| **跨期效用贴现** | `intertemporal_discounting_engine.py` | 指数贴现 $V e^{-rt}$ 与行为双曲线贴现 $U(t) = \frac{V}{1 + kt}$ 修正远期回报偏差 |
+| **最优停止求解器** | `optimal_stopping_solver.py` | 37% 法则 / Snell Envelope 最佳出手时机阈值计算 $k^* = \lfloor n / e \rfloor$ |
+| **Copula 风险联动** | `copula_correlation_engine.py` | 二元高斯 Copula 系统性联动矩阵（宏观下行 $\rightarrow$ 薪资下跌 + 资产缩水） |
+| **前景理论 (Prospect Theory)**| `prospect_theory_engine.py` | Kahneman-Tversky 损失厌恶价值函数 $v(x)$ ($\lambda = 2.25$) 与概率权重 $w(p)$ |
 
 ---
 
 ## 💻 快速开始与引擎运行
 
-### 运行端到端 MVP 决策流程闭环（自动生成 HTML 产物）
+### 1. 运行端到端 MVP 决策流程闭环（自动生成 HTML 产物）
 ```bash
 python3 .agent/skills/lifetree/scripts/run_mvp_workflow.py
 ```
 
----
+### 2. 运行独立决策科学套件测试
+```bash
+python3 .agent/skills/lifetree/scripts/run_decision_science_pipeline.py
+```
 
-## 📈 Star History 趋势图
-
-[![Star History Chart](https://api.star-history.com/svg?repos=CaryK753/LifeTree-Skills&type=Date)](https://star-history.com/#CaryK753/LifeTree-Skills&Date)
+### 3. 运行全量自动化单元测试集
+```bash
+python3 .agent/skills/lifetree/tests/run_all_tests.py
+```
 
 ---
 
