@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LifeTreeDomainRuleSchema",
+  "description": "Universal JSON Schema for defining any decision domain rule pack (Immigration, Wealth, Career, Health, Tax)",
+  "type": "object",
+  "required": ["domain_id", "domain_title", "category", "prerequisites", "point_scoring", "threshold_checks"],
+  "properties": {
+    "domain_id": { "type": "string" },
+    "domain_title": { "type": "string" },
+    "category": { "type": "string", "enum": ["IMMIGRATION", "ASSET_ALLOCATION", "CAREER_PIVOT", "MEDICAL_DECISION", "TAX_OPTIMIZATION", "EDUCATION_PLANNING", "CUSTOM"] },
+    "min_points_required": { "type": "integer", "default": 0 },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "operator", "expected"],
+        "properties": {
+          "field": { "type": "string" },
+          "operator": { "type": "string", "enum": ["EQUALS", "IN", "GTE", "LTE"] },
+          "expected": {},
+          "failure_message": { "type": "string" }
+        }
+      }
+    },
+    "point_scoring": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "type", "points", "category"],
+        "properties": {
+          "field": { "type": "string" },
+          "type": { "type": "string", "enum": ["BOOLEAN", "RANGE", "IN_SET"] },
+          "points": { "type": "integer" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "min": { "type": "number" },
+          "max": { "type": "number" },
+          "values": { "type": "array" }
+        }
+      }
+    },
+    "threshold_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "operator", "required_value", "severity", "message"],
+        "properties": {
+          "field": { "type": "string" },
+          "operator": { "type": "string", "enum": ["GTE", "LTE"] },
+          "required_value": { "type": "number" },
+          "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+          "message": { "type": "string" },
+          "error_code": { "type": "string" }
+        }
+      }
+    }
+  }
+}

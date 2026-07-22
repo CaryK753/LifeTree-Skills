@@ -1,0 +1,67 @@
+{
+  "data": [
+    {
+      "id": "page-brand-system",
+      "title": "品牌系统",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1784640000000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/brand-system.html",
+        "interactions": [
+          {
+            "domId": "cta-to-product",
+            "targetPageId": "page-decision-tree",
+            "hideEdge": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-decision-tree",
+      "title": "决策树核心界面",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1784640000000,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/decision-tree.html",
+        "interactions": [
+          {
+            "domId": "back-to-brand",
+            "targetPageId": "page-brand-system",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "品牌主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1784640000000,
+      "canvasData": {
+        "x": 0,
+        "y": 2218
+      },
+      "devMetadata": {
+        "imageSrc": "assets/brand-hero.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "LifeTree 品牌与核心界面"
+  }
+}

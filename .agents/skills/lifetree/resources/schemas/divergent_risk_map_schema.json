@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LifeTreeDivergentRiskMapSchema",
+  "description": "JSON Schema for Latent Risk Domains discovered via Divergent Thinking Mode and tracked in Continuous Surveillance Registry",
+  "type": "object",
+  "required": ["scanned_topics_count", "discovered_risk_domains"],
+  "properties": {
+    "scanned_topics_count": { "type": "integer" },
+    "discovered_risk_domains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["risk_id", "title", "category", "severity", "description", "suggested_tracking_metric"],
+        "properties": {
+          "risk_id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "type": "string", "enum": ["TAX_RESIDENCY_TRAP", "FOREIGN_EXCHANGE_RESTRICTION", "HEALTHCARE_INSURANCE_GAP", "FAMILY_ESTATE_SUCCESSION", "EDUCATION_QUOTA_SHIFT", "POLITICAL_CLIMATE_SHIFT", "CUSTOM"] },
+          "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+          "description": { "type": "string" },
+          "suggested_tracking_metric": { "type": "string" },
+          "status": { "type": "string", "enum": ["DISCOVERED_FOR_SURVEILLANCE", "ACTIVE_SURVEILLANCE", "CIRCUIT_BREAKER_ALERT"] }
+        }
+      }
+    }
+  }
+}

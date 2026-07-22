@@ -1,0 +1,18 @@
+{
+  "test_case_id": "TC_BLUE_CARD_TRANSITION_002",
+  "job_offer_data": {
+    "annual_gross_salary_eur": 48000.0,
+    "occupation_category": "IT_SOFTWARE_ENGINEERING",
+    "has_recognized_university_degree": true,
+    "it_experience_years": 4,
+    "qualification_matches_role": true
+  },
+  "expected_evaluation": {
+    "eligible": true,
+    "is_shortage_occupation": true,
+    "required_threshold_eur": 41041.0,
+    "salary_margin_eur": 6959.0,
+    "rejection_risks": [],
+    "recommendation": "PROCEED_TO_APPLICATION"
+  }
+}

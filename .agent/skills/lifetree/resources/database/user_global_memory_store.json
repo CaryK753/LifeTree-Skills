@@ -1,0 +1,62 @@
+{
+  "user_id": "usr_global_default",
+  "created_at": "2026-07-22T00:00:00Z",
+  "last_updated": "2026-07-22T00:00:00Z",
+  "global_profile": {
+    "demographics": {
+      "age": 31,
+      "nationality": "CN",
+      "current_residence": "CHINA"
+    },
+    "education": {
+      "highest_degree": "MASTER",
+      "field_of_study": "COMPUTER_SCIENCE",
+      "is_recognized": true
+    },
+    "languages": {
+      "primary": "ENGLISH_C1",
+      "secondary": "GERMAN_A2"
+    },
+    "work_experience": {
+      "years": 6,
+      "current_role": "Senior Software Engineer",
+      "industry_category": "IT_SOFTWARE_ENGINEERING"
+    },
+    "financial_assets": {
+      "liquid_funds_usd": 40000.0,
+      "annual_income_usd": 60000.0,
+      "risk_tolerance": "MODERATE"
+    }
+  },
+  "explicit_requirements_and_goals": [
+    {
+      "goal_id": "goal_01",
+      "title": "Establish European Skilled Talent Residence & Dual Status",
+      "priority": "HIGH",
+      "target_horizon_years": 3
+    }
+  ],
+  "active_topics": [
+    {
+      "topic_id": "tpc_global_mobility",
+      "title": "EU Talent Migration & Blue Card Pathway",
+      "category": "IMMIGRATION"
+    },
+    {
+      "topic_id": "tpc_asset_preservation",
+      "title": "Cross-Border Wealth Preservation",
+      "category": "ASSET_ALLOCATION"
+    }
+  ],
+  "decision_journal": [
+    {
+      "entry_id": "dec_1_2026-07-22",
+      "timestamp": "2026-07-22T00:00:00Z",
+      "topic_id": "tpc_global_mobility",
+      "decision_title": "Selected Primary Immigration Pathway",
+      "chosen_pathway": "Chancenkarte § 20a -> EU Blue Card § 18g",
+      "user_rationale": "High score margin on Opportunity Card points with fast-track Blue Card conversion.",
+      "plan_b_status": "ACTIVE_RESERVE"
+    }
+  ]
+}

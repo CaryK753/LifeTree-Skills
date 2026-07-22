@@ -1,0 +1,26 @@
+{
+  "component_name": "LifeTreeDeductionAndSimulationUI",
+  "version": "1.0.0",
+  "modes": {
+    "TIMELINE_PLAYER": {
+      "description": "Interactive year-by-year scenario player allowing users to step forward/backward through simulated temporal milestones (+1Y, +2Y, +5Y).",
+      "controls": ["PLAY", "PAUSE", "STEP_FORWARD", "STEP_BACKWARD", "SEEK_YEAR"]
+    },
+    "PROBABILITY_GAUGE": {
+      "description": "Real-time gauge displaying cumulative path success probability and accumulated risk score.",
+      "color_states": {
+        "HIGH_SUCCESS": "#2E7D32",
+        "MODERATE_RISK": "#F57C00",
+        "HIGH_RISK_ALERT": "#D32F2F"
+      }
+    },
+    "WHAT_IF_INJECTOR": {
+      "description": "Interactive panel allowing users to inject hypothetical shocks (e.g. inflation surge, language test drop, job loss) into any target timeline year.",
+      "input_fields": ["target_year", "shock_name", "severity_impact"]
+    },
+    "PLAN_B_CANVAS": {
+      "description": "Visual auxiliary canvas highlighting Plan B hedging triggers when cumulative risk score exceeds threshold.",
+      "visual_indicator": "HEDGE_BRANCH_HIGHLIGHT"
+    }
+  }
+}

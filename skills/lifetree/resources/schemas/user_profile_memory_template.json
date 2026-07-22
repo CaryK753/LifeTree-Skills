@@ -1,0 +1,42 @@
+{
+  "user_id": "usr_local_encrypted_001",
+  "privacy_mode": "LOCAL_FIRST_ZERO_TRUST",
+  "personal_data": {
+    "age": 32,
+    "nationality": "CN",
+    "residence": "CHINA",
+    "education": {
+      "degree_level": "MASTER",
+      "field_of_study": "COMPUTER_SCIENCE",
+      "university": "Zhejiang University",
+      "is_anabin_h_plus": true
+    },
+    "language_proficiencies": {
+      "german": "A2",
+      "english": "C1"
+    },
+    "professional_experience": {
+      "total_years": 6,
+      "current_title": "Senior Software Engineer",
+      "field_category": "IT_SOFTWARE_ENGINEERING"
+    },
+    "family_structure": {
+      "marital_status": "MARRIED",
+      "spouse_education": "BACHELOR",
+      "children_count": 0
+    },
+    "financial_profile": {
+      "liquid_funds_eur": 25000.0,
+      "annual_income_eur": 42000.0,
+      "risk_tolerance": "MODERATE"
+    }
+  },
+  "active_topics": [
+    {
+      "topic_id": "tpc_germany_immigration_2024",
+      "title": "German Migration Path Analysis",
+      "target_country": "DE",
+      "created_at": "2026-07-22T00:00:00Z"
+    }
+  ]
+}

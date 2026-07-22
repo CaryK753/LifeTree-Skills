@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LifeTreeConnectorPluginSchema",
+  "description": "Standard JSON Schema protocol for community data connectors & plugins in LifeTree",
+  "type": "object",
+  "required": ["plugin_id", "name", "version", "developer_id", "target_domain", "fetch_interval_seconds", "data_sources"],
+  "properties": {
+    "plugin_id": { "type": "string", "pattern": "^[a-z0-9_-]+\\.[a-z0-9_-]+$" },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "developer_id": { "type": "string" },
+    "revenue_share_payout_address": { "type": "string" },
+    "target_domain": { "type": "string", "enum": ["GERMAN_IMMIGRATION", "US_VISA", "CANADA_EXPRESS_ENTRY", "GLOBAL_TAX", "CAREER_MARKET"] },
+    "fetch_interval_seconds": { "type": "integer", "minimum": 300 },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_id", "url", "parser_type", "confidence_default"],
+        "properties": {
+          "source_id": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "parser_type": { "type": "string", "enum": ["HTML_SCRAPER", "JSON_API", "PDF_PARSER", "RSS_FEED"] },
+          "confidence_default": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+        }
+      }
+    }
+  }
+}

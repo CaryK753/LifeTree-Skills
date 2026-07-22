@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LifeTreeMonteCarloAndSensitivityReportSchema",
+  "description": "Schema for Monte Carlo stochastic simulation results, Value at Risk (VaR), and sensitivity ROI analysis",
+  "type": "object",
+  "required": ["pathway_name", "monte_carlo_results", "tail_risk_verdict"],
+  "properties": {
+    "pathway_name": { "type": "string" },
+    "simulation_config": {
+      "type": "object",
+      "required": ["num_trials", "baseline_success_prob", "volatility_factor"],
+      "properties": {
+        "num_trials": { "type": "integer" },
+        "baseline_success_prob": { "type": "number" },
+        "volatility_factor": { "type": "number" }
+      }
+    },
+    "monte_carlo_results": {
+      "type": "object",
+      "required": ["overall_success_rate_pct", "execution_timeline_months", "financial_capital_usd"],
+      "properties": {
+        "overall_success_rate_pct": { "type": "number" },
+        "execution_timeline_months": {
+          "type": "object",
+          "required": ["P10_optimistic", "P50_median", "P90_pessimistic", "VaR_95_max_time"],
+          "properties": {
+            "P10_optimistic": { "type": "number" },
+            "P50_median": { "type": "number" },
+            "P90_pessimistic": { "type": "number" },
+            "VaR_95_max_time": { "type": "number" }
+          }
+        },
+        "financial_capital_usd": {
+          "type": "object",
+          "required": ["P10_optimistic", "P50_median", "P90_pessimistic", "VaR_95_max_cost"],
+          "properties": {
+            "P10_optimistic": { "type": "number" },
+            "P50_median": { "type": "number" },
+            "P90_pessimistic": { "type": "number" },
+            "VaR_95_max_cost": { "type": "number" }
+          }
+        }
+      }
+    },
+    "tail_risk_verdict": { "type": "string", "enum": ["LOW_VOLATILITY", "MODERATE_VOLATILITY", "HIGH_TAIL_RISK_WARNING"] }
+  }
+}

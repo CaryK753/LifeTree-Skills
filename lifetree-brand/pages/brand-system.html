@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>品牌系统 · LifeTree</title>
+    <style id="theme-vars">
+/* ============================================================
+   LifeTree — 林木智识 (Forest Intelligence) Brand CSS
+   brandPrefix: lifetree
+   一棵为高风险人生决策而生的树：可信、有温度、不冷冰冰
+   ============================================================ */
+
+:root {
+  /* ---- Primary — 深森林绿 (single brand hue) ---- */
+  --lifetree-primary: #2F5D4A;
+  --lifetree-primary-foreground: #F5F0E6;
+  --lifetree-primary-tint: #3E6B5C;
+
+  /* ---- Surfaces — 暖羊皮纸 / 树皮 ---- */
+  --lifetree-background: #F2EAD8;          /* 暖羊皮纸底 */
+  --lifetree-foreground: #1E2A24;          /* 深墨绿褐 */
+  --lifetree-card: #FBF6EA;                /* 浅羊皮纸卡 */
+  --lifetree-card-foreground: #1E2A24;
+  --lifetree-popover: #FBF6EA;
+  --lifetree-popover-foreground: #1E2A24;
+  --lifetree-muted: #E3D9C4;               /* 暖米色 */
+  --lifetree-muted-foreground: #6B5D49;    /* 暖灰褐 */
+
+  /* ---- Borders / inputs / ring ---- */
+  --lifetree-border: #D6CAAF;              /* 暖棕褐分隔 */
+  --lifetree-input: #D6CAAF;
+  --lifetree-ring: #2F5D4A;
+
+  /* ---- Semantic states (real states only) ---- */
+  --lifetree-state-success: #4A7C59;       /* 健康枝叶 */
+  --lifetree-state-warning: #B8742A;       /* 树皮赭石 — 风险预警 */
+  --lifetree-state-error: #8B3A2E;         /* 枯枝深赭 — 高危/失效 */
+  --lifetree-state-info: #3E6B5C;
+
+  /* ---- Radius scale ---- */
+  --lifetree-radius-sm: 4px;
+  --lifetree-radius-md: 8px;
+  --lifetree-radius-lg: 14px;
+  --lifetree-radius-xl: 22px;
+
+  /* ---- Typography stacks ---- */
+  --lifetree-font-display: "Noto Serif SC", "Source Serif 4", "Songti SC", Georgia, serif;
+  --lifetree-font-sans: "Inter", "Noto Sans SC", -apple-system, system-ui, sans-serif;
+  --lifetree-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ---- Depth — restrained, trust-first ---- */
+  --lifetree-shadow-sm: 0 1px 2px rgba(31, 42, 36, 0.04);
+  --lifetree-shadow-md: 0 4px 14px rgba(31, 42, 36, 0.06);
+  --lifetree-shadow-float: 0 10px 30px rgba(31, 42, 36, 0.10);
+
+  /* ---- Data-viz accents (derived from primary / state, not new hues) ---- */
+  --lifetree-data-ink: #1E2A24;
+  --lifetree-data-grid: #E3D9C4;
+  --lifetree-data-confidence-high: #2F5D4A;   /* 实线 100% */
+  --lifetree-data-confidence-mid: #6B5D49;    /* 虚线 80% */
+  --lifetree-data-confidence-low: #B8742A;    /* 虚线 50% */
+}
+
+/* ---- Dark surface variant (soil-layer / sub-panel) ---- */
+.soil-surface {
+  background: #1E2A24;
+  color: #E3D9C4;
+}
+
+/* ---- Confidence line language (实线 / 虚线) ---- */
+.confidence-solid { stroke: var(--lifetree-data-confidence-high); stroke-dasharray: none; }
+.confidence-dashed-mid { stroke: var(--lifetree-data-confidence-mid); stroke-dasharray: 5 4; }
+.confidence-dashed-low { stroke: var(--lifetree-data-confidence-low); stroke-dasharray: 3 5; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--lifetree-background);
+    --color-foreground: var(--lifetree-foreground);
+    --color-card: var(--lifetree-card);
+    --color-card-foreground: var(--lifetree-card-foreground);
+    --color-popover: var(--lifetree-popover);
+    --color-popover-foreground: var(--lifetree-popover-foreground);
+    --color-primary: var(--lifetree-primary);
+    --color-primary-foreground: var(--lifetree-primary-foreground);
+    --color-muted: var(--lifetree-muted);
+    --color-muted-foreground: var(--lifetree-muted-foreground);
+    --color-border: var(--lifetree-border);
+    --color-input: var(--lifetree-input);
+    --color-ring: var(--lifetree-ring);
+    --radius-sm: var(--lifetree-radius-sm);
+    --radius-md: var(--lifetree-radius-md);
+    --radius-lg: var(--lifetree-radius-lg);
+    --radius-xl: var(--lifetree-radius-xl);
+  }
+  @layer base {
+    body { background: var(--lifetree-background); color: var(--lifetree-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--lifetree-background); }
+      .text-background { color: var(--lifetree-background); }
+      .border-background { border-color: var(--lifetree-background); }
+      .ring-background { --tw-ring-color: var(--lifetree-background); }
+      .bg-foreground { background-color: var(--lifetree-foreground); }
+      .text-foreground { color: var(--lifetree-foreground); }
+      .border-foreground { border-color: var(--lifetree-foreground); }
+      .ring-foreground { --tw-ring-color: var(--lifetree-foreground); }
+      .bg-card { background-color: var(--lifetree-card); }
+      .text-card { color: var(--lifetree-card); }
+      .border-card { border-color: var(--lifetree-card); }
+      .ring-card { --tw-ring-color: var(--lifetree-card); }
+      .bg-card-foreground { background-color: var(--lifetree-card-foreground); }
+      .text-card-foreground { color: var(--lifetree-card-foreground); }
+      .border-card-foreground { border-color: var(--lifetree-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--lifetree-card-foreground); }
+      .bg-popover { background-color: var(--lifetree-popover); }
+      .text-popover { color: var(--lifetree-popover); }
+      .border-popover { border-color: var(--lifetree-popover); }
+      .ring-popover { --tw-ring-color: var(--lifetree-popover); }
+      .bg-popover-foreground { background-color: var(--lifetree-popover-foreground); }
+      .text-popover-foreground { color: var(--lifetree-popover-foreground); }
+      .border-popover-foreground { border-color: var(--lifetree-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--lifetree-popover-foreground); }
+      .bg-primary { background-color: var(--lifetree-primary); }
+      .text-primary { color: var(--lifetree-primary); }
+      .border-primary { border-color: var(--lifetree-primary); }
+      .ring-primary { --tw-ring-color: var(--lifetree-primary); }
+      .bg-primary-foreground { background-color: var(--lifetree-primary-foreground); }
+      .text-primary-foreground { color: var(--lifetree-primary-foreground); }
+      .border-primary-foreground { border-color: var(--lifetree-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--lifetree-primary-foreground); }
+      .bg-muted { background-color: var(--lifetree-muted); }
+      .text-muted { color: var(--lifetree-muted); }
+      .border-muted { border-color: var(--lifetree-muted); }
+      .ring-muted { --tw-ring-color: var(--lifetree-muted); }
+      .bg-muted-foreground { background-color: var(--lifetree-muted-foreground); }
+      .text-muted-foreground { color: var(--lifetree-muted-foreground); }
+      .border-muted-foreground { border-color: var(--lifetree-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--lifetree-muted-foreground); }
+      .bg-border { background-color: var(--lifetree-border); }
+      .text-border { color: var(--lifetree-border); }
+      .border-border { border-color: var(--lifetree-border); }
+      .ring-border { --tw-ring-color: var(--lifetree-border); }
+      .bg-input { background-color: var(--lifetree-input); }
+      .text-input { color: var(--lifetree-input); }
+      .border-input { border-color: var(--lifetree-input); }
+      .ring-input { --tw-ring-color: var(--lifetree-input); }
+      .bg-ring { background-color: var(--lifetree-ring); }
+      .text-ring { color: var(--lifetree-ring); }
+      .border-ring { border-color: var(--lifetree-ring); }
+      .ring-ring { --tw-ring-color: var(--lifetree-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main class="min-h-screen overflow-x-hidden">
+      <style>
+        @keyframes lt-fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .lt-enter { animation: lt-fade-up 0.7s ease-out both; }
+        .lt-enter-2 { animation: lt-fade-up 0.7s ease-out 0.12s both; }
+        .lt-enter-3 { animation: lt-fade-up 0.7s ease-out 0.24s both; }
+        @media (prefers-reduced-motion: reduce) {
+          .lt-enter, .lt-enter-2, .lt-enter-3 { animation: none; }
+        }
+      </style>
+
+      <!-- Masthead -->
+      <header class="border-b" style="border-color: var(--lifetree-border)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <svg width="22" height="26" viewBox="0 0 160 180" fill="none" aria-hidden="true">
+              <path d="M80,14 C100,14 115,28 115,46 C124,47 130,57 125,67 C120,77 108,80 99,75 C95,86 80,88 72,79 C60,86 46,80 43,68 C36,63 35,51 43,46 C42,28 57,14 80,14 Z" fill="var(--lifetree-primary)"/>
+              <path d="M74,70 Q77,100 71,128 L89,128 Q83,100 86,70 Z" fill="var(--lifetree-primary)"/>
+            </svg>
+            <span class="font-display text-lg tracking-tight" style="color: var(--lifetree-foreground)">LifeTree</span>
+          </div>
+          <span class="font-mono text-[11px] tracking-[0.18em] uppercase" style="color: var(--lifetree-muted-foreground)">Brand System · 2026</span>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section class="mx-auto max-w-[1320px] px-6 lg:px-12 pt-14 lg:pt-24 pb-20 lg:pb-28">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <!-- Left 7 -->
+          <div class="lg:col-span-7">
+            <div class="flex items-center gap-4 mb-10 lt-enter">
+              <svg width="64" height="72" viewBox="0 0 160 180" fill="none" aria-hidden="true">
+                <path d="M80,12 C101,12 117,27 117,46 C126,47 132,58 127,68 C122,78 109,81 100,76 C96,87 80,89 71,79 C59,87 45,80 42,68 C34,63 33,50 42,45 C41,27 57,12 80,12 Z" fill="var(--lifetree-primary)"/>
+                <path d="M74,68 Q77,100 70,128 L90,128 Q83,100 86,68 Z" fill="var(--lifetree-primary)"/>
+                <g stroke="var(--lifetree-primary)" stroke-width="2" fill="none" stroke-linecap="round">
+                  <line x1="80" y1="128" x2="80" y2="152"/>
+                  <line x1="80" y1="128" x2="50" y2="160"/>
+                  <line x1="80" y1="128" x2="110" y2="160"/>
+                  <line x1="80" y1="128" x2="32" y2="146"/>
+                  <line x1="80" y1="128" x2="128" y2="146"/>
+                  <line x1="50" y1="160" x2="32" y2="146"/>
+                  <line x1="110" y1="160" x2="128" y2="146"/>
+                  <line x1="50" y1="160" x2="80" y2="152"/>
+                  <line x1="110" y1="160" x2="80" y2="152"/>
+                </g>
+                <g fill="var(--lifetree-primary)">
+                  <circle cx="80" cy="152" r="3.5"/>
+                  <circle cx="50" cy="160" r="3.5"/>
+                  <circle cx="110" cy="160" r="3.5"/>
+                </g>
+                <circle cx="32" cy="146" r="3.5" fill="var(--lifetree-background)" stroke="var(--lifetree-primary)" stroke-width="2"/>
+                <circle cx="128" cy="146" r="3.5" fill="var(--lifetree-background)" stroke="var(--lifetree-primary)" stroke-width="2"/>
+              </svg>
+              <div>
+                <div class="font-mono text-[11px] tracking-[0.22em] uppercase" style="color: var(--lifetree-muted-foreground)">Forest Intelligence</div>
+                <div class="font-display text-xl" style="color: var(--lifetree-foreground)">林木智识</div>
+              </div>
+            </div>
+
+            <h1 class="lt-enter font-display font-semibold leading-[0.95] mb-7" style="font-size: clamp(56px, 8vw, 104px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">人生树</h1>
+
+            <p class="lt-enter-2 font-display leading-relaxed max-w-xl mb-4" style="font-size: clamp(20px, 2vw, 26px); color: var(--lifetree-foreground); text-wrap: balance;">为关键人生决策构建稳健的替代方案与风险对冲机制。</p>
+
+            <p class="lt-enter-2 text-base leading-relaxed max-w-xl mb-10" style="color: var(--lifetree-muted-foreground)">全球首款基于知识图谱与时序推演的个人决策操作系统（Life OS）。在跨境移民、资产配置、重症医疗、职业转型等高风险抉择中，洞察走向、构建 Plan B、对冲风险。</p>
+
+            <div class="lt-enter-3 flex flex-wrap items-center gap-5">
+              <a href="decision-tree.html" data-dom-id="cta-to-product" class="inline-flex items-center gap-2 px-6 py-3 font-sans text-sm font-medium transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2" style="background: var(--lifetree-primary); color: var(--lifetree-primary-foreground); border-radius: var(--lifetree-radius-md); --tw-ring-color: var(--lifetree-ring);">
+                查看产品界面
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+              <span class="font-mono text-[11px] tracking-[0.18em] uppercase" style="color: var(--lifetree-muted-foreground)">Scroll to explore</span>
+            </div>
+          </div>
+
+          <!-- Right 5 -->
+          <div class="lg:col-span-5 lt-enter-3">
+            <div class="overflow-hidden border" style="border-color: var(--lifetree-border); border-radius: var(--lifetree-radius-lg)">
+              <img src="../assets/brand-hero.jpg" alt="LifeTree 品牌主视觉：一棵从数据网络根系生长的树" class="w-full h-[400px] lg:h-[560px] object-cover" />
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="font-mono text-[11px] tracking-[0.14em] uppercase" style="color: var(--lifetree-muted-foreground)">Plate 01 · Root System</span>
+              <span class="font-mono text-[11px]" style="color: var(--lifetree-muted-foreground)">植物学 × 数据图集</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 品牌精髓 -->
+      <section class="border-t" style="border-color: var(--lifetree-border)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">01</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Brand Essence</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">树即决策</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">四要素构成 LifeTree 的视觉与逻辑骨架：根系吸收知识，主干推演方向，枯枝显形风险，侧芽生长替代路径。</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
+            <!-- 土壤 / 网络 -->
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <svg viewBox="0 0 140 80" class="w-full h-20 mb-6" fill="none" aria-hidden="true">
+                <g stroke="var(--lifetree-primary)" stroke-width="1.6" stroke-linecap="round">
+                  <line x1="22" y1="20" x2="70" y2="40"/>
+                  <line x1="118" y1="20" x2="70" y2="40"/>
+                  <line x1="22" y1="62" x2="70" y2="40"/>
+                  <line x1="118" y1="62" x2="70" y2="40"/>
+                  <line x1="22" y1="20" x2="22" y2="62"/>
+                  <line x1="118" y1="20" x2="118" y2="62"/>
+                  <line x1="22" y1="20" x2="118" y2="20"/>
+                  <line x1="22" y1="62" x2="118" y2="62"/>
+                </g>
+                <g fill="var(--lifetree-primary)"><circle cx="22" cy="20" r="4"/><circle cx="118" cy="20" r="4"/><circle cx="70" cy="40" r="4.5"/><circle cx="22" cy="62" r="4"/><circle cx="118" cy="62" r="4"/></g>
+              </svg>
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-2" style="color: var(--lifetree-muted-foreground)">Soil · Network</div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">土壤 / 网络</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">底层知识图谱为根系，吸收官方源、判例与时序数据，为推演提供养分。</p>
+            </article>
+
+            <!-- 决策树 -->
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <svg viewBox="0 0 140 80" class="w-full h-20 mb-6" fill="none" aria-hidden="true">
+                <g stroke="var(--lifetree-primary)" stroke-width="2.2" stroke-linecap="round" fill="none">
+                  <path d="M70,72 L70,40"/>
+                  <path d="M70,52 L42,28"/>
+                  <path d="M70,52 L98,28"/>
+                  <path d="M70,40 L70,18"/>
+                </g>
+                <g fill="var(--lifetree-primary)"><circle cx="70" cy="14" r="6"/><circle cx="42" cy="28" r="5"/><circle cx="98" cy="28" r="5"/></g>
+                <circle cx="98" cy="28" r="9" fill="none" stroke="var(--lifetree-primary)" stroke-width="1.2" stroke-dasharray="2 2"/>
+              </svg>
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-2" style="color: var(--lifetree-muted-foreground)">Trunk · Branches</div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">决策树</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">主干为当前状态，分支为决策方向，侧芽（虚线圈）为 What-if 推演。</p>
+            </article>
+
+            <!-- 枯枝预警 -->
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <svg viewBox="0 0 140 80" class="w-full h-20 mb-6" fill="none" aria-hidden="true">
+                <path d="M20,40 L70,40" stroke="var(--lifetree-state-success)" stroke-width="2.6" stroke-linecap="round"/>
+                <path d="M70,40 L110,22" stroke="var(--lifetree-state-warning)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="5 4"/>
+                <path d="M70,40 L108,58" stroke="var(--lifetree-state-error)" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 5"/>
+                <circle cx="20" cy="40" r="4.5" fill="var(--lifetree-state-success)"/>
+                <circle cx="110" cy="22" r="5" fill="none" stroke="var(--lifetree-state-warning)" stroke-width="2"/>
+                <circle cx="108" cy="58" r="5" fill="none" stroke="var(--lifetree-state-error)" stroke-width="2"/>
+              </svg>
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-2" style="color: var(--lifetree-muted-foreground)">Deadwood · Alert</div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">枯枝预警</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">虚线与赭石标记风险节点，高危路径以枯枝深赭显形，不掩盖失效可能。</p>
+            </article>
+
+            <!-- Plan B -->
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <svg viewBox="0 0 140 80" class="w-full h-20 mb-6" fill="none" aria-hidden="true">
+                <path d="M18,60 C50,60 60,40 70,28" stroke="var(--lifetree-primary)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+                <path d="M70,28 C84,28 100,44 122,44" stroke="var(--lifetree-primary)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+                <path d="M70,28 C82,40 92,56 122,62" stroke="var(--lifetree-data-confidence-mid)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="5 4" fill="none"/>
+                <circle cx="18" cy="60" r="4.5" fill="var(--lifetree-primary)"/>
+                <circle cx="122" cy="44" r="4.5" fill="var(--lifetree-primary)"/>
+                <circle cx="122" cy="62" r="4.5" fill="none" stroke="var(--lifetree-data-confidence-mid)" stroke-width="2"/>
+                <text x="70" y="18" font-family="var(--lifetree-font-mono)" font-size="9" fill="var(--lifetree-muted-foreground)" text-anchor="middle">B</text>
+              </svg>
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-2" style="color: var(--lifetree-muted-foreground)">Plan B · Hedge</div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">Plan B</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">替代路径以虚线并行生长，对冲主路径风险，让决策始终保有退路。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 色彩体系 -->
+      <section class="border-t" style="border-color: var(--lifetree-border); background: var(--lifetree-muted)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">02</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Color Palette</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">色彩体系</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">单一品牌主色深森林绿，承载信任与生长；暖羊皮纸为底，树皮褐为骨；状态色仅用于真实语义。</p>
+            </div>
+          </div>
+
+          <!-- 主色 -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10">
+            <div class="lg:col-span-3">
+              <div class="font-display text-lg" style="color: var(--lifetree-foreground)">主色</div>
+              <div class="font-mono text-[11px] tracking-[0.14em] uppercase mt-1" style="color: var(--lifetree-muted-foreground)">Primary</div>
+            </div>
+            <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-2 gap-4">
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-primary)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#2F5D4A</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">深森林绿</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">主CTA · 选中 · 实线高置信</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-primary-foreground)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#F5F0E6</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">羊皮纸前景</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">主色上的文字与图标</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 表面 -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10">
+            <div class="lg:col-span-3">
+              <div class="font-display text-lg" style="color: var(--lifetree-foreground)">表面</div>
+              <div class="font-mono text-[11px] tracking-[0.14em] uppercase mt-1" style="color: var(--lifetree-muted-foreground)">Surfaces</div>
+            </div>
+            <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-background)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#F2EAD8</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">暖羊皮纸</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">页面背景</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-card)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#FBF6EA</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">浅羊皮纸</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">卡片背景</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-muted)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#E3D9C4</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">暖米色</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">弱化区块底</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 中性文字 + 边框 -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10">
+            <div class="lg:col-span-3">
+              <div class="font-display text-lg" style="color: var(--lifetree-foreground)">文字与边框</div>
+              <div class="font-mono text-[11px] tracking-[0.14em] uppercase mt-1" style="color: var(--lifetree-muted-foreground)">Ink &amp; Border</div>
+            </div>
+            <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-foreground)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#1E2A24</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">深墨绿褐</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">正文与标题</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-muted-foreground)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#6B5D49</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">暖灰褐</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">次要文字</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-border)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#D6CAAF</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">暖棕褐</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">分隔线与描边</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 状态色 -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            <div class="lg:col-span-3">
+              <div class="font-display text-lg" style="color: var(--lifetree-foreground)">状态色</div>
+              <div class="font-mono text-[11px] tracking-[0.14em] uppercase mt-1" style="color: var(--lifetree-muted-foreground)">States</div>
+            </div>
+            <div class="lg:col-span-9 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-state-success)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#4A7C59</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">健康枝叶</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">成功 · 路径可行</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-state-warning)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#B8742A</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">树皮赭石</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">警告 · 风险预警</div>
+                </div>
+              </div>
+              <div class="border overflow-hidden" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="h-24" style="background: var(--lifetree-state-error)"></div>
+                <div class="p-4">
+                  <div class="font-mono text-xs" style="color: var(--lifetree-muted-foreground)">#8B3A2E</div>
+                  <div class="font-display text-base mt-1" style="color: var(--lifetree-foreground)">枯枝深赭</div>
+                  <div class="text-xs mt-1.5" style="color: var(--lifetree-muted-foreground)">高危 · 路径失效</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 字体系统 -->
+      <section class="border-t" style="border-color: var(--lifetree-border)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">03</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Typography</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">字体系统</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">衬线展示字立品牌气质，无衬线正文承载界面，等宽字标注数据与置信度。</p>
+            </div>
+          </div>
+
+          <!-- 三字族 -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 mb-14">
+            <div class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-4" style="color: var(--lifetree-muted-foreground)">Display · Serif</div>
+              <div class="font-display mb-3" style="font-size: 56px; line-height: 1; color: var(--lifetree-foreground)">人生树</div>
+              <div class="font-display text-sm mb-4" style="color: var(--lifetree-foreground)">Noto Serif SC / Source Serif 4</div>
+              <p class="text-xs leading-relaxed" style="color: var(--lifetree-muted-foreground)">大标题、品牌名、章节标题。立沉静可信之气。</p>
+            </div>
+            <div class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-4" style="color: var(--lifetree-muted-foreground)">Body · Sans</div>
+              <div class="font-sans mb-3" style="font-size: 24px; line-height: 1.3; color: var(--lifetree-foreground)">稳健的替代方案</div>
+              <div class="font-sans text-sm mb-4" style="color: var(--lifetree-foreground)">Inter / Noto Sans SC</div>
+              <p class="text-xs leading-relaxed" style="color: var(--lifetree-muted-foreground)">正文、界面文案、说明。高可读，中性克制。</p>
+            </div>
+            <div class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-4" style="color: var(--lifetree-muted-foreground)">Data · Mono</div>
+              <div class="font-mono mb-3" style="font-size: 26px; line-height: 1.3; color: var(--lifetree-foreground)">置信度 92%</div>
+              <div class="font-mono text-sm mb-4" style="color: var(--lifetree-foreground)">JetBrains Mono</div>
+              <p class="text-xs leading-relaxed" style="color: var(--lifetree-muted-foreground)">数据标签、置信度、时序戳。精密可对齐。</p>
+            </div>
+          </div>
+
+          <!-- 字阶 -->
+          <div class="border" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+            <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-4 border-b font-mono text-[11px] tracking-[0.14em] uppercase" style="border-color: var(--lifetree-border); color: var(--lifetree-muted-foreground)">
+              <div class="col-span-3">Token</div>
+              <div class="col-span-2">Size</div>
+              <div class="col-span-7">Sample</div>
+            </div>
+            <div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline border-b" style="border-color: var(--lifetree-border)">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">Display</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">64 / 72</div>
+                <div class="col-span-7 font-display truncate" style="font-size: 40px; line-height: 1; color: var(--lifetree-foreground)">人生树</div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline border-b" style="border-color: var(--lifetree-border)">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">H1</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">44 / 52</div>
+                <div class="col-span-7 font-display truncate" style="font-size: 30px; line-height: 1.1; color: var(--lifetree-foreground)">树即决策</div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline border-b" style="border-color: var(--lifetree-border)">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">H2</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">32 / 40</div>
+                <div class="col-span-7 font-display truncate" style="font-size: 24px; line-height: 1.2; color: var(--lifetree-foreground)">替代路径</div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline border-b" style="border-color: var(--lifetree-border)">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">Body</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">16 / 26</div>
+                <div class="col-span-7 font-sans truncate" style="font-size: 16px; color: var(--lifetree-foreground)">为关键人生决策构建稳健的替代方案。</div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline border-b" style="border-color: var(--lifetree-border)">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">Caption</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">12 / 18</div>
+                <div class="col-span-7 font-sans truncate" style="font-size: 12px; color: var(--lifetree-muted-foreground)">官方源 · 可溯源 · 更新于 2026-07</div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 px-6 lg:px-8 py-5 items-baseline">
+                <div class="col-span-3 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">Mono-label</div>
+                <div class="col-span-2 font-mono text-xs" style="color: var(--lifetree-muted-foreground)">11 / 16</div>
+                <div class="col-span-7 font-mono truncate" style="font-size: 11px; letter-spacing: 0.16em; color: var(--lifetree-primary)">CONFIDENCE 92% · OFFICIAL</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 视觉语言 -->
+      <section class="border-t" style="border-color: var(--lifetree-border); background: var(--lifetree-muted)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">04</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Visual Language</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">置信度线型</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">用线型而非色彩堆叠表达确定性：实线为官方高置信，虚线为社区与模型推断，枯枝以赭石虚线显形。</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
+            <!-- 三级置信度 -->
+            <div class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-6" style="color: var(--lifetree-muted-foreground)">Confidence Scale</div>
+
+              <div class="space-y-6">
+                <div>
+                  <svg viewBox="0 0 260 16" class="w-full h-4 mb-2" fill="none" aria-hidden="true">
+                    <line x1="2" y1="8" x2="258" y2="8" stroke="var(--lifetree-data-confidence-high)" stroke-width="3.5" stroke-linecap="round"/>
+                  </svg>
+                  <div class="flex items-baseline justify-between gap-3">
+                    <span class="font-display text-base" style="color: var(--lifetree-foreground)">实线 · 100%</span>
+                    <span class="font-mono text-xs whitespace-nowrap" style="color: var(--lifetree-muted-foreground)">#2F5D4A</span>
+                  </div>
+                  <p class="text-xs mt-1" style="color: var(--lifetree-muted-foreground)">官方源 · 可溯源 · 最高置信</p>
+                </div>
+
+                <div>
+                  <svg viewBox="0 0 260 16" class="w-full h-4 mb-2" fill="none" aria-hidden="true">
+                    <line x1="2" y1="8" x2="258" y2="8" stroke="var(--lifetree-data-confidence-mid)" stroke-width="3" stroke-linecap="round" stroke-dasharray="5 4"/>
+                  </svg>
+                  <div class="flex items-baseline justify-between gap-3">
+                    <span class="font-display text-base" style="color: var(--lifetree-foreground)">虚线 · 80%</span>
+                    <span class="font-mono text-xs whitespace-nowrap" style="color: var(--lifetree-muted-foreground)">#6B5D49</span>
+                  </div>
+                  <p class="text-xs mt-1" style="color: var(--lifetree-muted-foreground)">社区验证 · 交叉印证</p>
+                </div>
+
+                <div>
+                  <svg viewBox="0 0 260 16" class="w-full h-4 mb-2" fill="none" aria-hidden="true">
+                    <line x1="2" y1="8" x2="258" y2="8" stroke="var(--lifetree-data-confidence-low)" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 5"/>
+                  </svg>
+                  <div class="flex items-baseline justify-between gap-3">
+                    <span class="font-display text-base" style="color: var(--lifetree-foreground)">虚线 · 50%</span>
+                    <span class="font-mono text-xs whitespace-nowrap" style="color: var(--lifetree-muted-foreground)">#B8742A</span>
+                  </div>
+                  <p class="text-xs mt-1" style="color: var(--lifetree-muted-foreground)">模型预测 · 需人工复核</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 枯枝节点 -->
+            <div class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-6" style="color: var(--lifetree-muted-foreground)">Deadwood Node</div>
+
+              <svg viewBox="0 0 320 150" class="w-full h-36 mb-5" fill="none" aria-hidden="true">
+                <path d="M16,90 L120,90" stroke="var(--lifetree-state-success)" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M120,90 L210,48" stroke="var(--lifetree-state-warning)" stroke-width="3" stroke-linecap="round" stroke-dasharray="5 4"/>
+                <path d="M120,90 L206,130" stroke="var(--lifetree-state-error)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="3 5"/>
+                <circle cx="16" cy="90" r="6" fill="var(--lifetree-state-success)"/>
+                <circle cx="120" cy="90" r="6" fill="var(--lifetree-primary)"/>
+                <circle cx="210" cy="48" r="7" fill="var(--lifetree-card)" stroke="var(--lifetree-state-warning)" stroke-width="2.4"/>
+                <circle cx="206" cy="130" r="7" fill="var(--lifetree-card)" stroke="var(--lifetree-state-error)" stroke-width="2.4"/>
+                <text x="120" y="78" font-family="var(--lifetree-font-mono)" font-size="9" fill="var(--lifetree-muted-foreground)" text-anchor="middle">主干</text>
+                <text x="222" y="46" font-family="var(--lifetree-font-mono)" font-size="9" fill="var(--lifetree-state-warning)">预警</text>
+                <text x="218" y="134" font-family="var(--lifetree-font-mono)" font-size="9" fill="var(--lifetree-state-error)">枯枝</text>
+              </svg>
+
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="inline-block w-3 h-3 rounded-full shrink-0" style="background: var(--lifetree-state-success)"></span>
+                  <span class="text-sm" style="color: var(--lifetree-foreground)">健康枝叶 — 实线，路径可行</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="inline-block w-3 h-3 rounded-full shrink-0 border-2" style="border-color: var(--lifetree-state-warning); background: var(--lifetree-card)"></span>
+                  <span class="text-sm" style="color: var(--lifetree-foreground)">预警节点 — 虚线赭石，需关注</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="inline-block w-3 h-3 rounded-full shrink-0 border-2" style="border-color: var(--lifetree-state-error); background: var(--lifetree-card)"></span>
+                  <span class="text-sm" style="color: var(--lifetree-foreground)">枯枝节点 — 深赭虚线，高危失效</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 标志构造 -->
+      <section class="border-t" style="border-color: var(--lifetree-border)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">05</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Logo Construction</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">标志构造</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">主干向上生长为决策，根系向下延展为数据节点网络。一株树，即一套决策系统。</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            <!-- 构造图 -->
+            <div class="lg:col-span-7 border p-8 lg:p-12 flex flex-col items-center justify-center" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="relative">
+                <svg width="200" height="260" viewBox="0 0 160 220" fill="none" aria-hidden="true">
+                  <!-- annotation: 主干向上 -->
+                  <line x1="150" y1="46" x2="108" y2="46" stroke="var(--lifetree-muted-foreground)" stroke-width="0.8" stroke-dasharray="2 2"/>
+                  <text x="153" y="44" font-family="var(--lifetree-font-mono)" font-size="7" fill="var(--lifetree-muted-foreground)">CANOPY</text>
+                  <line x1="150" y1="110" x2="92" y2="110" stroke="var(--lifetree-muted-foreground)" stroke-width="0.8" stroke-dasharray="2 2"/>
+                  <text x="153" y="108" font-family="var(--lifetree-font-mono)" font-size="7" fill="var(--lifetree-muted-foreground)">TRUNK</text>
+                  <line x1="150" y1="180" x2="120" y2="180" stroke="var(--lifetree-muted-foreground)" stroke-width="0.8" stroke-dasharray="2 2"/>
+                  <text x="123" y="178" font-family="var(--lifetree-font-mono)" font-size="7" fill="var(--lifetree-muted-foreground)">ROOTS</text>
+
+                  <!-- canopy -->
+                  <path d="M80,18 C101,18 117,33 117,52 C126,53 132,64 127,74 C122,84 109,87 100,82 C96,93 80,95 71,85 C59,93 45,86 42,74 C34,69 33,56 42,51 C41,33 57,18 80,18 Z" fill="var(--lifetree-primary)"/>
+                  <!-- trunk -->
+                  <path d="M74,74 Q77,110 70,140 L90,140 Q83,110 86,74 Z" fill="var(--lifetree-primary)"/>
+                  <!-- roots network -->
+                  <g stroke="var(--lifetree-primary)" stroke-width="2.2" fill="none" stroke-linecap="round">
+                    <line x1="80" y1="140" x2="80" y2="168"/>
+                    <line x1="80" y1="140" x2="48" y2="180"/>
+                    <line x1="80" y1="140" x2="112" y2="180"/>
+                    <line x1="80" y1="140" x2="28" y2="164"/>
+                    <line x1="80" y1="140" x2="132" y2="164"/>
+                    <line x1="48" y1="180" x2="28" y2="164"/>
+                    <line x1="112" y1="180" x2="132" y2="164"/>
+                    <line x1="48" y1="180" x2="80" y2="168"/>
+                    <line x1="112" y1="180" x2="80" y2="168"/>
+                    <line x1="48" y1="180" x2="112" y2="180"/>
+                  </g>
+                  <g fill="var(--lifetree-primary)">
+                    <circle cx="80" cy="168" r="3.6"/>
+                    <circle cx="48" cy="180" r="3.6"/>
+                    <circle cx="112" cy="180" r="3.6"/>
+                  </g>
+                  <circle cx="28" cy="164" r="3.6" fill="var(--lifetree-card)" stroke="var(--lifetree-primary)" stroke-width="2"/>
+                  <circle cx="132" cy="164" r="3.6" fill="var(--lifetree-card)" stroke="var(--lifetree-primary)" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="mt-6 text-center">
+                <div class="font-display text-xl" style="color: var(--lifetree-foreground)">LifeTree</div>
+                <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1" style="color: var(--lifetree-muted-foreground)">林木智识</div>
+              </div>
+            </div>
+
+            <!-- 规范 -->
+            <div class="lg:col-span-5 flex flex-col gap-5">
+              <div class="border p-6 lg:p-7" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-3" style="color: var(--lifetree-muted-foreground)">最小尺寸</div>
+                <div class="flex items-end gap-4">
+                  <svg width="24" height="33" viewBox="0 0 160 220" fill="none" aria-hidden="true">
+                    <path d="M80,18 C101,18 117,33 117,52 C126,53 132,64 127,74 C122,84 109,87 100,82 C96,93 80,95 71,85 C59,93 45,86 42,74 C34,69 33,56 42,51 C41,33 57,18 80,18 Z" fill="var(--lifetree-primary)"/>
+                    <path d="M74,74 Q77,110 70,140 L90,140 Q83,110 86,74 Z" fill="var(--lifetree-primary)"/>
+                    <g stroke="var(--lifetree-primary)" stroke-width="6" stroke-linecap="round"><line x1="80" y1="140" x2="48" y2="180"/><line x1="80" y1="140" x2="112" y2="180"/></g>
+                  </svg>
+                  <div>
+                    <div class="font-display text-base" style="color: var(--lifetree-foreground)">24px 最小</div>
+                    <p class="text-xs mt-1" style="color: var(--lifetree-muted-foreground)">低于此尺寸仅用单色简化版。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border p-6 lg:p-7" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-3" style="color: var(--lifetree-muted-foreground)">安全空间</div>
+                <div class="flex items-center gap-4">
+                  <div class="relative border" style="border-color: var(--lifetree-border); padding: 14px;">
+                    <svg width="36" height="48" viewBox="0 0 160 220" fill="none" aria-hidden="true">
+                      <path d="M80,18 C101,18 117,33 117,52 C126,53 132,64 127,74 C122,84 109,87 100,82 C96,93 80,95 71,85 C59,93 45,86 42,74 C34,69 33,56 42,51 C41,33 57,18 80,18 Z" fill="var(--lifetree-primary)"/>
+                      <path d="M74,74 Q77,110 70,140 L90,140 Q83,110 86,74 Z" fill="var(--lifetree-primary)"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-display text-base" style="color: var(--lifetree-foreground)">四周留 1/2 标志高</div>
+                    <p class="text-xs mt-1" style="color: var(--lifetree-muted-foreground)">安全区内不得有其他元素。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border p-6 lg:p-7" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase mb-4" style="color: var(--lifetree-muted-foreground)">单色版</div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="flex flex-col items-center gap-2 p-4" style="background: var(--lifetree-background); border-radius: var(--lifetree-radius-sm)">
+                    <svg width="36" height="48" viewBox="0 0 160 220" fill="none" aria-hidden="true">
+                      <path d="M80,18 C101,18 117,33 117,52 C126,53 132,64 127,74 C122,84 109,87 100,82 C96,93 80,95 71,85 C59,93 45,86 42,74 C34,69 33,56 42,51 C41,33 57,18 80,18 Z" fill="var(--lifetree-primary)"/>
+                      <path d="M74,74 Q77,110 70,140 L90,140 Q83,110 86,74 Z" fill="var(--lifetree-primary)"/>
+                    </svg>
+                    <span class="font-mono text-[10px]" style="color: var(--lifetree-muted-foreground)">绿 on 羊皮纸</span>
+                  </div>
+                  <div class="flex flex-col items-center gap-2 p-4" style="background: var(--lifetree-primary); border-radius: var(--lifetree-radius-sm)">
+                    <svg width="36" height="48" viewBox="0 0 160 220" fill="none" aria-hidden="true">
+                      <path d="M80,18 C101,18 117,33 117,52 C126,53 132,64 127,74 C122,84 109,87 100,82 C96,93 80,95 71,85 C59,93 45,86 42,74 C34,69 33,56 42,51 C41,33 57,18 80,18 Z" fill="var(--lifetree-primary-foreground)"/>
+                      <path d="M74,74 Q77,110 70,140 L90,140 Q83,110 86,74 Z" fill="var(--lifetree-primary-foreground)"/>
+                    </svg>
+                    <span class="font-mono text-[10px]" style="color: var(--lifetree-primary-foreground)">羊皮纸 on 绿</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 信任与语气 -->
+      <section class="border-t" style="border-color: var(--lifetree-border); background: var(--lifetree-muted)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-14 lg:mb-16">
+            <div class="lg:col-span-3">
+              <div class="font-mono text-sm tracking-[0.2em]" style="color: var(--lifetree-primary)">06</div>
+              <div class="font-mono text-[11px] tracking-[0.18em] uppercase mt-1.5" style="color: var(--lifetree-muted-foreground)">Voice &amp; Tone</div>
+            </div>
+            <div class="lg:col-span-9">
+              <h2 class="font-display font-semibold leading-tight mb-5" style="font-size: clamp(28px, 3.5vw, 44px); color: var(--lifetree-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">信任与语气</h2>
+              <p class="text-base leading-relaxed max-w-2xl" style="color: var(--lifetree-muted-foreground)">面对高风险决策，语气即承诺。四条原则约束每一次表达。</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="flex items-center gap-3 mb-3">
+                <i data-lucide="badge-check" class="w-5 h-5" style="color: var(--lifetree-primary)"></i>
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase" style="color: var(--lifetree-muted-foreground)">Principle 01</div>
+              </div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">诚实表达不确定</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">置信度即态度，不掩盖未知，不把推断包装成事实。</p>
+            </article>
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="flex items-center gap-3 mb-3">
+                <i data-lucide="link" class="w-5 h-5" style="color: var(--lifetree-primary)"></i>
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase" style="color: var(--lifetree-muted-foreground)">Principle 02</div>
+              </div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">官方可溯源</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">每条推演链接到权威源与判例，结论可追查、可复核。</p>
+            </article>
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="flex items-center gap-3 mb-3">
+                <i data-lucide="scale" class="w-5 h-5" style="color: var(--lifetree-primary)"></i>
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase" style="color: var(--lifetree-muted-foreground)">Principle 03</div>
+              </div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">克制不夸张</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">不贩卖焦虑，不承诺确定，呈现利弊与概率，让用户自主判断。</p>
+            </article>
+            <article class="border p-7 lg:p-8" style="border-color: var(--lifetree-border); background: var(--lifetree-card); border-radius: var(--lifetree-radius-md)">
+              <div class="flex items-center gap-3 mb-3">
+                <i data-lucide="leaf" class="w-5 h-5" style="color: var(--lifetree-primary)"></i>
+                <div class="font-mono text-[11px] tracking-[0.16em] uppercase" style="color: var(--lifetree-muted-foreground)">Principle 04</div>
+              </div>
+              <h3 class="font-display text-xl mb-2" style="color: var(--lifetree-foreground)">专业不冰冷</h3>
+              <p class="text-sm leading-relaxed" style="color: var(--lifetree-muted-foreground)">精密之外保留温度，理解决策背后是真实的人生。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer CTA -->
+      <section class="border-t" style="border-color: var(--lifetree-border); background: var(--lifetree-foreground); color: var(--lifetree-primary-foreground)">
+        <div class="mx-auto max-w-[1320px] px-6 lg:px-12 py-20 lg:py-28">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-end">
+            <div class="lg:col-span-8">
+              <div class="font-mono text-[11px] tracking-[0.2em] uppercase mb-6" style="color: var(--lifetree-muted)">Enter the Product</div>
+              <h2 class="font-display font-semibold leading-[1.05] mb-6" style="font-size: clamp(34px, 4.5vw, 60px); color: var(--lifetree-primary-foreground); text-wrap: balance; word-break: keep-all; overflow-wrap: break-word;">把决策，种成一棵树。</h2>
+              <p class="text-base leading-relaxed max-w-xl" style="color: var(--lifetree-muted)">进入决策树核心界面，以德国高技能人才移民推演为实例，体验主干、分支、侧芽与 Plan B 的完整生长。</p>
+            </div>
+            <div class="lg:col-span-4 flex lg:justify-end">
+              <a href="decision-tree.html" data-dom-id="cta-to-product" class="inline-flex items-center gap-2 px-7 py-4 font-sans text-sm font-medium transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2" style="background: var(--lifetree-primary); color: var(--lifetree-primary-foreground); border-radius: var(--lifetree-radius-md); --tw-ring-color: var(--lifetree-primary-foreground);">
+                进入决策树界面
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="mt-16 lg:mt-20 pt-8 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style="border-color: var(--lifetree-primary-tint)">
+            <div class="flex items-center gap-2.5">
+              <svg width="22" height="26" viewBox="0 0 160 180" fill="none" aria-hidden="true">
+                <path d="M80,14 C100,14 115,28 115,46 C124,47 130,57 125,67 C120,77 108,80 99,75 C95,86 80,88 72,79 C60,86 46,80 43,68 C36,63 35,51 43,46 C42,28 57,14 80,14 Z" fill="var(--lifetree-primary-foreground)"/>
+                <path d="M74,70 Q77,100 71,128 L89,128 Q83,100 86,70 Z" fill="var(--lifetree-primary-foreground)"/>
+              </svg>
+              <span class="font-display text-base" style="color: var(--lifetree-primary-foreground)">LifeTree · 林木智识</span>
+            </div>
+            <span class="font-mono text-[11px] tracking-[0.16em] uppercase" style="color: var(--lifetree-muted)">为关键人生决策而生的 Life OS · 2026</span>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

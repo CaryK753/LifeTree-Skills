@@ -1,0 +1,10 @@
+{
+  "user_id": "usr_example_001",
+  "global_profile": {
+    "demographics": { "age": 32, "nationality": "CN" },
+    "languages": { "primary": "ENGLISH_C1", "secondary": "GERMAN_A2" },
+    "education": { "highest_degree": "MASTER", "field_of_study": "COMPUTER_SCIENCE" },
+    "work_experience": { "years": 6, "current_role": "Senior Software Engineer" },
+    "financial_assets": { "liquid_funds_usd": 45000.0, "annual_income_usd": 70000.0 }
+  }
+}

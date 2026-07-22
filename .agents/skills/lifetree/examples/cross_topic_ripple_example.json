@@ -1,0 +1,21 @@
+{
+  "simulation_id": "SIM_RIPPLE_GERMANY_ASSETS_001",
+  "primary_topic": {
+    "topic_id": "tpc_germany_immigration",
+    "event": "Statutory Sperrkonto requirement increased from €11,208 to €12,000"
+  },
+  "secondary_impacted_topics": [
+    {
+      "topic_id": "tpc_asset_allocation",
+      "ripple_effect": "Liquid savings committed to Sperrkonto increases by €792, reducing available capital for high-yield investment portfolio.",
+      "severity": "MEDIUM",
+      "action": "Rebalance short-term cash reserves."
+    },
+    {
+      "topic_id": "tpc_career_transition",
+      "ripple_effect": "Requires starting job hunt 1 month earlier to avoid cash burn while on Opportunity Card.",
+      "severity": "LOW",
+      "action": "Accelerate German resume (Lebenslauf) preparation."
+    }
+  ]
+}

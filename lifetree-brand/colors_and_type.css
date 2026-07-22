@@ -1,0 +1,67 @@
+/* ============================================================
+   LifeTree — 林木智识 (Forest Intelligence) Brand CSS
+   brandPrefix: lifetree
+   一棵为高风险人生决策而生的树：可信、有温度、不冷冰冰
+   ============================================================ */
+
+:root {
+  /* ---- Primary — 深森林绿 (single brand hue) ---- */
+  --lifetree-primary: #2F5D4A;
+  --lifetree-primary-foreground: #F5F0E6;
+  --lifetree-primary-tint: #3E6B5C;
+
+  /* ---- Surfaces — 暖羊皮纸 / 树皮 ---- */
+  --lifetree-background: #F2EAD8;          /* 暖羊皮纸底 */
+  --lifetree-foreground: #1E2A24;          /* 深墨绿褐 */
+  --lifetree-card: #FBF6EA;                /* 浅羊皮纸卡 */
+  --lifetree-card-foreground: #1E2A24;
+  --lifetree-popover: #FBF6EA;
+  --lifetree-popover-foreground: #1E2A24;
+  --lifetree-muted: #E3D9C4;               /* 暖米色 */
+  --lifetree-muted-foreground: #6B5D49;    /* 暖灰褐 */
+
+  /* ---- Borders / inputs / ring ---- */
+  --lifetree-border: #D6CAAF;              /* 暖棕褐分隔 */
+  --lifetree-input: #D6CAAF;
+  --lifetree-ring: #2F5D4A;
+
+  /* ---- Semantic states (real states only) ---- */
+  --lifetree-state-success: #4A7C59;       /* 健康枝叶 */
+  --lifetree-state-warning: #B8742A;       /* 树皮赭石 — 风险预警 */
+  --lifetree-state-error: #8B3A2E;         /* 枯枝深赭 — 高危/失效 */
+  --lifetree-state-info: #3E6B5C;
+
+  /* ---- Radius scale ---- */
+  --lifetree-radius-sm: 4px;
+  --lifetree-radius-md: 8px;
+  --lifetree-radius-lg: 14px;
+  --lifetree-radius-xl: 16px;
+
+  /* ---- Typography stacks ---- */
+  --lifetree-font-display: "Noto Serif SC", "Source Serif 4", "Songti SC", Georgia, serif;
+  --lifetree-font-sans: "Inter", "Noto Sans SC", -apple-system, system-ui, sans-serif;
+  --lifetree-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ---- Depth — restrained, trust-first ---- */
+  --lifetree-shadow-sm: 0 1px 2px rgba(31, 42, 36, 0.04);
+  --lifetree-shadow-md: 0 4px 14px rgba(31, 42, 36, 0.05);
+  --lifetree-shadow-float: 0 10px 30px rgba(31, 42, 36, 0.10);
+
+  /* ---- Data-viz accents (derived from primary / state, not new hues) ---- */
+  --lifetree-data-ink: #1E2A24;
+  --lifetree-data-grid: #E3D9C4;
+  --lifetree-data-confidence-high: #2F5D4A;   /* 实线 100% */
+  --lifetree-data-confidence-mid: #6B5D49;    /* 虚线 80% */
+  --lifetree-data-confidence-low: #B8742A;    /* 虚线 50% */
+}
+
+/* ---- Dark surface variant (soil-layer / sub-panel) ---- */
+.soil-surface {
+  background: #1E2A24;
+  color: #E3D9C4;
+}
+
+/* ---- Confidence line language (实线 / 虚线) ---- */
+.confidence-solid { stroke: var(--lifetree-data-confidence-high); stroke-dasharray: none; }
+.confidence-dashed-mid { stroke: var(--lifetree-data-confidence-mid); stroke-dasharray: 5 4; }
+.confidence-dashed-low { stroke: var(--lifetree-data-confidence-low); stroke-dasharray: 3 5; }

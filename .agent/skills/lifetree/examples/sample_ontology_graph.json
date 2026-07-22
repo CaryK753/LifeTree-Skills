@@ -1,0 +1,59 @@
+{
+  "nodes": [
+    {
+      "id": "usr_person",
+      "label": "Person (Applicant)",
+      "entity_type": "PERSON"
+    },
+    {
+      "id": "asset_sperrkonto",
+      "label": "€12,000 Blocked Deposit Account (Sperrkonto)",
+      "entity_type": "CAPITAL_ASSET"
+    },
+    {
+      "id": "reg_chancenkarte",
+      "label": "Chancenkarte Skilled Regulation § 20a",
+      "entity_type": "REGULATION_LAW"
+    },
+    {
+      "id": "inst_embassy",
+      "label": "German Federal Embassy",
+      "entity_type": "INSTITUTION_AGENCY"
+    },
+    {
+      "id": "route_bluecard",
+      "label": "EU Blue Card Residence Permit § 18g",
+      "entity_type": "PATHWAY_ROUTE"
+    }
+  ],
+  "edges": [
+    {
+      "source": "usr_person",
+      "target": "asset_sperrkonto",
+      "relation_type": "REQUIRES_CAPITAL",
+      "confidence": 1.0,
+      "kinetic_weight": 1.0
+    },
+    {
+      "source": "asset_sperrkonto",
+      "target": "reg_chancenkarte",
+      "relation_type": "GOVERNS",
+      "confidence": 1.0,
+      "kinetic_weight": 1.0
+    },
+    {
+      "source": "reg_chancenkarte",
+      "target": "inst_embassy",
+      "relation_type": "DEPENDS_ON",
+      "confidence": 0.9,
+      "kinetic_weight": 1.0
+    },
+    {
+      "source": "inst_embassy",
+      "target": "route_bluecard",
+      "relation_type": "CONVERTS_TO",
+      "confidence": 0.9,
+      "kinetic_weight": 1.0
+    }
+  ]
+}

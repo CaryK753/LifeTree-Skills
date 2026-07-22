@@ -1,0 +1,52 @@
+{
+  "component_name": "LifeTreeGenUI",
+  "version": "2.0.0",
+  "philosophy": {
+    "network_soil": "The Soil (Network/Graph) represents objective facts, laws, and reality constraints.",
+    "tree_fate": "The Tree (Fate) represents user background and decision choices growing out of the soil.",
+    "core_claim": "The Soil provides objective facts/resistance; the Tree presents personal choices and possibilities, ensuring controllable Plan B side buds."
+  },
+  "smart_pruning_policy": {
+    "default_top_k_visible": 3,
+    "collapse_high_risk_branches": true,
+    "rationale": "Prevents decision paralysis by highlighting Top-3 optimal paths and collapsing extreme edge cases into expandable drawers."
+  },
+  "dual_track_interaction": {
+    "nl_to_gui_sync": "Natural language commands (e.g., 'Change my German level to B1') automatically trigger UI parameter slider highlights and re-render tree state.",
+    "gui_to_nl_sync": "Dragging sliders or toggling nodes in GUI automatically updates underlying user profile state and recalculates graph pathways."
+  },
+  "visual_primitives": {
+    "TRUNK": {
+      "description": "User baseline current state, local memory, and validated status.",
+      "color": "#2E7D32",
+      "line_width": 4,
+      "style": "SOLID"
+    },
+    "MAIN_BRANCH": {
+      "description": "Major decision pathways. Top-3 visible by default.",
+      "color": "#1976D2",
+      "line_width": 3,
+      "style": "SOLID"
+    },
+    "SIDE_BUD": {
+      "description": "Hypothetical what-if variables (e.g. language score, salary bump).",
+      "color": "#9C27B0",
+      "line_width": 2,
+      "style": "DASHED"
+    },
+    "DEAD_BRANCH": {
+      "description": "Blocked or high-risk decision pathways. Collapsed by default.",
+      "color": "#D32F2F",
+      "line_width": 2,
+      "style": "DASHED",
+      "badge": "RISK_ALERT"
+    },
+    "PLAN_B_HEDGE": {
+      "description": "Alternative risk-hedging pathway rendered as an auxiliary root/branch.",
+      "color": "#F57C00",
+      "line_width": 2,
+      "style": "SOLID",
+      "badge": "ALTERNATIVE"
+    }
+  }
+}

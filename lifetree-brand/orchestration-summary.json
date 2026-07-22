@@ -1,0 +1,249 @@
+{
+  "skillProvenance": {
+    "name": "solo-design",
+    "version": "2026.07.06.8",
+    "version_source": "skill-version.json",
+    "runtime_skill_dir": "/Users/cary/.trae-cn/builtin/design/default/skills/solo-design",
+    "recorded_at": "2026-07-21T10:00:00+08:00"
+  },
+  "project": {
+    "name": "LifeTree 品牌与核心界面",
+    "path": "/Users/cary/Desktop/Fun/LifeTree/lifetree-brand",
+    "operation": "create",
+    "deviceType": "desktop",
+    "language": "zh-CN",
+    "dashboardMode": false,
+    "intentProfile": {
+      "caseFamily": "free_exploration",
+      "graphicStrategy": null,
+      "sourceType": null,
+      "routingReason": "无设计系统的品牌系统+产品界面创建，桌面端自由探索双页项目"
+    },
+    "replicationMode": null,
+    "sourceUrl": null,
+    "contextReadBudget": {
+      "workflowFileReadLimit": 1,
+      "largeWorkflowFilesCachedInSummary": [],
+      "restoreInputsCached": [],
+      "subAgentReadsFullSummary": false
+    },
+    "readBudgetLedger": [
+      {
+        "file": "workflows/create-project-free-fast.md",
+        "readCount": 1,
+        "limit": 1,
+        "reason": "initial route-locked workflow read",
+        "exceeded": false
+      }
+    ],
+    "dispatchPreflightManifest": [],
+    "cssPreflightEvidence": {
+      "applies": true,
+      "status": "passed",
+      "command": "node /Users/cary/.trae-cn/builtin/design/default/skills/solo-design/script/fill-html-head.mjs /Users/cary/Desktop/Fun/LifeTree/lifetree-brand/colors_and_type.css /Users/cary/Desktop/Fun/LifeTree/lifetree-brand/.preflight/preflight.html --title=\"Preflight\" --lang=zh-CN --prefix=lifetree",
+      "brandPrefix": "lifetree",
+      "checks": {
+        "themeVars": "present",
+        "semanticTokenFallback": "present",
+        "themeInline": "present",
+        "tailwindCdn": "present",
+        "htmlClass": "present",
+        "semanticMappings": "resolved"
+      },
+      "retryCount": 0,
+      "blockingReason": null
+    },
+    "repairEntryEvidence": [
+      {
+        "repairPolicyRead": true,
+        "renderBlockingErrorPresent": true,
+        "softWarningOnly": false,
+        "ownerClassified": true,
+        "postValidationMutationDetected": false,
+        "validationErrorClasses": ["app-shell-viewport", "restore-evidence", "html-quality"],
+        "repairBudget": {
+          "validationRunsSoFar": 1,
+          "maxValidationRuns": 3
+        },
+        "recorded_at": "2026-07-21T13:45:00+08:00"
+      }
+    ],
+    "finishReadinessEvidence": null,
+    "referenceCaptureEvidence": {"applies": false, "reason": "free-exploration project; not restore_1to1"},
+    "visualSpecExcerpt": null,
+    "restoreVisualCheckpoints": [
+      {"id": "rc-1", "priority": "high", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-2", "priority": "high", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-3", "priority": "high", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-4", "priority": "high", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-5", "priority": "high", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-6", "priority": "medium", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-7", "priority": "medium", "description": "N/A — free exploration project", "status": "n/a", "applies": false},
+      {"id": "rc-8", "priority": "low", "description": "N/A — free exploration project", "status": "n/a", "applies": false}
+    ],
+    "restorationContractLite": null,
+    "restoreEvidenceReview": {"applies": true, "reason": "free-exploration project; not restore_1to1 — review auto-passed", "allHighPriorityCheckpointsAcceptable": true},
+    "styleDefinitionBrief": "林木智识：深森林绿 + 暖羊皮纸 + 树皮褐，衬线展示字 + 无衬线数据字。树的隐喻兼顾有机感与编辑级精密，像一本为人生决策精装打造的自然志，可信、有温度、不冷冰冰。",
+    "designRead": "LifeTree 品牌系统+决策OS / 高风险决策者 / 沉静森林信任+编辑级精密 / 中高密度 / 避免科技蓝AI俗套",
+    "designDials": {
+      "layoutVariance": 3,
+      "motionIntensity": 2,
+      "visualDensity": 3
+    },
+    "styleContinuityAnchors": {
+      "colorSystem": {
+        "primaryColorRole": "深森林绿 #2F5D4A 用于主CTA、选中态、实线高置信连接",
+        "brandHuePolicy": "free-explore 仅单一品牌主色；暖羊皮纸/树皮褐为中性表面，非品牌色；额外色相仅通过 state-success/warning/error/info 用于真实语义状态",
+        "stateColors": "success #4A7C59 健康枝叶；warning #B8742A 树皮赭石风险预警；error #8B3A2E 枯枝高危/失效；info #3E6B5C"
+      },
+      "shapeSystem": "克制圆角 4/8/14/22px；树状图为有机曲线(SVG)，UI卡/面板为几何直角圆角；枯枝节点用虚线+赭石色",
+      "typographySystem": "展示字 Noto Serif SC/Source Serif 4 用于大标题与品牌名；正文/数据 Inter/Noto Sans SC；数据标签/置信度 JetBrains Mono；强编辑级层级，标题短而有力",
+      "spacingSystem": "品牌页编辑式宽松留白；界面页紧凑栅格但保留呼吸感；分隔优先用 border 而非阴影",
+      "componentLanguage": "卡片以 border 为主、阴影 alpha<=0.06；置信度用线型（实线100%/虚线80%/虚线50%）而非色彩堆叠；按钮克制，主按钮深森林绿填充",
+      "surfaceAndDepth": "暖羊皮纸底 #F2EAD8；卡片更浅 #FBF6EA；soil-layer 深墨绿 #1E2A24 用于底层图谱/子面板；阴影极克制，浮动层才用 alpha 0.10",
+      "imageryAndIconography": "植物学×数据图集插画风格；UI图标用 Lucide；树隐喻为核心视觉资产；置信度/枯枝用线型语言表达",
+      "interactionTone": "沉静、可信、无炫技动效；仅 hover/focus 反馈与轻量首屏入场；这是信任型产品，不是炫技展示"
+    },
+    "specsConstraints": null,
+    "sharedProjectShellContract": {
+      "navigationShell": "两页结构不同（品牌展示 vs 产品工作台），不共享导航DOM外壳；共享品牌视觉语言与交叉跳转CTA",
+      "primaryColorSystem": "单一主色 深森林绿 #2F5D4A；无 secondary/accent 品牌色",
+      "typographySystem": "展示字 Noto Serif SC/Source Serif 4；正文 Inter/Noto Sans SC；数据 JetBrains Mono",
+      "radiusScale": "sm 4px / md 8px / lg 14px / xl 16px",
+      "surfaceDepthModel": "border 优先，静态阴影 alpha<=0.06，浮动层 alpha 0.10",
+      "ctaStyle": "主按钮 深森林绿填充 + 羊皮纸前景 + 8px 圆角；次按钮 描边",
+      "alignmentRules": "编辑级左对齐为主；数据列对齐 baseline/右对齐数字"
+    },
+    "generationTree": null
+  },
+  "designSource": {
+    "operatingMode": "free-explore",
+    "libraryIdentity": null,
+    "libraryPath": null,
+    "cssFilePath": "/Users/cary/Desktop/Fun/LifeTree/lifetree-brand/colors_and_type.css",
+    "brandPrefix": "lifetree",
+    "themeMode": "light",
+    "designDecisionSummary": "林木智识：单一深森林绿主色 + 暖羊皮纸表面 + 树皮褐中性；衬线展示+无衬线数据；置信度实线/虚线语言；克制圆角与阴影",
+    "componentContractKind": null,
+    "forbiddenInventedComponents": [],
+    "allowedComponents": [],
+    "styleConstraints": {
+      "radiusMax": 16,
+      "spacingBase": 1,
+      "fontSizeBody": 14,
+      "fontSizeMin": 11,
+      "controlHeightDefault": 32,
+      "controlHeightLarge": 38
+    },
+    "productContext": {
+      "kitType": null,
+      "productType": "个人决策智能系统 (PDI) / Life OS"
+    },
+    "actualTokenNameReference": [
+      { "semanticPurpose": "主色-深森林绿", "tokenName": "lifetree-primary" },
+      { "semanticPurpose": "主色前景-羊皮纸", "tokenName": "lifetree-primary-foreground" },
+      { "semanticPurpose": "页面背景-暖羊皮纸", "tokenName": "lifetree-background" },
+      { "semanticPurpose": "正文-深墨绿褐", "tokenName": "lifetree-foreground" },
+      { "semanticPurpose": "卡片背景-浅羊皮纸", "tokenName": "lifetree-card" },
+      { "semanticPurpose": "卡片前景", "tokenName": "lifetree-card-foreground" },
+      { "semanticPurpose": "弱化背景-暖米色", "tokenName": "lifetree-muted" },
+      { "semanticPurpose": "弱化文字-暖灰褐", "tokenName": "lifetree-muted-foreground" },
+      { "semanticPurpose": "边框-暖棕褐", "tokenName": "lifetree-border" },
+      { "semanticPurpose": "成功-健康枝叶", "tokenName": "lifetree-state-success" },
+      { "semanticPurpose": "警告-风险预警", "tokenName": "lifetree-state-warning" },
+      { "semanticPurpose": "错误-枯枝高危", "tokenName": "lifetree-state-error" },
+      { "semanticPurpose": "圆角md", "tokenName": "lifetree-radius-md" },
+      { "semanticPurpose": "圆角lg", "tokenName": "lifetree-radius-lg" },
+      { "semanticPurpose": "展示字族", "tokenName": "lifetree-font-display" },
+      { "semanticPurpose": "正文字族", "tokenName": "lifetree-font-sans" },
+      { "semanticPurpose": "数据字族", "tokenName": "lifetree-font-mono" }
+    ]
+  },
+  "pages": [
+    {
+      "nodeId": "page-brand-system",
+      "slug": "brand-system",
+      "title": "品牌系统",
+      "htmlSrc": "pages/brand-system.html",
+      "pageIndex": 1,
+      "stateGroupId": null,
+      "stateRole": null,
+      "baseStatePageId": null,
+      "sharedShellContract": [],
+      "mutableRegions": [],
+      "derivedFromHtmlSrc": null,
+      "derivationType": "original",
+      "sourcePageId": null,
+      "sourceHtmlSrc": null,
+      "pageType": "showcase",
+      "viewportMode": "document-scroll",
+      "businessScenario": "LifeTree 品牌系统展示页 — Logo概念、色彩体系、字体系统、树隐喻视觉语言（土壤/网络、决策树、枯枝预警、置信度实线虚线）、信任与语气原则。把品牌灵魂一页讲透。",
+      "visualNorthStar": "像一本为人生决策精装打造的自然志——衬线大标题立于暖羊皮纸底，深森林绿点缀，编辑级非对称版面把品牌灵魂层层展开，末尾引导进入产品界面。",
+      "compositionPattern": "editorial asymmetric — 非对称编辑式版面，类高端品牌手册：左文右图交替、大留白、章节编号",
+      "continuityAnchors": ["深森林绿主色 + 暖羊皮纸底", "衬线展示字 + 无衬线数据字", "圆角克制（最大14px）", "实线/虚线置信度语言"],
+      "libraryRestraintMode": false,
+      "uiKitPath": null,
+      "componentPlan": [],
+      "imagePlan": ["brand-hero.jpg"],
+      "chartsRequired": false,
+      "miniProgramStyle": false,
+      "qualityRisks": ["品牌信息密度高，需用编辑层级而非堆叠", "色彩展示需含hex与用法说明", "树隐喻需可视化而非纯文字"],
+      "restoreEvidence": {"applies": false, "reason": "free-exploration project; not restore_1to1", "visualCheckpointResults": [{"checkpointId": "rc-1", "result": "n/a", "applies": false}], "dominantReferenceImageUsedAsBody": false}
+      },
+      {
+      "nodeId": "page-decision-tree",
+      "slug": "decision-tree",
+      "title": "决策树核心界面",
+      "htmlSrc": "pages/decision-tree.html",
+      "pageIndex": 2,
+      "stateGroupId": null,
+      "stateRole": null,
+      "baseStatePageId": null,
+      "sharedShellContract": [],
+      "mutableRegions": [],
+      "derivedFromHtmlSrc": null,
+      "derivationType": "original",
+      "sourcePageId": null,
+      "sourceHtmlSrc": null,
+      "pageType": "information-dense",
+      "viewportMode": "app-shell",
+      "businessScenario": "LifeTree 决策树核心界面——生成式树状UI主屏。以德国高技能人才移民全路径推演为实例：机会卡积分核算→双元制/高等教育路径匹配→欧盟蓝卡动态追踪→永居入籍时序规划。展示主干/分支/侧芽(What-if)/枯枝(风险)/Plan B与置信度。",
+      "visualNorthStar": "一台可信的决策操作系统——左栏主题与本地记忆、中央生长的决策树（SVG，主干为当前状态、分支为决策方向、侧芽为What-if、枯枝为风险节点）、右栏选中节点推演详情（要求/风险/官方源/时序）。数据密度高但保留呼吸感，末尾有'上次同步'类内部细节暗示实时数据管道。",
+      "compositionPattern": "workbench three-column — 三栏工作台：左导航/记忆 + 中树状画布 + 右节点详情",
+      "continuityAnchors": ["深森林绿主色 + 暖羊皮纸底", "衬线展示字 + 无衬线数据字", "实线/虚线置信度语言", "圆角克制"],
+      "libraryRestraintMode": false,
+      "uiKitPath": null,
+      "componentPlan": [],
+      "imagePlan": [],
+      "chartsRequired": false,
+      "miniProgramStyle": false,
+      "qualityRisks": ["树状图需SVG实现且层级清晰", "置信度实线/虚线须可辨", "枯枝节点须视觉突出但不喧宾夺主", "三栏在小屏需合理收拢"],
+      "restoreEvidence": {"applies": false, "reason": "free-exploration project; not restore_1to1", "visualCheckpointResults": [{"checkpointId": "rc-1", "result": "n/a", "applies": false}], "dominantReferenceImageUsedAsBody": false}
+      }
+    ],
+  "assets": [
+    {
+      "filename": "brand-hero.jpg",
+      "role": "critical-hero",
+      "owningPage": "brand-system",
+      "semanticDescription": "品牌主视觉：一棵从数据网络根系生长的树，深森林绿+暖羊皮纸，植物学×数据图集插画风格",
+      "status": "generated"
+    }
+  ],
+  "wiringPlan": [
+    {
+      "sourceNodeId": "page-brand-system",
+      "domId": "cta-to-product",
+      "targetPageId": "page-decision-tree"
+    }
+  ],
+  "hiddenInteractionPlan": [
+    {
+      "sourceNodeId": "page-decision-tree",
+      "domId": "back-to-brand",
+      "targetPageId": "page-brand-system",
+      "hideEdge": true,
+      "reason": "返回品牌系统的次级返回链接"
+    }
+  ]
+}

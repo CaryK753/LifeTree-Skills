@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LifeTreePalantirObjectCentricDynamicOntologySchema",
+  "description": "Palantir Foundry/Gotham Style Object-Centric Dynamic Ontology Schema for LifeTree GraphRAG",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "entity_type", "valid_time", "source_id", "confidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "PERSON",
+              "REGULATION_LAW",
+              "PATHWAY_ROUTE",
+              "CAPITAL_ASSET",
+              "INSTITUTION_AGENCY",
+              "MACRO_EVENT",
+              "ACTION",
+              "FEES_REQUIREMENT",
+              "TIMELINE_EVENT",
+              "RISK_NODE",
+              "WHAT_IF_HYPOTHESIS"
+            ]
+          },
+          "properties": { "type": "object" },
+          "valid_time": {
+            "type": "object",
+            "required": ["start_time", "end_time"],
+            "properties": {
+              "start_time": { "type": "string", "format": "date-time" },
+              "end_time": { "type": ["string", "null"], "format": "date-time" }
+            }
+          },
+          "source_id": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "visual_style": { "type": "string", "enum": ["SOLID", "DASHED"] }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "relation_type", "source_id", "confidence"],
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "relation_type": {
+            "type": "string",
+            "enum": [
+              "DEPENDS_ON",
+              "GOVERNS",
+              "REQUIRES_CAPITAL",
+              "TRIGGERS_EVENT",
+              "MUTATES_STATE",
+              "CONFLICTS_WITH",
+              "DERIVES_FROM",
+              "REHABILITATION_BRIDGE",
+              "PREREQUISITE_FOR",
+              "IMPACTS",
+              "RISK_OF",
+              "CONVERTS_TO"
+            ]
+          },
+          "kinetic_weight": { "type": "number", "default": 1.0 },
+          "friction_penalty": { "type": "number", "default": 0.0 },
+          "source_id": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "visual_style": { "type": "string", "enum": ["SOLID", "DASHED"] }
+        }
+      }
+    }
+  }
+}
