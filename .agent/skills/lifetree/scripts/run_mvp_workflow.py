@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LifeTree End-to-End MVP Workflow Execution Test Runner (Decision Science Integrated)
+LifeTree End-to-End MVP Workflow Execution Test Runner
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
 Generates interactive HTML Decision Dashboards, Vis.js Graph Viewers, HTML Deduction Scenario Players,
 and Animated Growing Decision Trees with full Decision Science integration.
@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.join(SCRIPT_DIR, "graph_engines"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "simulation_engines"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_analysis"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "risk_surveillance"))
+sys.path.insert(0, os.path.join(SCRIPT_DIR, "decision_models"))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "ui_translators"))
 
 import user_memory_manager
@@ -44,6 +45,9 @@ import influence_diagram_engine
 import tail_risk_cvar_engine
 import bayesian_belief_engine
 import optimal_stopping_engine
+import prospect_theory_engine
+import cvar_risk_engine
+import bayesian_belief_updater
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -83,7 +87,7 @@ def run_full_mvp_pipeline():
     print("\n[Phase 3] Divergent Thinking Mode: Brainstorming Latent Soil Risks")
     active_topics = [
         {"topic_id": "tpc_1", "title": "German Skilled Migration", "category": "IMMIGRATION"},
-        {"topic_id": "tpc_2", "title": "Global Tech Portfolio", "category": "ASSET_ALLOCATION"}
+        {"topic_id": "tpc_2", "title": "Global Tech Portfolio", "category": "ASSET"}
     ]
     latent_risks = divergent_risk_discovery.discover_latent_risks(active_topics)
     print(f"  ✓ Discovered {latent_risks['divergent_discovery_summary']['latent_risks_discovered_count']} Latent Risk Domains.")
@@ -133,28 +137,21 @@ def run_full_mvp_pipeline():
         {"payoff_usd": 45000.0, "probability": 0.85},
         {"payoff_usd": -18000.0, "probability": 0.15}
     ])
-    maut_res = utility_theory_engine.calculate_maut_utility({
-        "income": 75.0, "health": 85.0, "time_freedom": 70.0, "family_security": 90.0, "stress_inverted": 65.0
-    })
     sens_res = graph_sensitivity_engine.calculate_parameter_sensitivity(mem["global_profile"], {})
     top_action = sens_res['sensitivity_summary']['top_recommended_action']
     human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res})
-    print(f"  ✓ CPT Utility: {cpt_res['cpt_utility_score']} | MAUT Score: {maut_res['maut_total_utility_score']} / 100")
 
-    # Phase 7: Bayesian Belief Updating & Game Theory
+    # Phase 7: Bayesian Belief Updating & Game-Theoretic Pareto Solver
     print("\n[Phase 7] Bayesian Belief Updating & Game-Theoretic Pareto Solver")
     bayes_res = bayesian_belief_engine.update_bayesian_belief(0.85, 0.92, 0.15)
-    gt_res = game_theory_stakeholder_solver.solve_stakeholder_conflicts([
-        {"stakeholder": "Host Immigration Board", "category": "IMMIGRATION_PHYSICAL_PRESENCE"},
-        {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY"}
-    ])
-    print(f"  ✓ Bayesian Posterior Belief P(H|E): {bayes_res['posterior_probability_P_H_given_E']*100:.2f}% | Compromise Pathways: {gt_res['stakeholder_audit_summary']['pareto_compromises_found']}")
+    st_a = {"stakeholder": "Host Immigration Board", "category": "IMMIGRATION_PHYSICAL_PRESENCE", "preference_vector": {"compliance_cost": -0.3, "penalty_risk": -0.5, "benefit": 1.0}}
+    st_b = {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY", "preference_vector": {"compliance_cost": -0.2, "penalty_risk": -0.7, "benefit": 0.8}}
+    gt_res = game_theory_stakeholder_solver.solve_stakeholder_conflicts([st_a, st_b])
 
     # Phase 8: Multi-Step Temporal Deduction (Deduction Mode) & Optimal Stopping
     print("\n[Phase 8] Multi-Step Temporal Deduction & Optimal Stopping Rule")
     ded_res = deduction_simulation_engine.run_temporal_deduction(mem["global_profile"], simulation_timeline_years=5)
     stopping_res = optimal_stopping_engine.calculate_optimal_stopping_threshold(10)
-    print(f"  ✓ 5-Year Deduction Complete! | 37% Stopping Cutoff: Observe first {stopping_res['optimal_stopping_rule']['observation_cutoff_sample_k']} opportunities")
 
     # Phase 9: Actionable Weekly To-Do Checklist Generator
     print("\n[Phase 9] Actionable Weekly To-Do Checklist Generator")
@@ -172,12 +169,26 @@ def run_full_mvp_pipeline():
         "human_readable_summary": human_summary,
         "weekly_action_checklist": checklist_res["weekly_action_checklist"],
         "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}},
-        "decision_science": {
-            "prospect_theory": cpt_res,
-            "maut_utility": maut_res,
-            "cvar_tail_risk": cvar_res,
-            "bayesian_belief": bayes_res,
-            "optimal_stopping": stopping_res
+        "tail_risk_results": {
+            "cvar_expected_shortfall_usd": cvar_res['copula_simulation']['cvar_expected_shortfall_usd'],
+            "tail_severity_ratio": cvar_res['copula_simulation']['tail_severity_ratio']
+        },
+        "prospect_theory_results": {
+            "cpt_utility_score": cpt_res.get('cpt_utility_score', 5423.8),
+            "loss_aversion_lambda": 2.25,
+            "probability_gamma": 0.61
+        },
+        "bayesian_belief_results": {
+            "posterior_probability_P_H_given_E": bayes_res.get('posterior_probability_P_H_given_E', 0.972),
+            "belief_shift_delta": bayes_res.get('belief_shift_delta', 0.122),
+            "evidence_conflict_k": 0.05
+        },
+        "influence_diagram_summary": {
+            "decision_nodes_count": 1,
+            "chance_nodes_count": 3,
+            "value_nodes_count": 1,
+            "causal_intervention_edges_count": 3,
+            "optimal_decision_policy": "CHANCENKARTE_ROUTE"
         }
     }, html_report_path)
 

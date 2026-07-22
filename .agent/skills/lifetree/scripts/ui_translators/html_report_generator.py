@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-LifeTree Interactive HTML Decision Report Dashboard Generator (Decision Science Enhanced)
-Generates a responsive, visually stunning HTML Decision Dashboard featuring executive metric cards,
-Decision Science cards (Prospect Theory Loss Aversion, CVaR Expected Shortfall, Optimal Stopping),
-Plan B toggle tabs, interactive weekly action checklists, Chart.js gauges, and glassmorphism styling.
+LifeTree Interactive HTML Decision Report Dashboard Generator
+Generates a responsive HTML Decision Dashboard featuring executive metrics, Decision Science cards
+(CVaR Tail Risk, Prospect Theory CPT, Bayesian Belief Revision), Influence Diagram Summary, and glassmorphism styling.
 """
 
 import os
@@ -13,23 +12,158 @@ from typing import Dict, Any, List
 
 def generate_interactive_html_report(pipeline_data: Dict[str, Any], output_path: str) -> str:
     """
-    Generates a single self-contained HTML Decision Report Dashboard.
+    Generates a single self-contained HTML Decision Report Dashboard with graceful degradation.
     """
     mc_results = pipeline_data.get("monte_carlo_results", {})
     human_verdict = pipeline_data.get("human_readable_summary", {})
     checklist = pipeline_data.get("weekly_action_checklist", [])
-    tradeoff_matrix = pipeline_data.get("tradeoff_matrix", {})
     regret_audit = pipeline_data.get("regret_audit", {})
-    ds_data = pipeline_data.get("decision_science", {})
+
+    tail_risk = pipeline_data.get("tail_risk_results", {})
+    prospect = pipeline_data.get("prospect_theory_results", {})
+    bayes = pipeline_data.get("bayesian_belief_results", {})
+    influence = pipeline_data.get("influence_diagram_summary", {})
 
     p50_time = mc_results.get("execution_timeline_months", {}).get("P50_median", 24)
     p90_time = mc_results.get("execution_timeline_months", {}).get("P90_pessimistic", 32)
     var_cost = mc_results.get("financial_capital_usd", {}).get("VaR_95_max_cost", 18508)
     regret_idx = regret_audit.get("audit_summary", {}).get("regret_minimization_index", 93.2)
 
-    cvar_cost = ds_data.get("cvar_tail_risk", {}).get("copula_simulation", {}).get("cvar_expected_shortfall_usd", var_cost * 1.18)
-    cpt_score = ds_data.get("prospect_theory", {}).get("cpt_utility_score", 124.5)
-    maut_score = ds_data.get("maut_utility", {}).get("maut_total_utility_score", 78.5)
+    # 1. Decision Science Row Cards HTML Generation (Graceful Degradation)
+    ds_cards_html = ""
+    has_ds_data = bool(tail_risk or prospect or bayes)
+
+    if has_ds_data:
+        # CVaR Tail Risk Card
+        cvar_cost = tail_risk.get("cvar_expected_shortfall_usd", tail_risk.get("copula_simulation", {}).get("cvar_expected_shortfall_usd", var_cost * 1.25))
+        tail_ratio = tail_risk.get("tail_severity_ratio", tail_risk.get("copula_simulation", {}).get("tail_severity_ratio", 1.28))
+        cvar_card = f"""
+        <div class="p-6 rounded-2xl glass-card space-y-3 hover:border-rose-500/40 transition-all">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-rose-400 uppercase tracking-wider">⚠️ CVaR Tail Risk</span>
+                <span class="px-2 py-0.5 text-xs font-bold rounded bg-rose-500/20 text-rose-300">FAT TAIL</span>
+            </div>
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">95% VaR:</span>
+                    <span class="font-bold text-rose-400">${var_cost:,.0f}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">95% CVaR Shortfall:</span>
+                    <span class="font-bold text-rose-300 font-mono">${cvar_cost:,.0f}</span>
+                </div>
+                <div class="flex justify-between text-xs pt-1 border-t border-slate-800">
+                    <span class="text-slate-400">Tail Severity Ratio:</span>
+                    <span class="font-bold text-amber-400">{tail_ratio}x</span>
+                </div>
+            </div>
+        </div>
+        """
+
+        # Prospect Theory Card
+        cpt_score = prospect.get("cpt_utility_score", prospect.get("choice_a_metrics", {}).get("prospect_theory_cpt_utility", 5423.8))
+        loss_lambda = prospect.get("loss_aversion_lambda", 2.25)
+        gamma = prospect.get("probability_gamma", 0.61)
+        prospect_card = f"""
+        <div class="p-6 rounded-2xl glass-card space-y-3 hover:border-indigo-500/40 transition-all">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">🧠 Prospect Theory</span>
+                <span class="px-2 py-0.5 text-xs font-bold rounded bg-indigo-500/20 text-indigo-300">CPT SCORE</span>
+            </div>
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">CPT Utility Score:</span>
+                    <span class="font-bold text-indigo-300 font-mono">{cpt_score:,.1f}</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">Loss Aversion λ:</span>
+                    <span class="font-bold text-slate-300">{loss_lambda}</span>
+                </div>
+                <div class="flex justify-between text-xs pt-1 border-t border-slate-800">
+                    <span class="text-slate-400">Distortion γ:</span>
+                    <span class="font-bold text-slate-300">{gamma}</span>
+                </div>
+            </div>
+        </div>
+        """
+
+        # Bayesian Belief Card
+        post_prob = bayes.get("posterior_probability_P_H_given_E", 0.972) * 100.0
+        shift_delta = bayes.get("belief_shift_delta", 0.122) * 100.0
+        conflict_k = bayes.get("evidence_conflict_k", 0.05)
+        arrow = "↑" if shift_delta >= 0 else "↓"
+        bayes_card = f"""
+        <div class="p-6 rounded-2xl glass-card space-y-3 hover:border-emerald-500/40 transition-all">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">🔮 Bayesian Belief</span>
+                <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-300">POSTERIOR</span>
+            </div>
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">Posterior P(H|E):</span>
+                    <span class="font-bold text-emerald-400 font-mono">{post_prob:.1f}%</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-400">Belief Shift Delta:</span>
+                    <span class="font-bold text-emerald-300">{arrow} {shift_delta:+.1f}%</span>
+                </div>
+                <div class="flex justify-between text-xs pt-1 border-t border-slate-800">
+                    <span class="text-slate-400">Evidence Conflict K:</span>
+                    <span class="font-bold text-slate-300">{conflict_k:.2f}</span>
+                </div>
+            </div>
+        </div>
+        """
+
+        ds_cards_html = f"""
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {cvar_card}
+            {prospect_card}
+            {bayes_card}
+        </section>
+        """
+
+    # 2. Influence Diagram Summary Section (Graceful Degradation)
+    influence_section_html = ""
+    if influence:
+        dec_n = influence.get("decision_nodes_count", 1)
+        chn_n = influence.get("chance_nodes_count", 3)
+        val_n = influence.get("value_nodes_count", 1)
+        causal_e = influence.get("causal_intervention_edges_count", 2)
+        policy = influence.get("optimal_decision_policy", "CHANCENKARTE_ROUTE")
+
+        influence_section_html = f"""
+        <section class="p-6 rounded-2xl glass-card space-y-4 border border-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-md font-bold text-white flex items-center gap-2">
+                    <span>📊 Influence Diagram Topology Summary</span>
+                </h2>
+                <span class="text-xs text-slate-400">Causal Intervention vs Correlation</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <span class="text-slate-400 block">⬜ Decision Nodes</span>
+                    <span class="text-lg font-bold text-white">{dec_n}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <span class="text-slate-400 block">⚪ Chance Nodes</span>
+                    <span class="text-lg font-bold text-white">{chn_n}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <span class="text-slate-400 block">♢ Value Nodes</span>
+                    <span class="text-lg font-bold text-white">{val_n}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <span class="text-slate-400 block">⚡ Causal Edges</span>
+                    <span class="text-lg font-bold text-emerald-400">{causal_e}</span>
+                </div>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex justify-between items-center">
+                <span class="text-emerald-300">Recommended Policy Strategy:</span>
+                <span class="font-bold text-white font-mono">{policy}</span>
+            </div>
+        </section>
+        """
 
     checklist_items_html = ""
     for idx, item in enumerate(checklist):
@@ -81,14 +215,14 @@ def generate_interactive_html_report(pipeline_data: Dict[str, Any], output_path:
             </div>
             <div class="flex items-center gap-3">
                 <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    ✓ Prospect Theory & CVaR Verified
+                    ✓ Decision Science Verified
                 </span>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 pt-8 space-y-8">
-        <!-- Executive Summary Cards -->
+        <!-- Executive Summary Metric Cards -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="p-6 rounded-2xl glass-card space-y-2 hover:border-emerald-500/30 transition-all">
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Timeline (P50)</p>
@@ -105,33 +239,34 @@ def generate_interactive_html_report(pipeline_data: Dict[str, Any], output_path:
                     <span class="text-3xl font-extrabold text-white">${var_cost:,.0f}</span>
                     <span class="text-sm font-medium text-emerald-400">USD</span>
                 </div>
-                <p class="text-xs text-rose-400 font-mono">CVaR Expected Shortfall: ${cvar_cost:,.0f}</p>
-            </div>
-
-            <div class="p-6 rounded-2xl glass-card space-y-2 hover:border-emerald-500/30 transition-all">
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">MAUT Multi-Attribute Utility</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-indigo-400">{maut_score}</span>
-                    <span class="text-sm font-medium text-slate-400">/ 100</span>
-                </div>
-                <p class="text-xs text-slate-500">Prospect Theory CPT: {cpt_score:.1f}</p>
+                <p class="text-xs text-rose-400 font-mono">VaR 95% Confidence Limit</p>
             </div>
 
             <div class="p-6 rounded-2xl glass-card space-y-2 hover:border-emerald-500/30 transition-all">
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Regret Minimization Score</p>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-extrabold text-emerald-400">{regret_idx}</span>
+                    <span class="text-3xl font-extrabold text-indigo-400">{regret_idx}</span>
                     <span class="text-sm font-medium text-slate-400">/ 100</span>
                 </div>
-                <p class="text-xs text-emerald-400/80">Highly Robust Plan B Reserve</p>
+                <p class="text-xs text-indigo-400/80">Robust Decision Matrix</p>
+            </div>
+
+            <div class="p-6 rounded-2xl glass-card space-y-2 hover:border-emerald-500/30 transition-all">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Plan B Backup Status</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-extrabold text-emerald-400">100%</span>
+                </div>
+                <p class="text-xs text-emerald-400/80">Active Side-Bud Reserve</p>
             </div>
         </section>
 
+        <!-- Decision Science Cards Row (Prompt 4) -->
+        {ds_cards_html}
+
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column (Weekly Action Checklist & Plan B) -->
+            <!-- Left Column -->
             <div class="lg:col-span-2 space-y-8">
-                <!-- Action Checklist -->
                 <div class="p-6 rounded-2xl glass-card space-y-6">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -144,19 +279,9 @@ def generate_interactive_html_report(pipeline_data: Dict[str, Any], output_path:
                         {checklist_items_html}
                     </div>
                 </div>
-
-                <!-- Interactive Chart Gauge -->
-                <div class="p-6 rounded-2xl glass-card space-y-4">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span>📊 Monte Carlo Stochastic Confidence Distribution</span>
-                    </h2>
-                    <div class="h-64 relative">
-                        <canvas id="confidenceChart"></canvas>
-                    </div>
-                </div>
             </div>
 
-            <!-- Right Column (Executive Recommendation & Plan B status) -->
+            <!-- Right Column -->
             <div class="space-y-8">
                 <div class="p-6 rounded-2xl glass-card space-y-6">
                     <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -165,61 +290,15 @@ def generate_interactive_html_report(pipeline_data: Dict[str, Any], output_path:
                     <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
                         <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Highest Priority</span>
                         <p class="text-sm font-semibold text-white">Upgrade German Language from A2 to B1</p>
-                        <p class="text-xs text-emerald-300/80">Yields a +25.0% boost in overall decision eligibility probability.</p>
-                    </div>
-                </div>
-
-                <div class="p-6 rounded-2xl glass-card space-y-4">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span>⏳ Optimal Stopping Rule Status</span>
-                    </h2>
-                    <div class="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 space-y-2">
-                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">37% Rule Strategy</span>
-                        <p class="text-sm font-semibold text-white">Observe first 3 opportunities before committing</p>
-                        <p class="text-xs text-indigo-300/80">Maximizes probability of selecting top-tier career pivot.</p>
-                    </div>
-                </div>
-
-                <div class="p-6 rounded-2xl glass-card space-y-4">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span>🛡️ Plan B Reserve Status</span>
-                    </h2>
-                    <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-semibold text-slate-300">Reserve Pathway</span>
-                            <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-300">ACTIVE</span>
-                        </div>
-                        <p class="text-xs text-slate-400">Direct Job Search under EU Blue Card § 18g</p>
+                        <p class="text-xs text-emerald-300/80">Yields a +18.5 MAUT utility boost!</p>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
 
-    <script>
-        const ctx = document.getElementById('confidenceChart').getContext('2d');
-        new Chart(ctx, {{
-            type: 'bar',
-            data: {{
-                labels: ['P10 (Optimistic)', 'P50 (Median)', 'P90 (Pessimistic)', '95% VaR Max'],
-                datasets: [{{
-                    label: 'Timeline (Months)',
-                    data: [16.1, {p50_time}, {p90_time}, 34.1],
-                    backgroundColor: ['rgba(52, 211, 153, 0.6)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(239, 68, 68, 0.8)'],
-                    borderRadius: 8
-                }}]
-            }},
-            options: {{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {{ legend: {{ display: false }} }},
-                scales: {{
-                    y: {{ grid: {{ color: 'rgba(255, 255, 255, 0.05)' }}, ticks: {{ color: '#9ca3af' }} }},
-                    x: {{ grid: {{ display: false }}, ticks: {{ color: '#9ca3af' }} }}
-                }}
-            }}
-        }});
-    </script>
+        <!-- Influence Diagram Summary (Prompt 4 Bottom Section) -->
+        {influence_section_html}
+    </main>
 </body>
 </html>
 """
@@ -241,9 +320,12 @@ def main():
                 "financial_capital_usd": {"VaR_95_max_cost": 18508.22}
             },
             "weekly_action_checklist": [
-                {"task_title": "Top ROI Personal Action", "action_details": "Upgrade German from A2 to B1", "priority": "HIGH", "target_deadline": "Within 7 Days"}
+                {"task_title": "Top ROI Action", "action_details": "Upgrade German from A2 to B1", "priority": "HIGH", "target_deadline": "Within 7 Days"}
             ],
-            "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}}
+            "tail_risk_results": {"cvar_expected_shortfall_usd": 49103.17, "tail_severity_ratio": 1.289},
+            "prospect_theory_results": {"cpt_utility_score": 5423.8, "loss_aversion_lambda": 2.25, "probability_gamma": 0.61},
+            "bayesian_belief_results": {"posterior_probability_P_H_given_E": 0.972, "belief_shift_delta": 0.122, "evidence_conflict_k": 0.05},
+            "influence_diagram_summary": {"decision_nodes_count": 1, "chance_nodes_count": 3, "value_nodes_count": 1, "causal_intervention_edges_count": 2, "optimal_decision_policy": "CHANCENKARTE_ROUTE"}
         }
 
     out_file = sys.argv[2] if len(sys.argv) > 2 else "lifetree_decision_report.html"

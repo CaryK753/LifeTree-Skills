@@ -8,81 +8,107 @@
 
 ---
 
-## 2. Mathematical Model Specifications
+## 2. Mathematical Model Specifications & Mathematical Formulas
 
-### 2.1 Multi-Attribute Utility Theory (MAUT) & AHP Weight Elicitation
-Replaces simple linear weighted sums with standardized Multi-Attribute Utility Theory (MAUT) across 6 core life dimensions: Income, Time Cost (Inverted), Health, Freedom, Family Stability, and Stress (Inverted):
-
+### 2.1 Multi-Attribute Utility Theory (MAUT) & AHP Matrix
 $$U_{\text{MAUT}}(\mathbf{x}) = \sum_{i=1}^K w_i \cdot u_i(x_i), \quad u_i(x_i) \in [0, 100], \quad \sum_{i=1}^K w_i = 1.0$$
 
-#### Analytic Hierarchy Process (AHP) Weight Elicitation
-Computes exact attribute weights using the Principal Eigenvector method over pairwise comparison matrix $\mathbf{A}$:
+#### AHP Principal Eigenvector & Consistency Check:
+$$\mathbf{A} w = \lambda_{\max} w, \quad \text{CI} = \frac{\lambda_{\max} - n}{n - 1}, \quad \text{CR} = \frac{\text{CI}}{\text{RI}_n}$$
 
-$$\mathbf{A} w = \lambda_{\max} w, \quad \text{CI} = \frac{\lambda_{\max} - n}{n - 1}, \quad \text{CR} = \frac{\text{CI}}{\text{RI}}$$
-
-Consistency Ratio $\text{CR} < 0.10$ verifies subjective weight consistency. Executed via [maut_utility_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/maut_utility_engine.py).
+- **Model Boundaries & Limitations**:
+  - Requires additive independence between attributes (e.g., utility of health is separable from utility of income). If health and income have strong non-additive interactions, additive MAUT understates structural coupling.
+  - AHP subject to rank reversal if new redundant attributes are introduced without rescaling.
 
 ---
 
-### 2.2 Advanced Risk Metrics: VaR vs. CVaR Expected Shortfall ($ES_{0.95}$)
-Extends standard 95% Value at Risk ($\text{VaR}_{0.95}$) to Conditional Value at Risk ($\text{CVaR}_{0.95}$ / Expected Shortfall), measuring average catastrophic loss severity in the 5% tail:
-
+### 2.2 Tail Risk CVaR (Expected Shortfall) & Value at Risk (VaR)
 $$\text{VaR}_{\alpha}(X) = \inf \{ x \in \mathbb{R} : P(X > x) \le 1 - \alpha \}$$
 
-$$\text{CVaR}_{\alpha}(X) = \mathbb{E} \left[ X \mid X \ge \text{VaR}_{\alpha}(X) \right]$$
+$$\text{CVaR}_{\alpha}(X) = \mathbb{E} \left[ X \mid X \ge \text{VaR}_{\alpha}(X) \right] = \frac{1}{1 - \alpha} \int_{\alpha}^1 \text{VaR}_u(X) \, du$$
 
-Executed via [cvar_risk_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/cvar_risk_engine.py).
-
----
-
-### 2.3 Influence Diagram Layer & Causal Intervention
-Superimposes explicit semantic distinctions over knowledge graphs:
-- **Decision Nodes ($\square$)**: Actions under human control.
-- **Chance Nodes ($\bigcirc$)**: Stochastic environmental events.
-- **Value Nodes ($\diamondsuit$)**: Final utility payoffs.
-
-Distinguishes causal intervention links ($do(x)$) from statistical correlation links to eliminate causal fallacy. Executed via [influence_diagram_layer.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/influence_diagram_layer.py).
+- **Model Boundaries & Limitations**:
+  - Relies on Monte Carlo sample density in the tail (upper 5%). For $N=10,000$ trials, $5\%$ tail contains 500 samples, providing high precision. For small sample sizes ($N < 500$), CVaR estimates exhibit higher variance.
 
 ---
 
-### 2.4 Recursive Bayesian Belief Updating & Dempster-Shafer Bounds
-Updates posterior probability $P(H \mid E)$ upon receiving new statutory/market evidence $E$:
+### 2.3 2x2 Game-Theoretic Nash Equilibrium (Pure & Mixed Strategy)
+Given a $2 \times 2$ payoff matrix for Player A and Player B:
 
+$$\mathbf{M} = \begin{bmatrix} (a_{11}, b_{11}) & (a_{12}, b_{12}) \\ (a_{21}, b_{21}) & (a_{22}, b_{22}) \end{bmatrix}$$
+
+#### Pure Strategy Nash Equilibrium Conditions:
+A strategy pair $(r^*, c^*)$ is a Pure Strategy Nash Equilibrium if:
+
+$$a_{r^* c^*} \ge a_{r c^*}, \quad \forall r \in \{1, 2\}$$
+
+$$b_{r^* c^*} \ge b_{r^* c}, \quad \forall c \in \{1, 2\}$$
+
+#### Non-Existence Conditions for Pure Strategy Nash Equilibrium:
+Pure Strategy Nash Equilibria **DO NOT EXIST** when best response cycles form (e.g., Matching Pennies game):
+- $a_{11} > a_{21}$ (A prefers Row 1 in Col 1)
+- $b_{12} > b_{11}$ (B prefers Col 2 in Row 1)
+- $a_{22} > a_{12}$ (A prefers Row 2 in Col 2)
+- $b_{21} > b_{22}$ (B prefers Col 1 in Row 2)
+
+Under such conditions, the solver falls back to **Mixed Strategy Nash Equilibrium ($p^*, q^*$)**:
+
+$$p^* = \frac{b_{22} - b_{21}}{(b_{11} - b_{21}) - (b_{12} - b_{22})}, \quad q^* = \frac{a_{22} - a_{12}}{(a_{11} - a_{12}) - (a_{21} - a_{22})}$$
+
+- **Model Boundaries & Limitations**:
+  - Assumes complete information about opposing stakeholder preferences. In asymmetric conflict, actual payoff matrices may shift dynamically.
+
+---
+
+### 2.4 Recursive Bayesian Belief Updating & Dempster's Combination Rule
 $$P(H \mid E) = \frac{P(E \mid H) P(H)}{P(E \mid H) P(H) + P(E \mid \neg H) P(\neg H)}$$
 
-Dempster-Shafer Interval Probabilities $[\text{Bel}(A), \text{Pl}(A)]$ model epistemic uncertainty bounds to eliminate false precision. Executed via [bayesian_belief_updater.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/bayesian_belief_updater.py).
+#### Dempster's Rule of Combination for Fusing Evidence $m_1, m_2$:
+$$m_{1,2}(A) = \frac{\sum_{B \cap C = A} m_1(B) m_2(C)}{1 - K}$$
+
+$$K = \sum_{B \cap C = \emptyset} m_1(B) m_2(C) \quad (\text{Conflict Measure})$$
+
+- **Model Boundaries & Limitations**:
+  - If $K \rightarrow 1.0$ (total contradiction between sources), Dempster's rule can produce counter-intuitive results (Zadeh's paradox). LifeTree flags `TOTAL_EVIDENCE_CONFLICT` when $K \ge 0.99$.
 
 ---
 
-### 2.5 Intertemporal Discounting (Exponential vs. Hyperbolic)
-- **Exponential Discounting (Classical)**: $U(t) = V \cdot e^{-r t}$
-- **Hyperbolic Discounting (Behavioral Present Bias)**: $U(t) = \frac{V}{1 + k \cdot t}$
+### 2.5 Intertemporal Utility Discounting (Exponential vs. Hyperbolic)
+- **Exponential Discounting (Classical)**:
+  $$U(t) = V \cdot e^{-r t}$$
+- **Hyperbolic Discounting (Behavioral Present Bias)**:
+  $$U(t) = \frac{V}{1 + k \cdot t}$$
 
-Corrects systemic overestimation of far-future payoffs. Executed via [intertemporal_discounting_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/intertemporal_discounting_engine.py).
+- **Model Boundaries & Limitations**:
+  - Hyperbolic discounting introduces time inconsistency (dynamically inconsistent choices where plans made for year 5 are abandoned when year 5 arrives).
 
 ---
 
 ### 2.6 Optimal Stopping Theory (37% Snell Envelope Rule)
-Solves optimal timing for job pivots, asset liquidations, and visa exit windows:
-
 $$k^* = \left\lfloor \frac{n}{e} \right\rfloor \approx 0.368 \times n$$
 
-Executed via [optimal_stopping_solver.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/optimal_stopping_solver.py).
+$$P(\text{Selecting Best}) = \frac{k^*}{n} \sum_{i=k^*+1}^n \frac{1}{i-1} \approx \frac{1}{e} \approx 36.8\%$$
+
+- **Model Boundaries & Limitations**:
+  - Assumes complete rank ordering without recall (rejected options cannot be recalled). If options can be recalled with a penalty, optimal threshold $k^*$ decreases.
 
 ---
 
-### 2.7 Copula Systemic Risk Correlation
-Correlates macro downturn, salary drop, and FX asset depreciation using Bivariate Gaussian Copulas:
-
+### 2.7 Bivariate Gaussian Copula Risk Coupling
 $$\mathbf{Z} = \mathbf{L} \mathbf{\epsilon}, \quad \mathbf{\Sigma} = \begin{bmatrix} 1 & \rho \\ \rho & 1 \end{bmatrix} = \mathbf{L} \mathbf{L}^T$$
 
-Executed via [copula_correlation_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/copula_correlation_engine.py).
+- **Model Boundaries & Limitations**:
+  - Gaussian Copula assumes symmetric linear tail dependence. In systemic financial crises, tail dependence is often asymmetric (Clayton Copula).
 
 ---
 
-### 2.8 Kahneman-Tversky Prospect Theory
-Models human psychological loss aversion ($\lambda = 2.25$) vs Rational Economic Man expected monetary value:
+## 3. Comprehensive Summary Matrix of Model Boundaries
 
-$$v(x) = \begin{cases} x^\alpha & \text{if } x \ge 0 \\ -\lambda (-x)^\beta & \text{if } x < 0 \end{cases}$$
-
-Executed via [prospect_theory_engine.py](file:///Users/cary/Desktop/Fun/LifeTree/.agent/skills/lifetree/scripts/decision_models/prospect_theory_engine.py).
+| Model | Primary Use Case | Key Mathematical Formula | Known Boundary / Failure Mode |
+| :--- | :--- | :--- | :--- |
+| **MAUT Utility** | Multi-attribute tradeoffs | $U = \sum w_i u_i$ | Non-additive attribute interaction |
+| **CVaR ES** | Disaster tail risk cutoff | $\mathbb{E}[X \mid X \ge \text{VaR}_{0.95}]$ | Low sample size ($N < 500$) variance |
+| **2x2 Nash** | Stakeholder conflict | $\mathbf{A} w = \lambda w$ | Best response cycles (no pure NE) |
+| **Bayesian** | Belief updating | $P(H \mid E) = \frac{P(E \mid H) P(H)}{P(E)}$ | Prior probability miscalibration |
+| **Discounting** | Far-future payoff valuation| $U(t) = \frac{V}{1 + k t}$ | Time inconsistency under hyperbolic |
+| **37% Stopping**| Pivot timing threshold | $k^* = \lfloor n/e \rfloor$ | Option recall availability |
