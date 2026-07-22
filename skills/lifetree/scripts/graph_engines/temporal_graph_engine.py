@@ -28,9 +28,18 @@ except ImportError:
 # primary causal path; otherwise it produces nonsensical shortcuts like
 #   usr_cary → lang_a1 → lang_a2 → lang_b1 → route_pr
 # that bypass the entire education + visa + employment chain.
+#
+# Bug 1 (2nd iteration): IMPROVES_CHANCE, SUBSTANTIALLY_HELPS, PARALLEL_ACTIVITY,
+# ALSO_QUALIFIES were incorrectly classified as modifiers, breaking legitimate
+# causal paths. These 4 relation types are genuine enabler/branch edges:
+#   - IMPROVES_CHANCE: GitHub portfolio → finding a job (real causal enabler)
+#   - SUBSTANTIALLY_HELPS: B2 German → finding a job (key enabler)
+#   - PARALLEL_ACTIVITY: university → learning German (real path connection)
+#   - ALSO_QUALIFIES: university → domestic employment (branch path, not modifier)
+# Only EXPEDITES / IMPEDES / THREATENS / ASSOCIATED_WITH remain as modifiers —
+# these genuinely augment an existing path without enabling reachability.
 MODIFIER_RELATION_TYPES = {
-    "EXPEDITES", "IMPROVES_CHANCE", "SUBSTANTIALLY_HELPS", "IMPEDES",
-    "THREATENS", "ASSOCIATED_WITH", "ALSO_QUALIFIES", "PARALLEL_ACTIVITY",
+    "EXPEDITES", "IMPEDES", "THREATENS", "ASSOCIATED_WITH",
 }
 
 

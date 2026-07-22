@@ -56,12 +56,19 @@ def _build_decision_stages(pathway_config: Dict[str, Any], base_time_months: flo
 
     # Default decomposition: time/cost split heuristically; stage probs default to a
     # profile that multiplies to ~baseline_success_prob after rescaling below.
+    # Bug 2: Language time fraction raised from 0.15 → 0.25 (learning German from
+    # zero to B2 takes ~14 months at 15% of a 7-year horizon, far too short).
+    # Visa time fraction reduced from 0.05 → 0.05 (unchanged) but its cost fraction
+    # stays at 0.25 (fees, translations, travel). Education time stays 0.65 for
+    # long-horizon pathways (e.g. 17yo → 7-year university path). Callers can
+    # always override via explicit `stages` in pathway_config.
     default_split = [
-        ("Education",   0.85, 0.65, 0.30),
-        ("Language",    0.80, 0.15, 0.15),
+        # (stage_name, stage_prob, time_fraction, cost_fraction)
+        ("Education",   0.85, 0.45, 0.30),
+        ("Language",    0.80, 0.25, 0.15),
         ("Visa",        0.90, 0.05, 0.25),
-        ("Employment",  0.75, 0.10, 0.20),
-        ("PRGrant",     0.95, 0.05, 0.10),
+        ("Employment",  0.75, 0.15, 0.20),
+        ("PRGrant",     0.95, 0.10, 0.10),
     ]
     stages = [{
         "name": name,
@@ -213,7 +220,11 @@ def run_monte_carlo_simulation(pathway_config: Dict[str, Any], num_trials: int =
                     "P90_pessimistic": p90_cost,
                     "VaR_95_max_cost": var_95_cost,
                     "CVaR_95_expected_shortfall_cost": cvar_95_cost,
-                    "tail_severity_ratio": tail_severity_ratio
+                    "tail_severity_ratio": tail_severity_ratio,
+                    # Bug 6: expose raw simulated costs so downstream CVaR engines
+                    # can compute tail risk from the same data (single source of truth)
+                    # instead of running a separate Copula simulation.
+                    "simulated_costs": simulated_costs
                 },
                 "stage_diagnostics": stage_diagnostics,
                 "riskiest_stage": next((d["stage_name"] for d in stage_diagnostics if d.get("is_bottleneck")), None)

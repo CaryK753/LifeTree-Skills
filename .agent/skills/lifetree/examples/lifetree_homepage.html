@@ -1,97 +1,333 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeTree 个人决策智能总控主页</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>LifeTree · 决策分析报告</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background-color: #07090e; color: #f8fafc; margin: 0; overflow: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glow-border { box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.15); }
-        .gradient-text { background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tab-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        .tab-btn.active { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%); border-color: rgba(52, 211, 153, 0.4); color: #ffffff; box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.25); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0c0c14; color: #e8e8ee; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        a { color: inherit; text-decoration: none; }
+
+        .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+        /* Header */
+        .header { border-bottom: 1px solid #1e1e2e; padding: 16px 0; position: sticky; top: 0; z-index: 50; background: rgba(12, 12, 20, 0.92); backdrop-filter: blur(12px); }
+        .header-inner { display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: #22c55e; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .logo-text { font-size: 15px; font-weight: 700; color: #e8e8ee; }
+        .logo-text span { color: #8888a0; font-weight: 500; }
+        .status-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: #22c55e12; border: 1px solid #22c55e25; font-size: 12px; font-weight: 600; color: #22c55e; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+
+        /* Hero */
+        .hero { padding: 48px 0 40px; }
+        .hero-label { font-size: 13px; font-weight: 600; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .hero-title { font-size: 28px; font-weight: 800; color: #f0f0f5; line-height: 1.3; margin-bottom: 8px; }
+        .hero-subtitle { font-size: 15px; color: #8888a0; max-width: 600px; }
+
+        /* Confidence bar */
+        .confidence-section { margin-top: 28px; max-width: 480px; }
+        .confidence-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .confidence-label-text { font-size: 13px; color: #8888a0; }
+        .confidence-value { font-size: 20px; font-weight: 800; color: #22c55e; }
+        .confidence-track { width: 100%; height: 8px; background: #1e1e2e; border-radius: 4px; overflow: hidden; }
+        .confidence-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 4px; transition: width 1s ease; }
+
+        /* Metrics Grid */
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0 0 8px; }
+        @media (max-width: 768px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+        .metric-card { background: #16161f; border: 1px solid #2a2a3a; border-radius: 12px; padding: 20px; }
+        .metric-label { font-size: 12px; font-weight: 600; color: #8888a0; margin-bottom: 8px; }
+        .metric-value { font-size: 24px; font-weight: 800; color: #e8e8ee; }
+        .metric-value .unit { font-size: 13px; font-weight: 600; color: #8888a0; margin-left: 4px; }
+        .metric-note { font-size: 12px; color: #6666a0; margin-top: 6px; }
+
+        /* Section */
+        .section { padding: 32px 0; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .section-title { font-size: 16px; font-weight: 700; color: #e8e8ee; }
+        .section-subtitle { font-size: 12px; color: #6666a0; }
+
+        /* Risk Analysis Cards */
+        .analysis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        @media (max-width: 768px) { .analysis-grid { grid-template-columns: 1fr; } }
+        .analysis-card { background: #16161f; border: 1px solid #2a2a3a; border-radius: 12px; padding: 24px; }
+        .analysis-icon { font-size: 20px; margin-bottom: 12px; }
+        .analysis-title { font-size: 14px; font-weight: 700; color: #e8e8ee; margin-bottom: 4px; }
+        .analysis-desc { font-size: 12px; color: #8888a0; margin-bottom: 16px; line-height: 1.5; }
+        .analysis-metric { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-top: 1px solid #2a2a3a; }
+        .analysis-metric-label { font-size: 12px; color: #8888a0; }
+        .analysis-metric-value { font-size: 14px; font-weight: 700; }
+        .text-red { color: #ef4444; }
+        .text-green { color: #22c55e; }
+        .text-blue { color: #6366f1; }
+        .text-amber { color: #f59e0b; }
+
+        /* Decision Factors */
+        .factors-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        @media (max-width: 768px) { .factors-grid { grid-template-columns: repeat(2, 1fr); } }
+        .factor-card { background: #16161f; border: 1px solid #2a2a3a; border-radius: 10px; padding: 16px; text-align: center; }
+        .factor-number { font-size: 28px; font-weight: 800; color: #e8e8ee; }
+        .factor-label { font-size: 12px; color: #8888a0; margin-top: 4px; }
+        .factor-banner { background: #16161f; border: 1px solid #22c55e25; border-radius: 10px; padding: 14px 20px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .factor-banner-label { font-size: 13px; color: #8888a0; }
+        .factor-banner-value { font-size: 14px; font-weight: 700; color: #22c55e; background: #22c55e12; padding: 4px 12px; border-radius: 6px; }
+
+        /* Checklist */
+        .checklist-card { background: #16161f; border: 1px solid #2a2a3a; border-radius: 12px; padding: 24px; }
+
+        /* Nav Cards */
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-bottom: 64px; }
+        @media (max-width: 768px) { .nav-grid { grid-template-columns: repeat(2, 1fr); } }
+        .nav-card { background: #16161f; border: 1px solid #2a2a3a; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.2s ease; display: block; }
+        .nav-card:hover { border-color: #3a3a5a; background: #1a1a26; transform: translateY(-2px); }
+        .nav-card-icon { font-size: 24px; margin-bottom: 12px; }
+        .nav-card-title { font-size: 14px; font-weight: 700; color: #e8e8ee; margin-bottom: 4px; }
+        .nav-card-desc { font-size: 12px; color: #8888a0; line-height: 1.5; }
+        .nav-card-arrow { font-size: 12px; color: #6666a0; margin-top: 12px; display: inline-block; }
+
+        /* Divider */
+        .divider { border: 0; border-top: 1px solid #1e1e2e; margin: 0; }
     </style>
 </head>
-<body class="h-screen flex flex-col">
-    <!-- Top Master Control Header -->
-    <header class="z-30 border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl px-6 py-3.5 flex items-center justify-between shadow-2xl">
-        <!-- Brand Logo & Live Ticker -->
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-                    🌳
-                </div>
-                <div>
-                    <h1 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-                        LifeTree <span class="gradient-text">决策智能全景中心</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">以对象为中心的个人决策操作系统 · 4合1 聚合入口</p>
-                </div>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <div class="logo">
+                <div class="logo-icon">🌳</div>
+                <div class="logo-text">LifeTree <span>· 决策分析</span></div>
             </div>
-
-            <!-- KPI Ticker Pills -->
-            <div class="hidden xl:flex items-center gap-3 pl-6 border-l border-slate-800 text-xs">
-                <div class="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2">
-                    <span class="text-slate-400">预期周期:</span>
-                    <span class="font-bold text-emerald-400 font-mono">24.1 个月</span>
-                </div>
-                <div class="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2">
-                    <span class="text-slate-400">最坏保障资金:</span>
-                    <span class="font-bold text-rose-400 font-mono">$49,103</span>
-                </div>
-                <div class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="font-semibold text-emerald-300">核心推荐: 提升德语至 B1</span>
-                </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                分析已完成
             </div>
         </div>
-
-        <!-- Master Tab Navigation -->
-        <nav class="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800">
-            <button onclick="switchTab('report')" id="tab-report" class="tab-btn active px-4 py-2 text-xs font-bold rounded-xl border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
-                <span>📊</span>
-                <span>决策推演仪表盘</span>
-            </button>
-            <button onclick="switchTab('tree')" id="tab-tree" class="tab-btn px-4 py-2 text-xs font-bold rounded-xl border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
-                <span>🌳</span>
-                <span>生长决策树全景</span>
-            </button>
-            <button onclick="switchTab('player')" id="tab-player" class="tab-btn px-4 py-2 text-xs font-bold rounded-xl border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
-                <span>🎬</span>
-                <span>5年时序演播厅</span>
-            </button>
-            <button onclick="switchTab('graph')" id="tab-graph" class="tab-btn px-4 py-2 text-xs font-bold rounded-xl border border-transparent text-slate-400 hover:text-white flex items-center gap-2">
-                <span>🕸️</span>
-                <span>知识土壤图谱</span>
-            </button>
-        </nav>
     </header>
 
-    <!-- Main Viewport Container (Seamless Dynamic iFrames) -->
-    <main class="flex-1 relative bg-slate-950">
-        <iframe id="frame-report" src="lifetree_decision_report.html" class="w-full h-full border-none absolute inset-0 block"></iframe>
-        <iframe id="frame-tree" src="lifetree_growing_tree.html" class="w-full h-full border-none absolute inset-0 hidden"></iframe>
-        <iframe id="frame-player" src="lifetree_deduction_player.html" class="w-full h-full border-none absolute inset-0 hidden"></iframe>
-        <iframe id="frame-graph" src="lifetree_graph_viewer.html" class="w-full h-full border-none absolute inset-0 hidden"></iframe>
-    </main>
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-label">📊 决策分析报告</div>
+            <h1 class="hero-title">推荐路线: 德国机会卡 → 欧盟蓝卡</h1>
+            <p class="hero-subtitle">基于万次蒙特卡洛模拟、贝叶斯推断和行为经济学模型的综合分析，为你量身定制的最优决策路径。</p>
 
-    <script>
-        function switchTab(tabKey) {
-            // Deactivate all tabs
-            ['report', 'tree', 'player', 'graph'].forEach(key => {
-                document.getElementById('tab-' + key).classList.remove('active');
-                document.getElementById('frame-' + key).classList.add('hidden');
-                document.getElementById('frame-' + key).classList.remove('block');
-            });
+            <div class="confidence-section">
+                <div class="confidence-label">
+                    <span class="confidence-label-text">综合成功概率</span>
+                    <span class="confidence-value">97.2%</span>
+                </div>
+                <div class="confidence-track">
+                    <div class="confidence-fill" style="width: 97.2%"></div>
+                </div>
+            </div>
+        </section>
 
-            // Activate target tab
-            document.getElementById('tab-' + tabKey).classList.add('active');
-            document.getElementById('frame-' + tabKey).classList.remove('hidden');
-            document.getElementById('frame-' + tabKey).classList.add('block');
-        }
-    </script>
+        <hr class="divider">
+
+        <!-- Key Metrics -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">核心指标</span>
+                <span class="section-subtitle">基于 10,000 次仿真计算</span>
+            </div>
+            <div class="metrics">
+                <div class="metric-card">
+                    <div class="metric-label">预计完成周期</div>
+                    <div class="metric-value">21.6<span class="unit">个月</span></div>
+                    <div class="metric-note">悲观预估 ~26.3 个月</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">建议准备资金</div>
+                    <div class="metric-value">$22,009</div>
+                    <div class="metric-note">覆盖 95% 常见情况</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">稳健度评分</div>
+                    <div class="metric-value">93.2<span class="unit">/ 100</span></div>
+                    <div class="metric-note">具备可靠的 Plan B 备案</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">最佳投入产出行动</div>
+                    <div class="metric-value" style="font-size: 16px; line-height: 1.4; margin-top: 4px;">提升德语<span class="unit">至 B1</span></div>
+                    <div class="metric-note">预计回报提升 +18.5%</div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Risk Analysis -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">风险与信心分析</span>
+                <span class="section-subtitle">综合评估结果</span>
+            </div>
+            <div class="analysis-grid">
+                <!-- Card 1: Worst-case buffer -->
+                <div class="analysis-card">
+                    <div class="analysis-icon">🛡️</div>
+                    <div class="analysis-title">最坏情况保障</div>
+                    <div class="analysis-desc">极端不利情况下需要准备的资金安全线，确保即使遇到黑天鹅事件也不会陷入被动。</div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">日常准备金</span>
+                        <span class="analysis-metric-value">$22,009</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">极端保障线</span>
+                        <span class="analysis-metric-value text-red">$24,497</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">防范倍数</span>
+                        <span class="analysis-metric-value text-amber">1.1x</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Psychological satisfaction -->
+                <div class="analysis-card">
+                    <div class="analysis-icon">🧠</div>
+                    <div class="analysis-title">心理满意度评估</div>
+                    <div class="analysis-desc">考虑人对亏损的天然厌恶心理后，评估这个方案带来的真实体感满意度。</div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">综合满意得分</span>
+                        <span class="analysis-metric-value text-blue">5,424</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">亏损防护等级</span>
+                        <span class="analysis-metric-value">2.25x</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">整体评价</span>
+                        <span class="analysis-metric-value text-green">偏好匹配</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Updated confidence -->
+                <div class="analysis-card">
+                    <div class="analysis-icon">🔮</div>
+                    <div class="analysis-title">证据更新后的信心</div>
+                    <div class="analysis-desc">结合最新政策信息和个人条件，通过贝叶斯推断动态更新的成功概率。</div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">最新成功率</span>
+                        <span class="analysis-metric-value text-green">97.2%</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">新证据带来的提升</span>
+                        <span class="analysis-metric-value text-green">+12.2%</span>
+                    </div>
+                    <div class="analysis-metric">
+                        <span class="analysis-metric-label">信息可信度</span>
+                        <span class="analysis-metric-value">高质量源</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Decision Factors -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">决策要素拆解</span>
+                <span class="section-subtitle">厘清可控与不可控因素</span>
+            </div>
+            <div class="factors-grid">
+                <div class="factor-card">
+                    <div class="factor-number" style="color: #22c55e;">1</div>
+                    <div class="factor-label">我的自主行动</div>
+                </div>
+                <div class="factor-card">
+                    <div class="factor-number" style="color: #f59e0b;">3</div>
+                    <div class="factor-label">外部环境变数</div>
+                </div>
+                <div class="factor-card">
+                    <div class="factor-number" style="color: #6366f1;">1</div>
+                    <div class="factor-label">核心追求目标</div>
+                </div>
+                <div class="factor-card">
+                    <div class="factor-number" style="color: #06b6d4;">3</div>
+                    <div class="factor-label">确定因果链路</div>
+                </div>
+            </div>
+            <div class="factor-banner">
+                <span class="factor-banner-label">建议优先推进的路线</span>
+                <span class="factor-banner-value">德国机会卡 → 欧盟蓝卡</span>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Action Checklist -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">📋 近期行动清单</span>
+                <span class="section-subtitle">按投入产出比排序</span>
+            </div>
+            <div class="checklist-card">
+                
+            <div class="flex items-start gap-4 py-4 ">
+                <div class="mt-0.5 w-5 h-5 rounded border-2 border-[#3a3a4a] flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="text-[15px] font-semibold text-[#e8e8ee]">提升德语水平至 B1 级</span>
+                        <span class="px-2 py-0.5 text-[11px] font-semibold rounded-md border bg-red-500/10 text-red-400 border-red-500/20">紧急</span>
+                    </div>
+                    <p class="text-[13px] text-[#8888a0] mt-1">完成 100 小时德语听力与口语强化训练</p>
+                    <span class="text-[12px] text-[#6666a0] mt-1.5 inline-block">⏱ 建议完成: 7 天内</span>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 py-4 border-t border-[#2a2a3a]">
+                <div class="mt-0.5 w-5 h-5 rounded border-2 border-[#3a3a4a] flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="text-[15px] font-semibold text-[#e8e8ee]">办理 €12,000 保证金账户 Sperrkonto</span>
+                        <span class="px-2 py-0.5 text-[11px] font-semibold rounded-md border bg-red-500/10 text-red-400 border-red-500/20">紧急</span>
+                    </div>
+                    <p class="text-[13px] text-[#8888a0] mt-1">开设 Expatrio 或 Fintiba 保证金账户并完成注资</p>
+                    <span class="text-[12px] text-[#6666a0] mt-1.5 inline-block">⏱ 建议完成: 14 天内</span>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Detailed Views Navigation -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">深入探索</span>
+                <span class="section-subtitle">点击查看详细分析</span>
+            </div>
+            <div class="nav-grid">
+                <a href="lifetree_decision_report.html" class="nav-card">
+                    <div class="nav-card-icon">📊</div>
+                    <div class="nav-card-title">完整分析报告</div>
+                    <div class="nav-card-desc">查看包含全部风险评估、信心分析和行动建议的完整报告。</div>
+                    <span class="nav-card-arrow">查看详情 →</span>
+                </a>
+                <a href="lifetree_growing_tree.html" class="nav-card">
+                    <div class="nav-card-icon">🌳</div>
+                    <div class="nav-card-title">决策树推演</div>
+                    <div class="nav-card-desc">通过可视化决策树查看不同选择的未来分支走向。</div>
+                    <span class="nav-card-arrow">查看详情 →</span>
+                </a>
+                <a href="lifetree_deduction_player.html" class="nav-card">
+                    <div class="nav-card-icon">🎬</div>
+                    <div class="nav-card-title">5年时序推演</div>
+                    <div class="nav-card-desc">播放 5 年资产与信心的动态演化曲线，测试突发冲击。</div>
+                    <span class="nav-card-arrow">查看详情 →</span>
+                </a>
+                <a href="lifetree_graph_viewer.html" class="nav-card">
+                    <div class="nav-card-icon">🕸️</div>
+                    <div class="nav-card-title">知识图谱</div>
+                    <div class="nav-card-desc">探索决策相关的人物、资产、法规和路径的关系网络。</div>
+                    <span class="nav-card-arrow">查看详情 →</span>
+                </a>
+            </div>
+        </section>
+    </div>
 </body>
 </html>

@@ -41,14 +41,17 @@ import html_report_generator
 import deduction_player_html
 import growing_tree_html
 import homepage_generator
-import utility_theory_engine
+# Bug 3: consolidated engines — utility_theory_engine & bayesian_belief_engine
+# (decision_analysis/) deleted; their functions merged into the decision_models/
+# canonical versions below.
+import prospect_theory_engine       # CPT + probability weighting (was utility_theory_engine)
+import maut_utility_engine          # MAUT + AHP (was utility_theory_engine.calculate_maut_utility)
+import bayesian_belief_updater      # Bayesian + evidence_basis (was bayesian_belief_engine)
+import cvar_risk_engine             # CVaR + bankruptcy risk (canonical CVaR)
 import influence_diagram_engine
-import tail_risk_cvar_engine
-import bayesian_belief_engine
+import influence_diagram_layer      # Bug 4: tag graph nodes before ID evaluation
+import tail_risk_cvar_engine        # Copula simulation (CVaR delegated to cvar_risk_engine)
 import optimal_stopping_engine
-import prospect_theory_engine
-import cvar_risk_engine
-import bayesian_belief_updater
 
 def run_full_mvp_pipeline():
     print("=" * 80)
@@ -114,6 +117,14 @@ def run_full_mvp_pipeline():
         ]
     }
     path_res = temporal_graph_engine.find_optimal_causal_path(sample_ontology, "usr_person", "route_bluecard")
+    # Bug 4: first tag the knowledge-graph nodes with Influence Diagram semantic
+    # types (DECISION/CHANCE/VALUE) via influence_diagram_layer, then feed those
+    # tagged nodes to the backward-induction solver. This integrates the two
+    # previously-disconnected Influence Diagram engines.
+    id_layer_res = influence_diagram_layer.construct_influence_diagram_layer(sample_ontology)
+    print(f"  ✓ Influence Diagram Layer: {id_layer_res['influence_diagram_summary']['decision_nodes_count']} decision / "
+          f"{id_layer_res['influence_diagram_summary']['chance_nodes_count']} chance / "
+          f"{id_layer_res['influence_diagram_summary']['value_nodes_count']} value nodes tagged")
     # C5 fix: pass a real decision diagram instead of {} so the engine does actual
     # backward-induction instead of silently returning hardcoded "CHANCENKARTE_ROUTE".
     id_res = influence_diagram_engine.evaluate_influence_diagram({
@@ -146,12 +157,26 @@ def run_full_mvp_pipeline():
     }, num_trials=10000)
     mc_results = mc_res['monte_carlo_results']
 
-    cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000, volatility=0.25)
-    print(f"  ✓ Monte Carlo Trials: {mc_results['total_trials_simulated']} | 95% VaR: ${mc_results['financial_capital_usd']['VaR_95_max_cost']:,.2f} | CVaR Expected Shortfall: ${cvar_res['copula_simulation']['cvar_expected_shortfall_usd']:,.2f}")
+    # Bug 6: Compute CVaR directly from MC simulated costs (single source of truth)
+    # instead of running a separate Copula simulation. The Copula engine is still
+    # available for systemic-risk correlation analysis, but VaR/CVaR should come
+    # from the same MC trial data to avoid "same scenario, two sets of numbers."
+    mc_simulated_costs = mc_results.get("financial_capital_usd", {}).get("simulated_costs", [])
+    if mc_simulated_costs:
+        cvar_res = tail_risk_cvar_engine.calculate_cvar_from_mc_costs(
+            mc_simulated_costs, alpha=0.95, initial_capital_usd=40000.0)
+        cvar_display = cvar_res
+    else:
+        # Fallback: Copula simulation if MC costs not exposed
+        cvar_res = tail_risk_cvar_engine.simulate_copula_systemic_risks(base_cost=15000.0, correlation_rho=0.65, num_trials=5000, volatility=0.25)
+        cvar_display = cvar_res["copula_simulation"]
+
+    cvar_esd = cvar_display.get("cvar_expected_shortfall_usd", 0.0)
+    print(f"  ✓ Monte Carlo Trials: {mc_results['total_trials_simulated']} | 95% VaR: ${mc_results['financial_capital_usd']['VaR_95_max_cost']:,.2f} | CVaR Expected Shortfall: ${cvar_esd:,.2f}")
 
     # Phase 6: Behavioral Prospect Theory & MAUT Utility Elicitation
     print("\n[Phase 6] Behavioral Prospect Theory & MAUT Multi-Attribute Utility")
-    cpt_res = utility_theory_engine.calculate_prospect_utility([
+    cpt_res = prospect_theory_engine.calculate_prospect_utility([
         {"payoff_usd": 45000.0, "probability": 0.85},
         {"payoff_usd": -18000.0, "probability": 0.15}
     ])
@@ -161,7 +186,7 @@ def run_full_mvp_pipeline():
 
     # Phase 7: Bayesian Belief Updating & Game-Theoretic Pareto Solver
     print("\n[Phase 7] Bayesian Belief Updating & Game-Theoretic Pareto Solver")
-    bayes_res = bayesian_belief_engine.update_bayesian_belief(0.85, 0.92, 0.15)
+    bayes_res = bayesian_belief_updater.update_bayesian_belief(0.85, 0.92, 0.15)
     st_a = {"stakeholder": "Host Immigration Board", "category": "IMMIGRATION_PHYSICAL_PRESENCE", "preference_vector": {"compliance_cost": -0.3, "penalty_risk": -0.5, "benefit": 1.0}}
     st_b = {"stakeholder": "Origin Tax Authority", "category": "TAX_WORLDWIDE_LIABILITY", "preference_vector": {"compliance_cost": -0.2, "penalty_risk": -0.7, "benefit": 0.8}}
     gt_res = game_theory_stakeholder_solver.solve_stakeholder_conflicts([st_a, st_b])
@@ -192,8 +217,9 @@ def run_full_mvp_pipeline():
         ],
         "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}},
         "tail_risk_results": {
-            "cvar_expected_shortfall_usd": cvar_res['copula_simulation']['cvar_expected_shortfall_usd'],
-            "tail_severity_ratio": cvar_res['copula_simulation']['tail_severity_ratio']
+            # Bug 6: CVaR now from MC costs (single source of truth), not Copula
+            "cvar_expected_shortfall_usd": cvar_display.get("cvar_expected_shortfall_usd", 0.0),
+            "tail_severity_ratio": cvar_display.get("tail_severity_ratio", 1.0)
         },
         "prospect_theory_results": {
             "cpt_utility_score": cpt_res.get('cpt_utility_score', 5423.8),
