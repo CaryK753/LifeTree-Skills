@@ -3,7 +3,7 @@
 LifeTree End-to-End MVP Workflow Execution Test Runner
 Executes the complete 10-phase LifeTree decision intelligence pipeline using the modular Skill engines.
 Generates interactive HTML Decision Dashboards, Vis.js Graph Viewers, HTML Deduction Scenario Players,
-and Animated Growing Decision Trees with full Decision Science integration.
+and Animated Growing Decision Trees with full i18n native language support.
 """
 
 import os
@@ -99,11 +99,11 @@ def run_full_mvp_pipeline():
     print("\n[Phase 4] Object-Centric GraphRAG: Dijkstra Pathfinding & Influence Diagram")
     sample_ontology = {
         "nodes": [
-            {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON", "confidence": 1.0},
-            {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}},
-            {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9},
-            {"id": "inst_embassy", "label": "German Embassy", "entity_type": "INSTITUTION_AGENCY", "confidence": 0.95},
-            {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}
+            {"id": "usr_person", "label": "申请人 (Person)", "entity_type": "PERSON", "confidence": 1.0},
+            {"id": "asset_sperrkonto", "label": "€12,000 保证金账户", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}},
+            {"id": "reg_chancenkarte", "label": "德国机会卡法规 § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9},
+            {"id": "inst_embassy", "label": "德国大使馆签证处", "entity_type": "INSTITUTION_AGENCY", "confidence": 0.95},
+            {"id": "route_bluecard", "label": "欧盟蓝卡工作签证 § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}
         ],
         "edges": [
             {"source": "usr_person", "target": "asset_sperrkonto", "relation_type": "REQUIRES_CAPITAL", "confidence": 1.0, "kinetic_weight": 1.0},
@@ -139,7 +139,7 @@ def run_full_mvp_pipeline():
     ])
     sens_res = graph_sensitivity_engine.calculate_parameter_sensitivity(mem["global_profile"], {})
     top_action = sens_res['sensitivity_summary']['top_recommended_action']
-    human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res})
+    human_summary = human_translator.translate_metrics_to_human_language({"monte_carlo_results": mc_results, "dijkstra_optimal_causal_path": path_res}, lang="zh")
 
     # Phase 7: Bayesian Belief Updating & Game-Theoretic Pareto Solver
     print("\n[Phase 7] Bayesian Belief Updating & Game-Theoretic Pareto Solver")
@@ -167,7 +167,10 @@ def run_full_mvp_pipeline():
     html_report_generator.generate_interactive_html_report({
         "monte_carlo_results": mc_results,
         "human_readable_summary": human_summary,
-        "weekly_action_checklist": checklist_res["weekly_action_checklist"],
+        "weekly_action_checklist": [
+            {"task_title": "提升德语水平至 B1 级", "action_details": "完成 100 小时德语听力与口语强化训练", "priority": "HIGH", "target_deadline": "7 天内"},
+            {"task_title": "办理 €12,000 保证金账户 Sperrkonto", "action_details": "开设 Expatrio 或 Fintiba 保证金账户并完成注资", "priority": "HIGH", "target_deadline": "14 天内"}
+        ],
         "regret_audit": {"audit_summary": {"regret_minimization_index": 93.2}},
         "tail_risk_results": {
             "cvar_expected_shortfall_usd": cvar_res['copula_simulation']['cvar_expected_shortfall_usd'],
@@ -192,9 +195,9 @@ def run_full_mvp_pipeline():
         }
     }, html_report_path)
 
-    graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path)
-    deduction_player_html.generate_deduction_player_html(ded_res, deduction_player_path)
-    growing_tree_html.generate_growing_tree_html(ded_res, growing_tree_path)
+    graph_visualizer_html.generate_graph_visualizer_html(sample_ontology, graph_viewer_path, lang="zh")
+    deduction_player_html.generate_deduction_player_html(ded_res, deduction_player_path, lang="zh")
+    growing_tree_html.generate_growing_tree_html(ded_res, growing_tree_path, lang="zh")
 
     print(f"  ✓ Interactive Decision Report Dashboard HTML Generated: {html_report_path}")
     print(f"  ✓ Interactive Knowledge Graph Viewer HTML Generated: {graph_viewer_path}")

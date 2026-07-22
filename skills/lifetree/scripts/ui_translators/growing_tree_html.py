@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-LifeTree Growing Decision Tree HTML Viewer Generator
-Generates a self-contained HTML file featuring a responsive, animated "Growing Tree" visualization.
+LifeTree Growing Decision Tree HTML Viewer Generator (i18n & Human-Centric UI Enhanced)
+Generates an interactive "Growing Decision Tree" visualization.
 Branches represent future choice trajectories, fruits represent PR/Citizenship goals,
 side buds represent Plan B hedges, and withered branches represent pruned high-risk paths.
 """
@@ -11,21 +11,42 @@ import sys
 import json
 from typing import Dict, Any, List
 
-def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str) -> str:
+def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str, lang: str = "zh") -> str:
     """
-    Generates a single self-contained HTML file displaying an interactive growing decision tree.
+    Generates a single self-contained HTML file displaying an interactive growing decision tree with i18n support.
     """
     summary = deduction_data.get("deduction_summary", {})
     traj_a = deduction_data.get("pathway_a_trajectory", [])
     traj_b = deduction_data.get("pathway_b_trajectory", [])
 
+    is_zh = (lang == "zh")
+
+    # Titles & Labels
+    title_text = "LifeTree 决策树生长全景推演" if is_zh else "LifeTree Growing Decision Tree"
+    subtitle_text = "未来选择分支推演 · 果实目标与退路侧芽视角" if is_zh else "Future Choice Branching & Temporal Trajectory Visualizer"
+    play_btn_text = "▶ 播放决策树生长动画" if is_zh else "▶ Play Tree Growth"
+    fit_btn_text = "复位全景视角" if is_zh else "Fit Layout"
+    inspector_title = "🍃 分支节点详情拆解" if is_zh else "🍃 Branch Inspector"
+
     # Construct Tree Node Hierarchy
     nodes = [
-        {"id": "root_soil", "label": "🌱 Knowledge Soil\n(Statutory Laws & Constraints)", "group": "SOIL", "level": 0, "color": "#78350f"},
-        {"id": "trunk_user", "label": "🪵 Current State (Year 0)\n(31 Yo, MS CS, $40k, A2 German)", "group": "TRUNK", "level": 1, "color": "#059669"}
+        {
+            "id": "root_soil",
+            "label": "🌱 知识土壤 (底层政策与客观法规)" if is_zh else "🌱 Knowledge Soil\n(Statutory Laws & Constraints)",
+            "group": "SOIL",
+            "level": 0,
+            "color": "#78350f"
+        },
+        {
+            "id": "trunk_user",
+            "label": "🪵 当前个人状态 (第 0 年)\n(31岁, 硕士学历, 4万美金, A2德语)" if is_zh else "🪵 Current State (Year 0)\n(31 Yo, MS CS, $40k, A2 German)",
+            "group": "TRUNK",
+            "level": 1,
+            "color": "#059669"
+        }
     ]
     edges = [
-        {"from": "root_soil", "to": "trunk_user", "label": "Nourishes"}
+        {"from": "root_soil", "to": "trunk_user", "label": "滋养" if is_zh else "Nourishes"}
     ]
 
     # Branch A Nodes (Chancenkarte -> Blue Card)
@@ -34,16 +55,21 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
         yr = step["year"]
         nid = f"branch_a_y{yr}"
         prob_pct = int(step["success_probability"] * 100)
-        badge = step.get("badge", "")
 
         is_fruit = prob_pct >= 95
         is_plan_b = step.get("plan_b_active", False)
 
         shape_type = "star" if is_fruit else ("diamond" if is_plan_b else "dot")
         node_color = "#34d399" if is_fruit else ("#fbbf24" if is_plan_b else "#10b981")
-        node_label = f"🌿 Y{yr}: Pathway A ({prob_pct}%)\n${step['capital_balance_usd']:,.0f}"
-        if is_fruit:
-            node_label = f"🏆 Y{yr}: PR Unlocked!\n({prob_pct}% Success)"
+
+        if is_zh:
+            node_label = f"🌿 第{yr}年: 方案A (胜算{prob_pct}%)\n资金: ${step['capital_balance_usd']:,.0f}"
+            if is_fruit:
+                node_label = f"🏆 第{yr}年: 永居/目标果实成熟!\n(成功率 {prob_pct}%)"
+        else:
+            node_label = f"🌿 Y{yr}: Pathway A ({prob_pct}%)\nCapital: ${step['capital_balance_usd']:,.0f}"
+            if is_fruit:
+                node_label = f"🏆 Y{yr}: PR Unlocked!\n({prob_pct}% Success)"
 
         nodes.append({
             "id": nid,
@@ -54,7 +80,7 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             "shape": shape_type,
             "raw_data": step
         })
-        edges.append({"from": prev_id, "to": nid, "label": f"Year {yr}"})
+        edges.append({"from": prev_id, "to": nid, "label": f"第{yr}年" if is_zh else f"Year {yr}"})
         prev_id = nid
 
         # Add Side Bud (Plan B) if active
@@ -62,13 +88,13 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             bud_id = f"side_bud_y{yr}"
             nodes.append({
                 "id": bud_id,
-                "label": f"🛡️ Plan B Side Bud (Y{yr})\n(Remote Freelance Hedge)",
+                "label": f"🛡️ Plan B 侧芽 (第{yr}年)\n(远程自由职业对冲备用)" if is_zh else f"🛡️ Plan B Side Bud (Y{yr})\n(Remote Freelance Hedge)",
                 "group": "SIDE_BUD",
                 "level": yr + 1,
                 "color": "#f59e0b",
                 "shape": "triangle"
             })
-            edges.append({"from": nid, "to": bud_id, "label": "Sprouts Plan B", "dashes": True})
+            edges.append({"from": nid, "to": bud_id, "label": "萌发退路侧芽" if is_zh else "Sprouts Plan B", "dashes": True})
 
     # Branch B Nodes (Direct Employer)
     prev_id = "trunk_user"
@@ -79,9 +105,15 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
 
         is_fruit = prob_pct >= 95
         node_color = "#60a5fa" if not is_fruit else "#6366f1"
-        node_label = f"🌿 Y{yr}: Pathway B ({prob_pct}%)\n${step['capital_balance_usd']:,.0f}"
-        if is_fruit:
-            node_label = f"🏆 Y{yr}: Pathway B PR!\n({prob_pct}% Success)"
+
+        if is_zh:
+            node_label = f"🌿 第{yr}年: 方案B (胜算{prob_pct}%)\n资金: ${step['capital_balance_usd']:,.0f}"
+            if is_fruit:
+                node_label = f"🏆 第{yr}年: 方案B 果实成熟!\n(成功率 {prob_pct}%)"
+        else:
+            node_label = f"🌿 Y{yr}: Pathway B ({prob_pct}%)\nCapital: ${step['capital_balance_usd']:,.0f}"
+            if is_fruit:
+                node_label = f"🏆 Y{yr}: Pathway B PR!\n({prob_pct}% Success)"
 
         nodes.append({
             "id": nid,
@@ -92,26 +124,26 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             "shape": "star" if is_fruit else "dot",
             "raw_data": step
         })
-        edges.append({"from": prev_id, "to": nid, "label": f"Year {yr}"})
+        edges.append({"from": prev_id, "to": nid, "label": f"第{yr}年" if is_zh else f"Year {yr}"})
         prev_id = nid
 
     # Add Dead Branch (Withered High Risk Path)
     nodes.append({
         "id": "dead_branch_01",
-        "label": "🥀 Pruned High-Friction Path\n(Blocked Student Visa)",
+        "label": "🥀 已剪枝的高风险枯枝\n(高摩擦留学语言班路径)" if is_zh else "🥀 Pruned High-Friction Path\n(Blocked Student Visa)",
         "group": "DEAD_BRANCH",
         "level": 2,
         "color": "#ef4444",
         "shape": "cross"
     })
-    edges.append({"from": "trunk_user", "to": "dead_branch_01", "label": "Pruned", "dashes": True, "color": "#ef4444"})
+    edges.append({"from": "trunk_user", "to": "dead_branch_01", "label": "剪枝规避" if is_zh else "Pruned", "dashes": True, "color": "#ef4444"})
 
     html_content = f"""<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="{ 'zh-CN' if is_zh else 'en' }" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeTree — Growing Decision Tree Visualizer</title>
+    <title>LifeTree — {title_text}</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -130,18 +162,18 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
                 🌳
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">Growing Decision Tree</span></h1>
-                <p class="text-xs text-slate-400">Future Choice Branching & Temporal Trajectory Visualizer</p>
+                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">{ '决策树生长全景推演' if is_zh else 'Growing Decision Tree' }</span></h1>
+                <p class="text-xs text-slate-400">{subtitle_text}</p>
             </div>
         </div>
 
         <!-- Controls -->
         <div class="flex items-center gap-3">
             <button onclick="playGrowthAnimation()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2">
-                <span>▶ Play Tree Growth</span>
+                <span>{play_btn_text}</span>
             </button>
             <button onclick="resetTreeLayout()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700">
-                Fit Layout
+                {fit_btn_text}
             </button>
         </div>
     </div>
@@ -153,7 +185,7 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
     <div id="node-inspector" class="absolute top-24 right-4 bottom-4 w-96 z-10 glass-panel rounded-2xl p-6 shadow-2xl overflow-y-auto hidden border border-slate-700/60">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>🍃 Branch Inspector</span>
+                <span>{inspector_title}</span>
             </h2>
             <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-lg">&times;</button>
         </div>
@@ -173,7 +205,7 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
         const options = {{
             layout: {{
                 hierarchical: {{
-                    direction: 'BU', // Bottom to Up (Tree grows upward)
+                    direction: 'BU',
                     sortMethod: 'directed',
                     nodeSpacing: 180,
                     levelSeparation: 130
@@ -208,7 +240,6 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             visNodes.clear();
             visEdges.clear();
 
-            // Sort nodes by level
             const levels = [0, 1, 2, 3, 4, 5, 6];
             let delay = 0;
 
@@ -232,11 +263,12 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             let detailsHtml = '';
             if (nodeData.raw_data) {{
                 const d = nodeData.raw_data;
+                const isZh = { 'true' if is_zh else 'false' };
                 detailsHtml = `
                     <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-xs">
-                        <div class="flex justify-between"><span class="text-slate-400">Success Probability:</span><span class="text-emerald-400 font-bold font-mono">${{(d.success_probability * 100).toFixed(0)}}%</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Capital Balance:</span><span class="text-white font-mono">$${{d.capital_balance_usd.toLocaleString()}}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Trajectory Badge:</span><span class="text-amber-300 font-semibold">${{d.badge || 'NORMAL'}}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '胜算成功率' : 'Success Probability'}}:</span><span class="text-emerald-400 font-bold font-mono">${{(d.success_probability * 100).toFixed(0)}}%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '资金储备余额' : 'Capital Balance'}}:</span><span class="text-white font-mono">$${{d.capital_balance_usd.toLocaleString()}}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${{isZh ? '轨迹状态标记' : 'Trajectory Badge'}}:</span><span class="text-amber-300 font-semibold">${{d.badge || 'NORMAL'}}</span></div>
                     </div>
                 `;
             }}
@@ -263,7 +295,6 @@ def generate_growing_tree_html(deduction_data: Dict[str, Any], output_path: str)
             network.fit({{ animation: {{ duration: 800, easingFunction: 'easeInOutQuad' }} }});
         }}
 
-        // Auto-play growth on load
         playGrowthAnimation();
     </script>
 </body>
@@ -296,7 +327,7 @@ def main():
         }
 
     out_file = sys.argv[2] if len(sys.argv) > 2 else "lifetree_growing_tree.html"
-    res_path = generate_growing_tree_html(data, out_file)
+    res_path = generate_growing_tree_html(data, out_file, lang="zh")
     print(json.dumps({"status": "SUCCESS", "growing_tree_html_path": os.path.abspath(res_path)}, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":

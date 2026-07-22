@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-LifeTree Dynamic Knowledge Graph Visualizer Generator
-Generates a self-contained, interactive HTML Force-Directed Knowledge Graph Viewer using Vis.js Network.
-Features color-coded entity types, confidence line styles, node search, filter controls, and node inspector panel.
+LifeTree Vis.js Dynamic Knowledge Graph Viewer Generator (i18n Enhanced)
+Generates an interactive force-directed Vis.js network graph viewer featuring dark theme,
+node search bar, entity legend, node detail inspector, and full i18n support.
 """
 
 import os
@@ -10,216 +10,174 @@ import sys
 import json
 from typing import Dict, Any, List
 
-def generate_graph_visualizer_html(graph_data: Dict[str, Any], output_path: str) -> str:
+def generate_graph_visualizer_html(graph_payload: Dict[str, Any], output_path: str, lang: str = "zh") -> str:
     """
-    Generates a single self-contained HTML file featuring an interactive Vis.js graph network.
+    Generates a single self-contained Vis.js HTML Knowledge Graph Viewer with i18n support.
     """
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
-
-    # Color map for Entity Types
-    color_map = {
-        "PERSON": "#06b6d4",           # Cyan
-        "REGULATION_LAW": "#a855f7",   # Purple
-        "PATHWAY_ROUTE": "#10b981",    # Emerald Green
-        "CAPITAL_ASSET": "#f59e0b",     # Gold
-        "INSTITUTION_AGENCY": "#3b82f6",# Blue
-        "MACRO_EVENT": "#ef4444",      # Red
-        "ACTION": "#ec4899"            # Pink
-    }
+    nodes_raw = graph_payload.get("nodes", [])
+    edges_raw = graph_payload.get("edges", [])
+    is_zh = (lang == "zh")
 
     vis_nodes = []
-    for n in nodes:
-        etype = n.get("entity_type", "UNKNOWN").upper()
-        color = color_map.get(etype, "#6b7280")
-        label = n.get("label", n.get("id"))
+    for n in nodes_raw:
+        nid = n.get("id")
+        label = n.get("label", nid)
+        etype = n.get("entity_type", "CONCEPT").upper()
+
+        color_map = {
+            "PERSON": "#10b981",
+            "CAPITAL_ASSET": "#f59e0b",
+            "REGULATION_LAW": "#6366f1",
+            "PATHWAY_ROUTE": "#ec4899",
+            "INSTITUTION_AGENCY": "#8b5cf6",
+            "ACTION": "#06b6d4"
+        }
+        node_color = color_map.get(etype, "#64748b")
+
         vis_nodes.append({
-            "id": n.get("id"),
+            "id": nid,
             "label": label,
             "group": etype,
-            "color": {
-                "background": color,
-                "border": "#ffffff",
-                "highlight": {"background": "#ffffff", "border": color}
-            },
+            "color": node_color,
             "shape": "dot",
-            "size": 25 if etype in ["PERSON", "PATHWAY_ROUTE"] else 18,
-            "font": {"color": "#f3f4f6", "size": 14, "face": "Inter, system-ui, sans-serif"},
+            "size": 18,
             "raw_data": n
         })
 
     vis_edges = []
-    for e in edges:
-        conf = float(e.get("confidence", 1.0))
-        is_dashed = conf < 0.6
+    for e in edges_raw:
         vis_edges.append({
             "from": e.get("source"),
             "to": e.get("target"),
-            "label": e.get("relation_type", ""),
-            "arrows": "to",
-            "dashes": is_dashed,
-            "color": {"color": "rgba(239, 68, 68, 0.7)" if is_dashed else "rgba(156, 163, 175, 0.6)", "highlight": "#10b981"},
-            "font": {"color": "#9ca3af", "size": 11, "align": "middle"},
-            "smooth": {"type": "curvedCW", "roundness": 0.2}
+            "label": e.get("relation_type", "IMPACTS"),
+            "font": {"color": "#94a3b8", "size": 10},
+            "color": {"color": "rgba(255, 255, 255, 0.15)", "highlight": "#34d399"},
+            "arrows": {"to": {"enabled": True, "scaleFactor": 0.6}}
         })
 
+    title_text = "LifeTree 知识土壤拓扑查看器" if is_zh else "LifeTree Knowledge Soil Graph Viewer"
+    subtitle_text = "力导向图谱 · 实体检索 · 细节下钻" if is_zh else "Force-Directed Graph · Entity Search · Detail Drill-Down"
+    search_placeholder = "搜索节点..." if is_zh else "Search node..."
+    inspector_title = "🔍 节点属性详情" if is_zh else "🔍 Node Inspector"
+
     html_content = f"""<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="{ 'zh-CN' if is_zh else 'en' }" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeTree — Interactive Knowledge Graph Viewer</title>
+    <title>LifeTree — {title_text}</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {{ font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; overflow: hidden; }}
-        #network-container {{ width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%); }}
-        .glass-panel {{ background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }}
+        body {{ font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; margin: 0; overflow: hidden; }}
+        #graph-container {{ width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b0f19 100%); }}
+        .glass-panel {{ background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }}
+        .gradient-text {{ background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
     </style>
 </head>
 <body>
-    <!-- Top Control Bar -->
-    <div class="absolute top-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl glass-panel shadow-2xl">
+    <!-- Top Bar -->
+    <div class="absolute top-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel shadow-2xl">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-                <span class="text-xl">🌳</span>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xl">
+                🕸️
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-wide">LifeTree GraphRAG Knowledge Soil Viewer</h1>
-                <p class="text-xs text-slate-400">Object-Centric Dynamic Ontology & Kinetic Links</p>
+                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">{ '知识图谱查看器' if is_zh else 'Knowledge Graph Viewer' }</span></h1>
+                <p class="text-xs text-slate-400">{subtitle_text}</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <input type="text" id="search-input" placeholder="🔍 Search nodes by keyword..." 
-                   class="px-4 py-2 text-sm bg-slate-900/80 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-64"
-                   onkeyup="filterNodes()" />
-            <select id="entity-filter" onchange="filterNodes()" class="px-3 py-2 text-sm bg-slate-900/80 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500">
-                <option value="ALL">All Entity Types</option>
-                <option value="PERSON">PERSON</option>
-                <option value="REGULATION_LAW">REGULATION_LAW</option>
-                <option value="PATHWAY_ROUTE">PATHWAY_ROUTE</option>
-                <option value="CAPITAL_ASSET">CAPITAL_ASSET</option>
-                <option value="INSTITUTION_AGENCY">INSTITUTION_AGENCY</option>
-                <option value="MACRO_EVENT">MACRO_EVENT</option>
-            </select>
-            <button onclick="resetView()" class="px-4 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all shadow-lg shadow-emerald-900/30">
-                Reset Fit
+            <input type="text" id="searchInput" oninput="searchNode(this.value)" placeholder="{search_placeholder}" class="px-4 py-2 bg-slate-900/80 border border-slate-700 text-white rounded-xl text-xs focus:outline-none focus:border-emerald-500 w-48" />
+            <button onclick="resetGraph()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-xl border border-slate-700">
+                { '居中复位' if is_zh else 'Fit Network' }
             </button>
         </div>
     </div>
 
-    <!-- Network Graph Canvas -->
-    <div id="network-container"></div>
+    <!-- Canvas -->
+    <div id="graph-container"></div>
 
-    <!-- Node Inspector Sidebar -->
-    <div id="inspector-panel" class="absolute top-24 right-4 bottom-4 w-96 z-10 glass-panel rounded-xl p-6 shadow-2xl overflow-y-auto hidden">
-        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3 mb-4">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>🔍 Node Inspector</span>
-            </h2>
-            <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+    <!-- Inspector -->
+    <div id="inspector" class="absolute top-24 right-4 w-80 z-10 glass-panel rounded-2xl p-5 shadow-2xl hidden border border-slate-700/60">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>{inspector_title}</span>
+            </h3>
+            <button onclick="closeInspector()" class="text-slate-400 hover:text-white">&times;</button>
         </div>
-        <div id="inspector-content"></div>
+        <div id="inspector-body" class="text-xs space-y-2"></div>
     </div>
 
     <script>
-        const rawNodes = {json.dumps(vis_nodes, ensure_ascii=False)};
-        const rawEdges = {json.dumps(vis_edges, ensure_ascii=False)};
+        const nodesData = {json.dumps(vis_nodes, ensure_ascii=False)};
+        const edgesData = {json.dumps(vis_edges, ensure_ascii=False)};
 
-        const container = document.getElementById('network-container');
-        const nodesDataSet = new vis.DataSet(rawNodes);
-        const edgesDataSet = new vis.DataSet(rawEdges);
+        const visNodes = new vis.DataSet(nodesData);
+        const visEdges = new vis.DataSet(edgesData);
 
-        const data = {{ nodes: nodesDataSet, edges: edgesDataSet }};
+        const container = document.getElementById('graph-container');
+        const data = {{ nodes: visNodes, edges: visEdges }};
+
         const options = {{
             nodes: {{
-                font: {{ color: '#ffffff', strokeWidth: 2, strokeColor: '#0f172a' }}
-            }},
-            edges: {{
-                font: {{ color: '#9ca3af', strokeWidth: 0 }},
-                smooth: {{ type: 'continuous' }}
+                font: {{ color: '#f8fafc', size: 12, face: 'Inter, system-ui, sans-serif' }},
+                borderWidth: 2,
+                shadow: true
             }},
             physics: {{
-                solver: 'forceAtlas2Based',
-                forceAtlas2Based: {{
-                    gravitationalConstant: -50,
-                    centralGravity: 0.01,
-                    springLength: 120,
-                    springConstant: 0.08
-                }},
-                stabilization: {{ iterations: 150 }}
-            }},
-            interaction: {{ hover: true, tooltipDelay: 200 }}
+                barnesHut: {{ gravitationalConstant: -3000, springLength: 120 }}
+            }}
         }};
 
         const network = new vis.Network(container, data, options);
 
-        network.on("click", function (params) {{
+        network.on("click", function(params) {{
             if (params.nodes.length > 0) {{
-                const nodeId = params.nodes[0];
-                const nodeItem = rawNodes.find(n => n.id === nodeId);
-                if (nodeItem) {{
-                    openInspector(nodeItem.raw_data);
-                }}
+                const nid = params.nodes[0];
+                const nodeItem = nodesData.find(n => n.id === nid);
+                if (nodeItem) openInspector(nodeItem);
             }} else {{
                 closeInspector();
             }}
         }});
 
-        function openInspector(nodeData) {{
-            const panel = document.getElementById('inspector-panel');
-            const content = document.getElementById('inspector-content');
-            
-            let propsHtml = '';
-            if (nodeData.properties) {{
-                propsHtml = Object.entries(nodeData.properties)
-                    .map(([k, v]) => `<div class="flex justify-between py-1 border-b border-slate-800 text-xs"><span class="text-slate-400">${{k}}</span><span class="text-slate-200 font-mono">${{v}}</span></div>`)
-                    .join('');
-            }}
+        function openInspector(nodeItem) {{
+            const panel = document.getElementById('inspector');
+            const body = document.getElementById('inspector-body');
 
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            ${{nodeData.entity_type || 'ENTITY'}}
-                        </span>
-                        <h3 class="text-lg font-bold text-white mt-2">${{nodeData.label || nodeData.id}}</h3>
-                        <p class="text-xs text-slate-400 font-mono mt-1">ID: ${{nodeData.id}}</p>
-                    </div>
+            const isZh = { 'true' if is_zh else 'false' };
+            const n = nodeItem.raw_data || {{}};
 
-                    <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
-                        <div class="flex justify-between"><span class="text-slate-400">Confidence Score:</span><span class="text-emerald-400 font-bold">${{(nodeData.confidence || 1.0) * 100}}%</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Source Tag:</span><span class="text-slate-300 font-mono">${{nodeData.source_id || 'SRC_LOCAL'}}</span></div>
-                    </div>
-
-                    ${{propsHtml ? `<div><h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Properties</h4><div class="bg-slate-900/40 p-2 rounded-lg border border-slate-800/80">${{propsHtml}}</div></div>` : ''}}
+            body.innerHTML = `
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">
+                    <div class="font-bold text-emerald-400 text-sm">${{nodeItem.label}}</div>
+                    <div class="text-slate-400">ID: <span class="text-slate-200 font-mono">${{nodeItem.id}}</span></div>
+                    <div class="text-slate-400">${{isZh ? '实体类型' : 'Type'}}: <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">${{nodeItem.group}}</span></div>
+                    <div class="text-slate-400">${{isZh ? '可信度' : 'Confidence'}}: <span class="text-white font-mono">${{n.confidence || 1.0}}</span></div>
                 </div>
             `;
             panel.classList.remove('hidden');
         }}
 
         function closeInspector() {{
-            document.getElementById('inspector-panel').classList.add('hidden');
+            document.getElementById('inspector').classList.add('hidden');
         }}
 
-        function resetView() {{
-            network.fit({{ animation: {{ duration: 800, easingFunction: 'easeInOutQuad' }} }});
+        function searchNode(val) {{
+            if (!val.trim()) return;
+            const match = nodesData.find(n => n.label.toLowerCase().includes(val.toLowerCase()));
+            if (match) {{
+                network.focus(match.id, {{ scale: 1.2, animation: {{ duration: 500 }} }});
+                network.selectNodes([match.id]);
+                openInspector(match);
+            }}
         }}
 
-        function filterNodes() {{
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            const filterType = document.getElementById('entity-filter').value;
-
-            const filteredNodes = rawNodes.filter(n => {{
-                const matchesSearch = (n.label || '').toLowerCase().includes(searchVal) || (n.id || '').toLowerCase().includes(searchVal);
-                const matchesType = filterType === 'ALL' || n.group === filterType;
-                return matchesSearch && matchesType;
-            }});
-
-            nodesDataSet.clear();
-            nodesDataSet.add(filteredNodes);
+        function resetGraph() {{
+            network.fit({{ animation: {{ duration: 600 }} }});
         }}
     </script>
 </body>
@@ -235,25 +193,23 @@ def generate_graph_visualizer_html(graph_data: Dict[str, Any], output_path: str)
 def main():
     if len(sys.argv) > 1:
         with open(sys.argv[1], 'r', encoding='utf-8') as f:
-            g = json.load(f)
+            data = json.load(f)
     else:
-        g = {
+        data = {
             "nodes": [
                 {"id": "usr_person", "label": "Person (Applicant)", "entity_type": "PERSON", "confidence": 1.0},
-                {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET", "confidence": 1.0, "properties": {"amount": 12000, "currency": "EUR"}},
-                {"id": "reg_chancenkarte", "label": "Chancenkarte Regulation § 20a", "entity_type": "REGULATION_LAW", "confidence": 0.9},
-                {"id": "route_bluecard", "label": "EU Blue Card Permit § 18g", "entity_type": "PATHWAY_ROUTE", "confidence": 0.95}
+                {"id": "asset_sperrkonto", "label": "€12,000 Blocked Account", "entity_type": "CAPITAL_ASSET", "confidence": 1.0},
+                {"id": "route_bluecard", "label": "EU Blue Card Permit", "entity_type": "PATHWAY_ROUTE", "confidence": 1.0}
             ],
             "edges": [
-                {"source": "usr_person", "target": "asset_sperrkonto", "relation_type": "REQUIRES_CAPITAL", "confidence": 1.0},
-                {"source": "asset_sperrkonto", "target": "reg_chancenkarte", "relation_type": "GOVERNS", "confidence": 1.0},
-                {"source": "reg_chancenkarte", "target": "route_bluecard", "relation_type": "CONVERTS_TO", "confidence": 0.9}
+                {"source": "usr_person", "target": "asset_sperrkonto", "relation_type": "REQUIRES_CAPITAL"},
+                {"source": "asset_sperrkonto", "target": "route_bluecard", "relation_type": "CONVERTS_TO"}
             ]
         }
 
     out_file = sys.argv[2] if len(sys.argv) > 2 else "lifetree_graph_viewer.html"
-    res_path = generate_graph_visualizer_html(g, out_file)
-    print(json.dumps({"status": "SUCCESS", "html_file_path": os.path.abspath(res_path)}, indent=2, ensure_ascii=False))
+    res_path = generate_graph_visualizer_html(data, out_file, lang="zh")
+    print(json.dumps({"status": "SUCCESS", "graph_visualizer_html_path": os.path.abspath(res_path)}, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="zh-CN" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeTree — Growing Decision Tree Visualizer</title>
+    <title>LifeTree — LifeTree 决策树生长全景推演</title>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,18 +22,18 @@
                 🌳
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">Growing Decision Tree</span></h1>
-                <p class="text-xs text-slate-400">Future Choice Branching & Temporal Trajectory Visualizer</p>
+                <h1 class="text-lg font-bold text-white tracking-tight">LifeTree <span class="gradient-text">决策树生长全景推演</span></h1>
+                <p class="text-xs text-slate-400">未来选择分支推演 · 果实目标与退路侧芽视角</p>
             </div>
         </div>
 
         <!-- Controls -->
         <div class="flex items-center gap-3">
             <button onclick="playGrowthAnimation()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2">
-                <span>▶ Play Tree Growth</span>
+                <span>▶ 播放决策树生长动画</span>
             </button>
             <button onclick="resetTreeLayout()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700">
-                Fit Layout
+                复位全景视角
             </button>
         </div>
     </div>
@@ -45,7 +45,7 @@
     <div id="node-inspector" class="absolute top-24 right-4 bottom-4 w-96 z-10 glass-panel rounded-2xl p-6 shadow-2xl overflow-y-auto hidden border border-slate-700/60">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>🍃 Branch Inspector</span>
+                <span>🍃 分支节点详情拆解</span>
             </h2>
             <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-lg">&times;</button>
         </div>
@@ -53,8 +53,8 @@
     </div>
 
     <script>
-        const rawNodes = [{"id": "root_soil", "label": "🌱 Knowledge Soil\n(Statutory Laws & Constraints)", "group": "SOIL", "level": 0, "color": "#78350f"}, {"id": "trunk_user", "label": "🪵 Current State (Year 0)\n(31 Yo, MS CS, $40k, A2 German)", "group": "TRUNK", "level": 1, "color": "#059669"}, {"id": "branch_a_y1", "label": "🌿 Y1: Pathway A (85%)\n$26,000", "group": "BRANCH_A", "level": 2, "color": "#10b981", "shape": "dot", "raw_data": {"year": 1, "success_probability": 0.85, "capital_balance_usd": 26000.0, "events": ["Year 1 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}}, {"id": "branch_a_y2", "label": "🌿 Y2: Pathway A (90%)\n$46,000", "group": "BRANCH_A", "level": 3, "color": "#10b981", "shape": "dot", "raw_data": {"year": 2, "success_probability": 0.9, "capital_balance_usd": 46000.0, "events": ["Year 2 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}}, {"id": "branch_a_y3", "label": "🏆 Y3: PR Unlocked!\n(98% Success)", "group": "BRANCH_A", "level": 4, "color": "#34d399", "shape": "star", "raw_data": {"year": 3, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 3 Standard Progression", "Statutory Settlement PR (§ 18g) Unlocked!"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_a_y4", "label": "🏆 Y4: PR Unlocked!\n(98% Success)", "group": "BRANCH_A", "level": 5, "color": "#34d399", "shape": "star", "raw_data": {"year": 4, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 4 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_a_y5", "label": "🏆 Y5: PR Unlocked!\n(98% Success)", "group": "BRANCH_A", "level": 6, "color": "#34d399", "shape": "star", "raw_data": {"year": 5, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 5 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_b_y1", "label": "🌿 Y1: Pathway B (70%)\n$35,000", "group": "BRANCH_B", "level": 2, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 1, "success_probability": 0.7, "capital_balance_usd": 35000.0, "events": ["Year 1 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y2", "label": "🌿 Y2: Pathway B (70%)\n$60,000", "group": "BRANCH_B", "level": 3, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 2, "success_probability": 0.7, "capital_balance_usd": 60000.0, "events": ["Year 2 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y3", "label": "🌿 Y3: Pathway B (80%)\n$95,000", "group": "BRANCH_B", "level": 4, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 3, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 3 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y4", "label": "🌿 Y4: Pathway B (80%)\n$95,000", "group": "BRANCH_B", "level": 5, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 4, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 4 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y5", "label": "🌿 Y5: Pathway B (80%)\n$95,000", "group": "BRANCH_B", "level": 6, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 5, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 5 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "dead_branch_01", "label": "🥀 Pruned High-Friction Path\n(Blocked Student Visa)", "group": "DEAD_BRANCH", "level": 2, "color": "#ef4444", "shape": "cross"}];
-        const rawEdges = [{"from": "root_soil", "to": "trunk_user", "label": "Nourishes"}, {"from": "trunk_user", "to": "branch_a_y1", "label": "Year 1"}, {"from": "branch_a_y1", "to": "branch_a_y2", "label": "Year 2"}, {"from": "branch_a_y2", "to": "branch_a_y3", "label": "Year 3"}, {"from": "branch_a_y3", "to": "branch_a_y4", "label": "Year 4"}, {"from": "branch_a_y4", "to": "branch_a_y5", "label": "Year 5"}, {"from": "trunk_user", "to": "branch_b_y1", "label": "Year 1"}, {"from": "branch_b_y1", "to": "branch_b_y2", "label": "Year 2"}, {"from": "branch_b_y2", "to": "branch_b_y3", "label": "Year 3"}, {"from": "branch_b_y3", "to": "branch_b_y4", "label": "Year 4"}, {"from": "branch_b_y4", "to": "branch_b_y5", "label": "Year 5"}, {"from": "trunk_user", "to": "dead_branch_01", "label": "Pruned", "dashes": true, "color": "#ef4444"}];
+        const rawNodes = [{"id": "root_soil", "label": "🌱 知识土壤 (底层政策与客观法规)", "group": "SOIL", "level": 0, "color": "#78350f"}, {"id": "trunk_user", "label": "🪵 当前个人状态 (第 0 年)\n(31岁, 硕士学历, 4万美金, A2德语)", "group": "TRUNK", "level": 1, "color": "#059669"}, {"id": "branch_a_y1", "label": "🌿 第1年: 方案A (胜算85%)\n资金: $26,000", "group": "BRANCH_A", "level": 2, "color": "#10b981", "shape": "dot", "raw_data": {"year": 1, "success_probability": 0.85, "capital_balance_usd": 26000.0, "events": ["Year 1 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}}, {"id": "branch_a_y2", "label": "🌿 第2年: 方案A (胜算90%)\n资金: $46,000", "group": "BRANCH_A", "level": 3, "color": "#10b981", "shape": "dot", "raw_data": {"year": 2, "success_probability": 0.9, "capital_balance_usd": 46000.0, "events": ["Year 2 Standard Progression"], "plan_b_active": false, "badge": "OPTIMAL_PROGRESSION"}}, {"id": "branch_a_y3", "label": "🏆 第3年: 永居/目标果实成熟!\n(成功率 98%)", "group": "BRANCH_A", "level": 4, "color": "#34d399", "shape": "star", "raw_data": {"year": 3, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 3 Standard Progression", "Statutory Settlement PR (§ 18g) Unlocked!"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_a_y4", "label": "🏆 第4年: 永居/目标果实成熟!\n(成功率 98%)", "group": "BRANCH_A", "level": 5, "color": "#34d399", "shape": "star", "raw_data": {"year": 4, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 4 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_a_y5", "label": "🏆 第5年: 永居/目标果实成熟!\n(成功率 98%)", "group": "BRANCH_A", "level": 6, "color": "#34d399", "shape": "star", "raw_data": {"year": 5, "success_probability": 0.98, "capital_balance_usd": 76000.0, "events": ["Year 5 Standard Progression"], "plan_b_active": false, "badge": "PR_ELIGIBLE"}}, {"id": "branch_b_y1", "label": "🌿 第1年: 方案B (胜算70%)\n资金: $35,000", "group": "BRANCH_B", "level": 2, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 1, "success_probability": 0.7, "capital_balance_usd": 35000.0, "events": ["Year 1 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y2", "label": "🌿 第2年: 方案B (胜算70%)\n资金: $60,000", "group": "BRANCH_B", "level": 3, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 2, "success_probability": 0.7, "capital_balance_usd": 60000.0, "events": ["Year 2 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y3", "label": "🌿 第3年: 方案B (胜算80%)\n资金: $95,000", "group": "BRANCH_B", "level": 4, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 3, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 3 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y4", "label": "🌿 第4年: 方案B (胜算80%)\n资金: $95,000", "group": "BRANCH_B", "level": 5, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 4, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 4 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "branch_b_y5", "label": "🌿 第5年: 方案B (胜算80%)\n资金: $95,000", "group": "BRANCH_B", "level": 6, "color": "#60a5fa", "shape": "dot", "raw_data": {"year": 5, "success_probability": 0.8, "capital_balance_usd": 95000.0, "events": ["Year 5 Direct Employment Progression"], "plan_b_active": false, "badge": "HIGH_FRICTION_PROGRESSION"}}, {"id": "dead_branch_01", "label": "🥀 已剪枝的高风险枯枝\n(高摩擦留学语言班路径)", "group": "DEAD_BRANCH", "level": 2, "color": "#ef4444", "shape": "cross"}];
+        const rawEdges = [{"from": "root_soil", "to": "trunk_user", "label": "滋养"}, {"from": "trunk_user", "to": "branch_a_y1", "label": "第1年"}, {"from": "branch_a_y1", "to": "branch_a_y2", "label": "第2年"}, {"from": "branch_a_y2", "to": "branch_a_y3", "label": "第3年"}, {"from": "branch_a_y3", "to": "branch_a_y4", "label": "第4年"}, {"from": "branch_a_y4", "to": "branch_a_y5", "label": "第5年"}, {"from": "trunk_user", "to": "branch_b_y1", "label": "第1年"}, {"from": "branch_b_y1", "to": "branch_b_y2", "label": "第2年"}, {"from": "branch_b_y2", "to": "branch_b_y3", "label": "第3年"}, {"from": "branch_b_y3", "to": "branch_b_y4", "label": "第4年"}, {"from": "branch_b_y4", "to": "branch_b_y5", "label": "第5年"}, {"from": "trunk_user", "to": "dead_branch_01", "label": "剪枝规避", "dashes": true, "color": "#ef4444"}];
 
         const visNodes = new vis.DataSet();
         const visEdges = new vis.DataSet();
@@ -65,7 +65,7 @@
         const options = {
             layout: {
                 hierarchical: {
-                    direction: 'BU', // Bottom to Up (Tree grows upward)
+                    direction: 'BU',
                     sortMethod: 'directed',
                     nodeSpacing: 180,
                     levelSeparation: 130
@@ -100,7 +100,6 @@
             visNodes.clear();
             visEdges.clear();
 
-            // Sort nodes by level
             const levels = [0, 1, 2, 3, 4, 5, 6];
             let delay = 0;
 
@@ -124,11 +123,12 @@
             let detailsHtml = '';
             if (nodeData.raw_data) {
                 const d = nodeData.raw_data;
+                const isZh = true;
                 detailsHtml = `
                     <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-xs">
-                        <div class="flex justify-between"><span class="text-slate-400">Success Probability:</span><span class="text-emerald-400 font-bold font-mono">${(d.success_probability * 100).toFixed(0)}%</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Capital Balance:</span><span class="text-white font-mono">$${d.capital_balance_usd.toLocaleString()}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-400">Trajectory Badge:</span><span class="text-amber-300 font-semibold">${d.badge || 'NORMAL'}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${isZh ? '胜算成功率' : 'Success Probability'}:</span><span class="text-emerald-400 font-bold font-mono">${(d.success_probability * 100).toFixed(0)}%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${isZh ? '资金储备余额' : 'Capital Balance'}:</span><span class="text-white font-mono">$${d.capital_balance_usd.toLocaleString()}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">${isZh ? '轨迹状态标记' : 'Trajectory Badge'}:</span><span class="text-amber-300 font-semibold">${d.badge || 'NORMAL'}</span></div>
                     </div>
                 `;
             }
@@ -155,7 +155,6 @@
             network.fit({ animation: { duration: 800, easingFunction: 'easeInOutQuad' } });
         }
 
-        // Auto-play growth on load
         playGrowthAnimation();
     </script>
 </body>
